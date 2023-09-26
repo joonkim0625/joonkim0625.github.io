@@ -1,6 +1,6 @@
 ---
 title: "TryHackMe - Brainstorm"
-date: 2023-09-23 24:10:00 +/-0500
+date: 2023-09-23 00:10:00 +/-0500
 categories: [Cybersecurity, CTFs, TryHackMe, Windows, Reverse engineering]
 tags:
   [CTF, TryHackMe, cybersecurity, Windows, reverse shell, buffer overflow]
