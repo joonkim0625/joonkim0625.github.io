@@ -362,8 +362,7 @@ SeLoadDriverPrivilege
 If the account has been granted SeDebugPrivilege and SeImpersonatePrivilege,
 `incognito` will automatically enable these privileges and use them to gain
 access to all tokens and escalate to the SYSTEM. Knowing that, we will create a
-user on the system by running `powershell.exe <path_to_incognito.exe> add_user
-<username> <password>`.
+user on the system by running `powershell.exe <path_to_incognito.exe> add_user <username> <password>`
 
 If you run `net user jay`, you see:
 
