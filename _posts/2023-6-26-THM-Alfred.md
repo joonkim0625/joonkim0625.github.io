@@ -116,7 +116,7 @@ One thing I should have realized earlier was to access the Jenkins server page (
 
 The hint suggest that I should look into the configuration tab under 'project' at the bottom of the index page.
 
-![jenkins-index-page](../images/jenkins-index-page.png)
+![jenkins-index-page](https://joonkim0625.github.io/images/jenkins-index-page.png)
 
 After inspecting the current project, under "Build" section, you can enter Windows shell command so it can be executed! If we write our custom shell command so that we can start a reverse shell, we will be able to access the server machine. So, we will create a reverse shell using `msfvenom` and upload it onto the target machine.
 
