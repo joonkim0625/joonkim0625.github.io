@@ -62,11 +62,11 @@ or no) then ran `mget *` to download all the files.
 
 To move files between the guest VMs in VirtualBox, I used `File Manager`
 functionality which allows you to move files between the host and the guest
-(https://www.youtube.com/watch?v=wYe0UOQwWzI).
+- [link](https://www.youtube.com/watch?v=wYe0UOQwWzI).
 
 I prepared two VMs: Kali, Windows and set up the networking between them. I
 followed this write-up -
-https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/
+[ https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/](https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/)
 
 ## Reverse engineering a Windows binary
 
@@ -204,8 +204,8 @@ earlier, we can use `mona` with the debugger to make our lives a bit easier. I
 found this
 [article](https://github.com/cris-m/Buffer-Overflow-Exploit-Development/blob/main/assets/documentations/characters.md)
 and
-[this](https://int0x33.medium.com/day-71-essential-immunity-commands-for-oscp-and-ctfs-cebfe06d935a)that
-walks through how to use moan with the debugger.
+[this](https://int0x33.medium.com/day-71-essential-immunity-commands-for-oscp-and-ctfs-cebfe06d935a) that
+walk through how to use moan with the debugger.
 
 According to the second article, first we need to set the base directory for
 `mona` by running `!mona config -set workingfolder C:\mona`and run `!mona
