@@ -79,7 +79,7 @@ memory address of our choice, we can do many interesting things!
 After installing the immunity debugger and loading the chatserver executable,
 you will see something like this:
 
-![immunity-debugger.png](../images/immunity-debugger.png)
+![immunity-debugger.png](https://joonkim0625.github.io/images/immunity-debugger.png)
 
 When trying to exploit a buffer overflow vulnerability, one would try to input a
 bunch of bytes to see if we can break the program. So what I did was to create a
@@ -90,7 +90,7 @@ pattern, `pwn cyclic 5000`. The I copied and pasted the cyclic pattern and
 passed them as the input message for the program. The program crashed and the
 immunity debugger showed this:
 
-![immunity-result-5000.png](../images/immunity-result-5000.png)
+![immunity-result-5000.png](https://joonkim0625.github.io/images/immunity-result-5000.png)
 
 As we can see, the EIP register is now 75616164 (in hex) and we can use these
 four bytes to find the offset from the beginning of the input buffer to the
@@ -197,7 +197,7 @@ After running the script again (make sure you re-launch the program in the
 debugger), you can right-click the value of ESP register and click `Follow in
 Dump`. I was able to see the bad characters I sent along with the payload:
 
-![badcahrs-in-esp.png](../images/badcahrs-in-esp.png)
+![badcahrs-in-esp.png](https://joonkim0625.github.io/images/badcahrs-in-esp.png)
 
 We can see the start of the badchars `01 02 03 ... 9E 0F A0`. As I mentioned
 earlier, we can use `mona` with the debugger to make our lives a bit easier. I
@@ -216,14 +216,14 @@ badchars sequence that we passed into the program.
 Running this command `!mona compare -a esp -f C:\mona\bytearray.bin` will tell
 you if there are any bad characters. After running it, I got this result:
 
-![no-bad-char.png](../images/no-bad-char.png)
+![no-bad-char.png](https://joonkim0625.github.io/images/no-bad-char.png)
 
 So, other than the null byte, we could use all the bytes to create a shellcode.
 The next thing we need to do is to check if there are any protection mechanisms
 in place. You can check it easily by running `!monal modules`. The result of the
 run looks like this:
 
-![mona-moduels.png](../images/mona-moduels.png)
+![mona-moduels.png](https://joonkim0625.github.io/images/mona-moduels.png)
 
 What we want to look at is the lines that have all `False` columns and there are
 two: `chatserver.exe` and `essfunc.dll` (the dll library we downloaded from the
@@ -235,7 +235,7 @@ redirect the code flow to our shellcode. `!mona find -s "\xff\xe4" -m
 essfunc.dll` is the command we want to run: `\xff\xe4` is the byte instruction
 for `JMP ESP`.
 
-![find-jmp-esp.png](../images/find-jmp-esp.png)
+![find-jmp-esp.png](https://joonkim0625.github.io/images/find-jmp-esp.png)
 
 There were several `JMP ESP` instructions in the dll file. Let's say I am going
 to use the address of `0x625014df`. When we use this address in our script, this
@@ -312,7 +312,7 @@ Now it is time to test the script on the actual target of this challenge and the
 Kali VM's IP address (the one that is connected to the THM's VPN tunnel -
 `tun0`).
 
-![brainstrom-access.png](../images/brainstrom-access.png)
+![brainstrom-access.png](https://joonkim0625.github.io/images/brainstrom-access.png)
 
 After modifying the script, I was able to access the target machine.
 
