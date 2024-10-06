@@ -1,5 +1,5 @@
 ---
-title: BuckeyeCTF 2024 - Binary Exploitation"
+title: BuckeyeCTF 2024 - Binary Exploitation
 date: 2024-10-06 01:39:00 +/-0500
 categories: [Cybersecurity, CTF, BuckeyeCTF, GDB, Reverse engineering, Binary Exploitation]
 tags:
@@ -67,7 +67,7 @@ Give me a message to say!
 bctf{0v3rfl0w_th3_M00m0ry_2d310e3de286658e}sh: 2: Syntax error: Unterminated quoted string
 ```
 
-Why this works is because the `fgets` will add a null character at the end of the message variable. So, if we input 100 A's into the message variable, it will look something like `AAA...AAA\n\000` (fgets reads up to the `\n` and then adds a `\000`).  So, with 110 A's, we are right before the character 'c':
+Why this works is because the `fgets` will add a null character at the end of the message variable. So, if we input 100 A's into the message variable, it will look something like `AAA...AAA\n\000` (fgets reads up n bytes specified or an EOF or a newline - refer to the manpage).  So, with 110 A's, we are right before the character 'c':
 
 ```bash
 wndbg> x/10c 0x7fffffffdcf0 - 9
@@ -89,7 +89,7 @@ x7fffffffdcee: 65 'A'  65 'A'  65 'A'  65 'A'  65 'A'  10 '\n' 97 'a'  121 'y'
 0x7fffffffdcf6: 32 ' '  34 '"'
 ```
 
-So, the A's and the newline character has taken the first four characters `cows` (I am not sure what happened to the null byte). So this is why/how we are able to enter the command we want to run by calculating the offset correctly. 
+So, the A's and the newline character has taken the first four characters `cows` (I am sure the null byte disappears because of `message` having more than 100 bytes of stuff). So this is why/how we are able to enter the command we want to run by calculating the offset correctly. The `system` function will first execute the command that it reads up to the `\n`, and then try to execute whatever comes the next. That is why you are seeing the error message of `sh: 2: Syntax error: Unterminated quoted string` - there is an ending double quote but the opening double quote is overwritten by our payload.
 
 Please feel free to contact me if this article includes any wrong information!
 
