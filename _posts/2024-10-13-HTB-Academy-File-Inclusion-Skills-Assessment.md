@@ -75,7 +75,7 @@ error                   [Status: 200, Size: 199, Words: 41, Lines: 10, Dura
 
 By viewing the source code of the `index.php` page, I discovered the following PHP code snippet:
 
-![index.php](../images/file-inclusion/screenshot_2024-10-12_233448.png)
+![index.php](https://joonkim0625.github.io/images/file-inclusion/screenshot_2024-10-12_233448.png)
 
 Base64 decoded source code:
 
@@ -123,7 +123,7 @@ http://83.136.254.47:31827/ilf_admin/index.php?log=../../../../../etc/passwd
 
 It appeared that the path traversal protection was missing on this page, as I was able to successfully read /etc/passwd.
 
-![read-passwd](../images/file-inclusion/screenshot_2024-10-13_010132.png)
+![read-passwd](https://joonkim0625.github.io/images/file-inclusion/screenshot_2024-10-13_010132.png)
 
 
 I used `ffuf` again to search for files that could be accessed via LFI on this page:
@@ -194,11 +194,11 @@ This revealed that the server used `Nginx`!
 By inspecting the logs in /var/log/nginx/access.log, I found an opportunity to inject PHP code for a shell. Using Burp Suite, I sent a request that included a PHP shell command, and it worked, allowing me to execute arbitrary commands on the server:
 
 
-![brup1](../images/file-inclusion/screenshot_2024-10-13_012840.png)
+![brup1](https://joonkim0625.github.io/images/file-inclusion/screenshot_2024-10-13_012840.png)
 
 I  was able to successfully retrieve the flag:
 
-![burp2](../images/file-inclusion/screenshot_2024-10-13_013210.png)
+![burp2](https://joonkim0625.github.io/images/file-inclusion/screenshot_2024-10-13_013210.png)
 
 
 ## Lessons Learned
