@@ -1,5 +1,5 @@
 ---
-title: webhacking
+title: webhacking.kr: old-18
 date: 2024-10-25 22:51:34 
 categories: [Cybersecurity, Web Application Security, Penetration Testing, CTF]
 tags:
