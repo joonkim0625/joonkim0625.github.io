@@ -17,7 +17,7 @@ current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S %z")
 
 # Check if the filename is passed as an argument
 if len(sys.argv) < 2:
-    print("Usage: python create_md_file.py 'Name-of-the-file'")
+    print("Usage: python create_md_file.py 'YYYY-MM-DD-Name-of-the-file'")
     sys.exit(1)
 
 # Get the name of the file from the arguments
