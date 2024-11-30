@@ -14,7 +14,7 @@ Description
 	I found a web app that can help process images: PNG images only! Try it here!
 
 
-![https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png](https://joonkim0625.github.io/images/picoctf-trickster.png)
+![https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png](https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png)
 
 When I attempted to upload some random files, I got the following error message:
 
