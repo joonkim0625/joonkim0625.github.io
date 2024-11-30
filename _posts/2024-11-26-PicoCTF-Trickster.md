@@ -14,7 +14,7 @@ Description
 	I found a web app that can help process images: PNG images only! Try it here!
 
 
-![https://joonkim0625.github.io/images/picoctf-trickster.png](https://joonkim0625.github.io/images/picoctf-trickster.png)
+![https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png](https://joonkim0625.github.io/images/picoctf-trickster.png)
 
 When I attempted to upload some random files, I got the following error message:
 
@@ -96,17 +96,17 @@ The key here is to write the magic bytes first, followed by the code you want to
 
 I uploaded the file shell.php.png.
 
-![file upload](https://joonkim0625.github.io/images/picoctf-trickster-upload-file.png)
+![file upload](https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster-upload-file.png)
 
 However, I encountered an error:
 
-![error](https://joonkim0625.github.io/images/picoctf-trickster-error.png)
+![error](https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster-error.png)
 
 After troubleshooting, I realized my mistake: I named the file shell.php.png. Because of the .png extension, the app treated it as an image file rather than a script. This caused an error instead of executing the code.
 
 Once I renamed the file and corrected the mistake, I successfully executed the command whoami.
 
-![flag](https://joonkim0625.github.io/images/picoctf-trickster-ws-working.png)
+![flag](https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster-ws-working.png)
 
 From here, a bit of lateral movement helped me locate the flag. Happy hacking!
 
