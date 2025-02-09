@@ -97,5 +97,6 @@ This told me that the value in the `pw` column was 17 characters long. Finally, 
 (and iterating this process for each character), I eventually obtained the complete password:  
 **`kudos_to_beistlab`**
 
+
 Because I had to extract the values byte by byte, the process resembled a side-channel attack in which necessary information is revealed incrementally. Overall, this was an excellent exercise in demonstrating the many different ways SQL injection can be exploited.
 
