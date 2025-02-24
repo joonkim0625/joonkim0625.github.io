@@ -3,7 +3,7 @@ title: webhackingkr old 02
 date: 2025-02-09 00:34:20 
 categories: [Web Application Security, SQL Injection, Vulnerability Research, Cybersecurity, Penetration Testing]
 tags:
-  [SQLi, Web Hacking, Vulnerability Exploitation, Penetration Testing, Bug Bounty, Information Disclosure, Cookie Injection, ZAP]
+  [sqli, web hacking, vulnerability exploitation, penetration testing, bug bounty, information disclosure, cookie injection, zap]
 ---
 
 This is a challenge `old-02` from `webhacking.kr`.

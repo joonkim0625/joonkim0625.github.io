@@ -2,7 +2,7 @@
 title: BuckeyeCTF 2024 - SSFS
 date: 2024-10-07 00:29:20 
 categories: [CTF, BuckeyeCTF, Web]
-tags: [CTF, Path traversal, Web, Curl]
+tags: [ctf, path traversal, web, curl]
 ---
 
 ## Page Source Inspection

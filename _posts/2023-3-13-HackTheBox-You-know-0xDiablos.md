@@ -2,7 +2,7 @@
 title: "HackTheBox: You know 0xDiablos"
 date: 2023-03-13 10:00:00 +/-0500
 categories: [Cybersecurity, CTFs, HackTheBox]
-tags: [CTF, cybersecurity, buffer overflow, Python, X86, flow control]
+tags: [ctf, cybersecurity, buffer overflow, python, x86, flow control]
 ---
 
 ## Description

@@ -2,7 +2,7 @@
 title: "picoCTF - Scavenger Hunt"
 date: 2022-3-04 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, picoCTF, Web exploitation, cybersecurity]
+tags: [ctf, picoctf, web exploitation, cybersecurity]
 ---
 
 # picoCTF: Scavenger Hunt

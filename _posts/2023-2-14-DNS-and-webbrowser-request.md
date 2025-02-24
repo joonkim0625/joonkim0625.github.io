@@ -2,7 +2,7 @@
 title: "DNS & Web Browser Request"
 date: 2023-02-14 00:00:00 +/-0500
 categories: [Cybersecurity, Computer Network]
-tags: [DNS, Domain Name System]
+tags: [dns, domain name system]
 ---
 
 

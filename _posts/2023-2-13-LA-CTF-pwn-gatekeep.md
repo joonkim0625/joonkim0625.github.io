@@ -2,7 +2,7 @@
 title: "LA CTF - pwn: gatekeep"
 date: 2023-02-13 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, LA CTF, cybersecurity, buffer overflow, Python, variable overwrite, check bypass]
+tags: [ctf, la ctf, cybersecurity, buffer overflow, python, variable overwrite, check bypass]
 ---
 
 ## Description

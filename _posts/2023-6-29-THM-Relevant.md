@@ -3,7 +3,7 @@ title: "TryHackMe - Relevant"
 date: 2023-06-29 22:00:00 +/-0500
 categories: [Cybersecurity, CTFs, TryHackMe, Windows]
 tags:
-  [CTF, TryHackMe, cybersecurity, Windows, smb, nmap, ms17-010]
+  [ctf, tryHackMe, cybersecurity, windows, smb, nmap, ms17-010]
 ---
 
 ## Challenge: Relevant

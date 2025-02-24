@@ -2,7 +2,7 @@
 title: "tamuctf 2022 - Lucky"
 date: 2022-4-20 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, tamuctf, pwn, cybersecurity] 
+tags: [ctf, tamuctf, pwn, cybersecurity] 
 ---
 
 # tamuctf 2022: Lucky

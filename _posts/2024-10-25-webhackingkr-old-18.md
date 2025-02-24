@@ -3,7 +3,7 @@ title: webhackingkr-old-18
 date: 2024-10-25 22:51:34 
 categories: [Cybersecurity, Web Application Security, Penetration Testing, CTF]
 tags:
-  [SQLi, SQL Injection, Filter Bypass, PHP]
+  [sqli, sql injection, filter bypass, php]
 ---
 
 This is a challenge from `webhacking.kr`. As the name of the website suggests, it is about SQL injection. You can check the source code of the page: 

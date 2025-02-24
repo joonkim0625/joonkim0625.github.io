@@ -2,7 +2,7 @@
 title: "RSA Encryption"
 date: 2022-1-27 00:00:00 +/-0500
 categories: [Blogging]
-tags: [security, RSA, learning]
+tags: [security, rsa, learning]
 ---
 
 # RSA Encryption

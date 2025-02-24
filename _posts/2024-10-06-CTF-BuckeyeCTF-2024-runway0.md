@@ -3,7 +3,7 @@ title: BuckeyeCTF 2024 - Binary Exploitation
 date: 2024-10-06 01:39:00 +/-0500
 categories: [Cybersecurity, CTF, BuckeyeCTF, GDB, Reverse engineering, Binary Exploitation]
 tags:
-  [CTF, cybersecurity, BuckeyeCTF, GDB, Binary, Binary exploitation]
+  [ctf, cybersecurity, buckeyectf, gdb, binary, binary exploitation]
 ---
 
 ## Beginner pwn: First challenge

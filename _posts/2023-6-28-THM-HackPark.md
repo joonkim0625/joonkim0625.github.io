@@ -3,7 +3,7 @@ title: "TryHackMe - HackPark"
 date: 2023-06-28 22:00:00 +/-0500
 categories: [Cybersecurity, CTFs, TryHackMe, Windows]
 tags:
-  [CTF, TryHackMe, cybersecurity, Windows, RCE, Hydra, winPEAS]
+  [ctf, tryHackMe, cybersecurity, windows, rce, hydra, winpeas]
 ---
 
 ## Challenge: HackPark

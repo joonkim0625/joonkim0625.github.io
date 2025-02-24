@@ -3,7 +3,7 @@ title: PicoCTF Trickster
 date: 2024-11-26 01:56:19 
 categories: [CTF, Cybersecurity, Web Application Pentesting, Pentesting]
 tags:
-  [PicoCTF, Trickster, Web App Pentesting, File Signature, File Upload Vulnerability, RCE]
+  [picoctf, trickster, web app pentesting, file signature, file upload vulnerability, rce]
 ---
 
 ## Trickster

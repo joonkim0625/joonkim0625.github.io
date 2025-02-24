@@ -2,7 +2,7 @@
 title: "LA CTF - pwn: bot"
 date: 2023-02-14 10:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, LA CTF, cybersecurity, buffer overflow, Python, strcmp, flow control]
+tags: [ctf, la ctf, cybersecurity, buffer overflow, python, strcmp, flow control]
 ---
 
 ## Description

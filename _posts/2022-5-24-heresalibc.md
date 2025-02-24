@@ -2,7 +2,7 @@
 title: "picoCTF 2021 - Here's a LIBC"
 date: 2022-5-24 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, picoCTF2021, cybersecurity, binary exploit]
+tags: [ctf, picoctf2021, cybersecurity, binary exploit]
 ---
 
 ## Description

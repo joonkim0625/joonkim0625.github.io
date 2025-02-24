@@ -3,7 +3,7 @@ title: Unholy Union
 date: 2024-10-27 00:14:09 
 categories: [Cybersecurity, Web Application Security, Penetration Testing, CTF]
 tags:
-  [SQLi, SQL Injection, Union Injection]
+  [sqli, sql injection, union injection]
 ---
 
 A challenge about SLQi that uses Union injection technique. 

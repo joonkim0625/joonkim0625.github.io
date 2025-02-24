@@ -3,7 +3,7 @@ title: "HackTheBox - Beginner Track: Blue"
 date: 2023-04-29 22:00:00 +/-0500
 categories: [Cybersecurity, CTFs, HackTheBox]
 tags:
-  [CTF, HackTheBox, cybersecurity, Windows, msrpc, Remote Code Execution, SMB]
+  [ctf, hackthebox, cybersecurity, windows, msrpc, remote code execution, smb]
 ---
 
 ## Challenge: Blue

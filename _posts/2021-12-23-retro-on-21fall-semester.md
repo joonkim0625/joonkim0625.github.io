@@ -2,7 +2,7 @@
 title: "Retrospective on Fall 2021 Semester"
 date: 2021-12-23 00:00:00 +/-0500
 categories: [Blogging]
-tags: [retrospective, school, UMN, University of Minnesota]
+tags: [retrospective, school, umn, university of minnesota]
 ---
 
 This semester was very different than the previous semesters that I had in

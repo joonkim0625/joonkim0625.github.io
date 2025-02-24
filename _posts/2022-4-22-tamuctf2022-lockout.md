@@ -2,7 +2,7 @@
 title: "tamuctf 2022 - Lockout"
 date: 2022-4-22 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, tamuctf, cybersecurity, web] 
+tags: [ctf, tamuctf, cybersecurity, web] 
 ---
 
 # taumf2022: lockout

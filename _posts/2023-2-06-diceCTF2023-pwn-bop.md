@@ -2,7 +2,7 @@
 title: "diceCTF 2023 - pwn: bop"
 date: 2023-02-06 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, diceCTF 2023, cybersecurity, binary exploit, Ghidra, Python, Script,
+tags: [ctf, dicectf 2023, cybersecurity, binary exploit, ghidra, python, script,
 ret2csu, ret2dlresolve]
 ---
 

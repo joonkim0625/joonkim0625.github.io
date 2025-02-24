@@ -3,7 +3,7 @@ title: USCCTF2024 Pwn Portal
 date: 2024-11-15 00:24:34 
 categories: [Cybersecurity, Pwn, Binary Analysis, CTF, USCCTF]
 tags:
-  [Pwn, GDB, Cybersecurity, CTF, USCCTF 2024]
+  [pwn, gdb, cybersecurity, ctf, uscctf 2024]
 ---
 
 ## Description

@@ -2,7 +2,7 @@
 title: "IA-32 Assembly"
 date: 2022-5-27 00:00:00 +/-0500
 categories: [Cybersecurity, CTFs]
-tags: [CTF, picoCTF2021, cybersecurity, assembly]
+tags: [ctf, picoctf2021, cybersecurity, assembly]
 ---
 
 

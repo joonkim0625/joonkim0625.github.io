@@ -3,7 +3,7 @@ title: SANS Holiday Hack Challenge Elf Connect
 date: 2024-12-10 22:41:30 
 categories: [Cybersecurity, Ethical Hacking, Web Application Security]
 tags:
-  [JavaScript, Burp Suite, Session Storage, Web Browser Debugging Tools]
+  [javaScript, burp suite, session storage, web browser debugging tools]
 ---
 
 ## Hacking a JavaScript Game

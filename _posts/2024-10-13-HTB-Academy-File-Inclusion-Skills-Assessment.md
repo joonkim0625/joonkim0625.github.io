@@ -3,7 +3,7 @@ title: HTB Academy File Inclusion Skills Assessment
 date: 2024-10-13 22:20:03 
 categories: [Cybersecurity, HTB, Web Application Security, Penetration Testing, CTF]
 tags:
-  [Local File Inclusion, LFI, Path Traversal, Log Poisoning, ffuf, Burp Suite, RCE]
+  [local file inclusion, lfi, path traversal, log poisoning, ffuf, burp suite, rce]
 ---
 
 ## Identifying the Local File Inclusion (LFI) Vulnerability

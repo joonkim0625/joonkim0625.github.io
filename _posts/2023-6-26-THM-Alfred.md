@@ -3,7 +3,7 @@ title: "TryHackMe - Alfred"
 date: 2023-06-26 22:00:00 +/-0500
 categories: [Cybersecurity, CTFs, TryHackMe, Windows, CMS, Jenkins]
 tags:
-  [CTF, TryHackMe, cybersecurity, Windows, cms, jenkins, token-impersonation]
+  [ctf, tryHackMe, cybersecurity, windows, cms, jenkins, token impersonation]
 ---
 
 ## Challenge: Alfred
