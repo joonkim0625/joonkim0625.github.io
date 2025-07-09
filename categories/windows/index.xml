@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Windows on My Blog</title>
+    <link>http://localhost:1313/categories/windows/</link>
+    <description>Recent content in Windows on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/categories/windows/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>TryHackMe - Alfred</title>
+      <link>http://localhost:1313/posts/2023-6-26-thm-alfred/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2023-6-26-thm-alfred/</guid>
+      <description>&lt;h2 id=&#34;challenge-alfred&#34;&gt;Challenge: Alfred&lt;/h2&gt;
+&lt;p&gt;This box is about exploiting Jenkins (misconfiguration). Jenkins is an open
+source &lt;strong&gt;continuous integration/continuous delivery and deployment (CI/CD)&lt;/strong&gt;
+automation software DevOps tool written in the Java programming language. This
+tool is used to implement CI/CD workflows, called pipelines.&lt;/p&gt;
+&lt;p&gt;This box introduces a tool called Nishang which is a framework and collection of
+scripts and payloads which enables usage of PowerShell for offensive security,
+penetration testing and red teaming.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Brainstorm</title>
+      <link>http://localhost:1313/posts/2023-9-23-thm-brainstorm/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2023-9-23-thm-brainstorm/</guid>
+      <description>&lt;h2 id=&#34;challenge-brainstorm&#34;&gt;Challenge: Brainstorm&lt;/h2&gt;
+&lt;p&gt;This is a room that tests on reverse engineering a chat program to exploit a
+Windows machine.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Nmap:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;─$&lt;/span&gt; nmap &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;sC &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;sV &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Pn &lt;span style=&#34;color:#ae81ff&#34;&gt;10.10.37.33&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Starting Nmap &lt;span style=&#34;color:#ae81ff&#34;&gt;7.93&lt;/span&gt; ( https:&lt;span style=&#34;color:#f92672&#34;&gt;//&lt;/span&gt;nmap&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;org ) at &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;02&lt;/span&gt; EDT
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Nmap scan report &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; hi&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;hormel&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;wg010&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;hi&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;umn&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;edu (&lt;span style=&#34;color:#ae81ff&#34;&gt;10.10.37.33&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Host &lt;span style=&#34;color:#f92672&#34;&gt;is&lt;/span&gt; up (&lt;span style=&#34;color:#ae81ff&#34;&gt;0.22&lt;/span&gt;s latency)&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Not shown: &lt;span style=&#34;color:#ae81ff&#34;&gt;997&lt;/span&gt; filtered tcp ports (no&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;response)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;PORT     STATE SERVICE            VERSION
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp   open  ftp                Microsoft ftpd
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ftp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;anon: Anonymous FTP login allowed (FTP code &lt;span style=&#34;color:#ae81ff&#34;&gt;230&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_Can&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t get directory listing: TIMEOUT&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ftp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;syst:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_  SYST: Windows_NT
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3389&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp open  ssl&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;ms&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;wbt&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;server&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;?&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; rdp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;ntlm&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;info:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   Target_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   NetBIOS_Domain_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   NetBIOS_Computer_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   DNS_Domain_Name: brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   DNS_Computer_Name: brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   Product_Version: &lt;span style=&#34;color:#ae81ff&#34;&gt;6.1.7601&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_  System_Time: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T04:&lt;span style=&#34;color:#ae81ff&#34;&gt;05&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;48&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ssl&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;cert: Subject: commonName&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; Not valid before: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;T03:&lt;span style=&#34;color:#ae81ff&#34;&gt;52&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;41&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_Not valid after:  &lt;span style=&#34;color:#ae81ff&#34;&gt;2024&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;03&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T03:&lt;span style=&#34;color:#ae81ff&#34;&gt;52&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;41&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_ssl&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;date: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T04:&lt;span style=&#34;color:#ae81ff&#34;&gt;06&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;19&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;s &lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; scanner time&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;9999&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp open  abyss&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;?&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Service Info: OS: Windows; CPE: cpe:&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;o:microsoft:windows
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Service detection performed&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt; Please report any incorrect results at https:&lt;span style=&#34;color:#f92672&#34;&gt;//&lt;/span&gt;nmap&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;org&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;submit&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Nmap done: &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; IP address (&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; host up) scanned &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;216.80&lt;/span&gt; seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;First thing I noticed was Port 21 &lt;code&gt;ftp&lt;/code&gt; was open with the anonymous FTP login
+enabled. I checked it out by running &lt;code&gt;ftp 10.10.37.33&lt;/code&gt; with the name
+&lt;code&gt;anonymous&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - HackPark</title>
+      <link>http://localhost:1313/posts/2023-6-28-thm-hackpark/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2023-6-28-thm-hackpark/</guid>
+      <description>&lt;h2 id=&#34;challenge-hackpark&#34;&gt;Challenge: HackPark&lt;/h2&gt;
+&lt;p&gt;In this box, it introduces Hydra, RCE &amp;amp; WinPEAS tools/techniques to exploit a
+Windows System.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24+00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using &lt;code&gt;xfreerdp&lt;/code&gt; or &lt;code&gt;rdesktop&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Relevant</title>
+      <link>http://localhost:1313/posts/2023-6-29-thm-relevant/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2023-6-29-thm-relevant/</guid>
+      <description>&lt;h2 id=&#34;challenge-relevant&#34;&gt;Challenge: Relevant&lt;/h2&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;p&gt;I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool &lt;code&gt;threader3000&lt;/code&gt; and I decided to give it a try.&lt;/p&gt;
+&lt;p&gt;The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

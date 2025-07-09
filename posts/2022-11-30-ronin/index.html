@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>BuckeyeCTF 2022 - pwn: ronin | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="CTF, BuckeyeCTF 2022, cybersecurity, binary exploit, IDA, Python, Script">
+<meta name="description" content="References
+https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md
+Decompiled code
+After decompiling the binary, I was able to take a look at those major funtions
+that make up this program.
+main():
+int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char shellcode_buffer[80]; // [rsp&#43;0h] [rbp-50h] BYREF
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  scroll(txt);
+  fgets(shellcode_buffer, 80, stdin);
+  if ( !strncmp(&#34;Chase after it.&#34;, shellcode_buffer, 15uLL) )
+  {
+    scroll(off_4028);
+    chase();
+  }
+  scroll(off_4030);
+  return 0;
+}
+scroll():
+ize_t __fastcall scroll(const char *addr_to_some_buffer)
+{
+  __useconds_t v1; // eax
+  size_t result; // rax
+  char single_char; // [rsp&#43;1Fh] [rbp-11h]
+  size_t v4; // [rsp&#43;20h] [rbp-10h]
+  size_t i; // [rsp&#43;28h] [rbp-8h]
+
+  v4 = strlen(addr_to_some_buffer);
+  for ( i = 0LL; ; &#43;&#43;i )
+  {
+    result = i;
+    if ( i &gt;= v4 )
+      break;
+    single_char = addr_to_some_buffer[i];       // printing a single char from the string array
+    putchar(single_char);
+    if ( single_char == 10 )
+      v1 = 1000000;
+    else
+      v1 = 50000;
+    usleep(v1);
+  }
+  return result;
+}
+encounter():">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2022-11-30-ronin/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2022-11-30-ronin/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2022-11-30-ronin/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="BuckeyeCTF 2022 - pwn: ronin">
+  <meta property="og:description" content="References https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md
+Decompiled code After decompiling the binary, I was able to take a look at those major funtions that make up this program.
+main():
+int __cdecl main(int argc, const char **argv, const char **envp) { char shellcode_buffer[80]; // [rsp&#43;0h] [rbp-50h] BYREF setvbuf(_bss_start, 0LL, 2, 0LL); scroll(txt); fgets(shellcode_buffer, 80, stdin); if ( !strncmp(&#34;Chase after it.&#34;, shellcode_buffer, 15uLL) ) { scroll(off_4028); chase(); } scroll(off_4030); return 0; } scroll():
+ize_t __fastcall scroll(const char *addr_to_some_buffer) { __useconds_t v1; // eax size_t result; // rax char single_char; // [rsp&#43;1Fh] [rbp-11h] size_t v4; // [rsp&#43;20h] [rbp-10h] size_t i; // [rsp&#43;28h] [rbp-8h] v4 = strlen(addr_to_some_buffer); for ( i = 0LL; ; &#43;&#43;i ) { result = i; if ( i &gt;= v4 ) break; single_char = addr_to_some_buffer[i]; // printing a single char from the string array putchar(single_char); if ( single_char == 10 ) v1 = 1000000; else v1 = 50000; usleep(v1); } return result; } encounter():">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-11-29T00:00:00+00:00">
+    <meta property="article:modified_time" content="2022-11-29T00:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="BuckeyeCTF 2022">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Binary Exploit">
+    <meta property="article:tag" content="IDA">
+    <meta property="article:tag" content="Python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BuckeyeCTF 2022 - pwn: ronin">
+<meta name="twitter:description" content="References
+https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md
+Decompiled code
+After decompiling the binary, I was able to take a look at those major funtions
+that make up this program.
+main():
+int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char shellcode_buffer[80]; // [rsp&#43;0h] [rbp-50h] BYREF
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  scroll(txt);
+  fgets(shellcode_buffer, 80, stdin);
+  if ( !strncmp(&#34;Chase after it.&#34;, shellcode_buffer, 15uLL) )
+  {
+    scroll(off_4028);
+    chase();
+  }
+  scroll(off_4030);
+  return 0;
+}
+scroll():
+ize_t __fastcall scroll(const char *addr_to_some_buffer)
+{
+  __useconds_t v1; // eax
+  size_t result; // rax
+  char single_char; // [rsp&#43;1Fh] [rbp-11h]
+  size_t v4; // [rsp&#43;20h] [rbp-10h]
+  size_t i; // [rsp&#43;28h] [rbp-8h]
+
+  v4 = strlen(addr_to_some_buffer);
+  for ( i = 0LL; ; &#43;&#43;i )
+  {
+    result = i;
+    if ( i &gt;= v4 )
+      break;
+    single_char = addr_to_some_buffer[i];       // printing a single char from the string array
+    putchar(single_char);
+    if ( single_char == 10 )
+      v1 = 1000000;
+    else
+      v1 = 50000;
+    usleep(v1);
+  }
+  return result;
+}
+encounter():">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "BuckeyeCTF 2022 - pwn: ronin",
+      "item": "https://joonkim0625.github.io/posts/2022-11-30-ronin/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "BuckeyeCTF 2022 - pwn: ronin",
+  "name": "BuckeyeCTF 2022 - pwn: ronin",
+  "description": "References https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md\nDecompiled code After decompiling the binary, I was able to take a look at those major funtions that make up this program.\nmain():\nint __cdecl main(int argc, const char **argv, const char **envp) { char shellcode_buffer[80]; // [rsp+0h] [rbp-50h] BYREF setvbuf(_bss_start, 0LL, 2, 0LL); scroll(txt); fgets(shellcode_buffer, 80, stdin); if ( !strncmp(\u0026#34;Chase after it.\u0026#34;, shellcode_buffer, 15uLL) ) { scroll(off_4028); chase(); } scroll(off_4030); return 0; } scroll():\nize_t __fastcall scroll(const char *addr_to_some_buffer) { __useconds_t v1; // eax size_t result; // rax char single_char; // [rsp+1Fh] [rbp-11h] size_t v4; // [rsp+20h] [rbp-10h] size_t i; // [rsp+28h] [rbp-8h] v4 = strlen(addr_to_some_buffer); for ( i = 0LL; ; ++i ) { result = i; if ( i \u0026gt;= v4 ) break; single_char = addr_to_some_buffer[i]; // printing a single char from the string array putchar(single_char); if ( single_char == 10 ) v1 = 1000000; else v1 = 50000; usleep(v1); } return result; } encounter():\n",
+  "keywords": [
+    "CTF", "BuckeyeCTF 2022", "cybersecurity", "binary exploit", "IDA", "Python", "Script"
+  ],
+  "articleBody": "References https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md\nDecompiled code After decompiling the binary, I was able to take a look at those major funtions that make up this program.\nmain():\nint __cdecl main(int argc, const char **argv, const char **envp) { char shellcode_buffer[80]; // [rsp+0h] [rbp-50h] BYREF setvbuf(_bss_start, 0LL, 2, 0LL); scroll(txt); fgets(shellcode_buffer, 80, stdin); if ( !strncmp(\"Chase after it.\", shellcode_buffer, 15uLL) ) { scroll(off_4028); chase(); } scroll(off_4030); return 0; } scroll():\nize_t __fastcall scroll(const char *addr_to_some_buffer) { __useconds_t v1; // eax size_t result; // rax char single_char; // [rsp+1Fh] [rbp-11h] size_t v4; // [rsp+20h] [rbp-10h] size_t i; // [rsp+28h] [rbp-8h] v4 = strlen(addr_to_some_buffer); for ( i = 0LL; ; ++i ) { result = i; if ( i \u003e= v4 ) break; single_char = addr_to_some_buffer[i]; // printing a single char from the string array putchar(single_char); if ( single_char == 10 ) v1 = 1000000; else v1 = 50000; usleep(v1); } return result; } encounter():\nsize_t encounter() { char s[32]; // [rsp+0h] [rbp-20h] BYREF while ( getchar() != 10 ) ; scroll(off_4040); fgets(s, 49, stdin); return scroll(off_4048); } chase():\noid __noreturn chase() { int user_input_direction; // [rsp+Ch] [rbp-24h] BYREF __int64 text_options[4]; // [rsp+10h] [rbp-20h] text_options[0] = (__int64)\"The treeline ends, and you see beautiful mountains in the distance. No monkey here.\\n\"; text_options[1] = (__int64)\"Tall, thick trees surround you. You can't see a thing. Best to go back.\\n\"; text_options[2] = (__int64)\"You found the monkey! You continue your pursuit.\\n\"; text_options[3] = (__int64)\"You find a clearing with a cute lake, but nothing else. Turning around.\\n\"; scroll(off_4038); while ( 1 ) { __isoc99_scanf(\"%d\", \u0026user_input_direction); if ( user_input_direction \u003c= 3 ) search((const char *)text_options[user_input_direction], user_input_direction); else puts(\"Nice try, punk\"); } } How to? I noticed there were two possible buffers that I could store the shellcode in the main function and encounter(). But, if I want to use the buffer in encounter(), the size of the shellcode should be small (smaller than 40 bytes possibly). If we use a shellcode that is crafted by pwntools’ shellcraft utility, the amd64 linux shellcode is 48 bytes big so we must use the buffer that is in the main function.\nWhat I didn’t realize was if I wanted to use the buffer in the main function (or even the buffer in encounter()), since PIE is enabled, we need to find an offset to the buffer because we don’t know the exact memory address to the buffer.\nAs I just mentioned it is important to find a spot where you can leak stack address to calculate the offset to the buffer and in chase(), there is this line of code search((const char *)text_options[user_input_direction], user_input_direction); that passes the pointer to a char array where stores some strings that need to be printed to the users. And by providing an index value that is abnormal (meaning a negative value), the reference says that we are able to leak a memory address on stack.\nIn chase(), we can see that as long as the index value that we enter is less than 4, it will pass the memory address of text_options[some_val] to search().\nAnd, in search(), it basically prints out a character that is pointed by that memory address. This is how we are able to see the leaked address in GDB and use that (by examining things around the leaked address) to find the buffer in the main function and the offset to the shellcode.\nOf course, the attack should happen in encounter() because the buffer in that function also can be controlled by us and we can replace the return address with the offset we calculate. The reference describes how to do all this in detail.\nThings I Learned Using a negative index value to expose stack address.\nGood understanding of a target application is important.\nBecame more familiar with pwntools’ shellcode generation.\n",
+  "wordCount" : "627",
+  "inLanguage": "en",
+  "datePublished": "2022-11-29T00:00:00Z",
+  "dateModified": "2022-11-29T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2022-11-30-ronin/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      BuckeyeCTF 2022 - pwn: ronin
+    </h1>
+    <div class="post-meta"><span title='2022-11-29 00:00:00 +0000 UTC'>November 29, 2022</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<p><a href="https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md">https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md</a></p>
+<h2 id="decompiled-code">Decompiled code<a hidden class="anchor" aria-hidden="true" href="#decompiled-code">#</a></h2>
+<p>After decompiling the binary, I was able to take a look at those major funtions
+that make up this program.</p>
+<p><code>main()</code>:</p>
+<pre tabindex="0"><code>int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char shellcode_buffer[80]; // [rsp+0h] [rbp-50h] BYREF
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  scroll(txt);
+  fgets(shellcode_buffer, 80, stdin);
+  if ( !strncmp(&#34;Chase after it.&#34;, shellcode_buffer, 15uLL) )
+  {
+    scroll(off_4028);
+    chase();
+  }
+  scroll(off_4030);
+  return 0;
+}
+</code></pre><p><code>scroll()</code>:</p>
+<pre tabindex="0"><code>ize_t __fastcall scroll(const char *addr_to_some_buffer)
+{
+  __useconds_t v1; // eax
+  size_t result; // rax
+  char single_char; // [rsp+1Fh] [rbp-11h]
+  size_t v4; // [rsp+20h] [rbp-10h]
+  size_t i; // [rsp+28h] [rbp-8h]
+
+  v4 = strlen(addr_to_some_buffer);
+  for ( i = 0LL; ; ++i )
+  {
+    result = i;
+    if ( i &gt;= v4 )
+      break;
+    single_char = addr_to_some_buffer[i];       // printing a single char from the string array
+    putchar(single_char);
+    if ( single_char == 10 )
+      v1 = 1000000;
+    else
+      v1 = 50000;
+    usleep(v1);
+  }
+  return result;
+}
+</code></pre><p><code>encounter()</code>:</p>
+<pre tabindex="0"><code>size_t encounter()
+{
+  char s[32]; // [rsp+0h] [rbp-20h] BYREF
+
+  while ( getchar() != 10 )
+    ;
+  scroll(off_4040);
+  fgets(s, 49, stdin);
+  return scroll(off_4048);
+}
+</code></pre><p><code>chase()</code>:</p>
+<pre tabindex="0"><code>oid __noreturn chase()
+{
+  int user_input_direction; // [rsp+Ch] [rbp-24h] BYREF
+  __int64 text_options[4]; // [rsp+10h] [rbp-20h]
+
+  text_options[0] = (__int64)&#34;The treeline ends, and you see beautiful mountains in the distance. No monkey here.\n&#34;;
+  text_options[1] = (__int64)&#34;Tall, thick trees surround you. You can&#39;t see a thing. Best to go back.\n&#34;;
+  text_options[2] = (__int64)&#34;You found the monkey! You continue your pursuit.\n&#34;;
+  text_options[3] = (__int64)&#34;You find a clearing with a cute lake, but nothing else. Turning around.\n&#34;;
+  scroll(off_4038);
+  while ( 1 )
+  {
+    __isoc99_scanf(&#34;%d&#34;, &amp;user_input_direction);
+    if ( user_input_direction &lt;= 3 )
+      search((const char *)text_options[user_input_direction], user_input_direction);
+    else
+      puts(&#34;Nice try, punk&#34;);
+  }
+}
+</code></pre><h2 id="how-to">How to?<a hidden class="anchor" aria-hidden="true" href="#how-to">#</a></h2>
+<p>I noticed there were two possible buffers that I could store the shellcode in
+the main function and <code>encounter()</code>. But, if I want to use the buffer in
+<code>encounter()</code>, the size of the shellcode should be small (smaller than 40 bytes possibly).
+If we use a shellcode that is crafted by pwntools&rsquo; shellcraft utility, the
+amd64 linux shellcode is 48 bytes big so we must use the buffer that is in the
+main function.</p>
+<p>What I didn&rsquo;t realize was if I wanted to use the buffer in the main function (or
+even the buffer in <code>encounter()</code>), since PIE is enabled, we need to find an
+offset to the buffer because we don&rsquo;t know the exact memory address to the
+buffer.</p>
+<p>As I just mentioned it is important to find a spot where you can leak stack
+address to calculate the offset to the buffer and in <code>chase()</code>, there is this
+line of code <code>search((const char *)text_options[user_input_direction], user_input_direction);</code>
+that passes the pointer to a char array where stores some strings that need to
+be printed to the users. And by providing an index value that is abnormal
+(meaning a negative value), the reference says that we are able to
+leak a memory address on stack.</p>
+<p>In <code>chase()</code>, we can see that as long as the index value that we enter is less
+than 4, it will pass the memory address of <code>text_options[some_val]</code> to <code>search()</code>.</p>
+<p>And, in <code>search()</code>, it basically prints out a character that is pointed by that
+memory address. This is how we are able to see the leaked address in GDB and use
+that (by examining things around the leaked address) to find the buffer in the
+main function and the offset to the shellcode.</p>
+<p>Of course, the attack should happen in <code>encounter()</code> because the buffer in that function also can be controlled by us and we can replace the return address with
+the offset we calculate. The reference describes how to do all this in detail.</p>
+<h2 id="things-i-learned">Things I Learned<a hidden class="anchor" aria-hidden="true" href="#things-i-learned">#</a></h2>
+<ul>
+<li>
+<p>Using a negative index value to expose stack address.</p>
+</li>
+<li>
+<p>Good understanding of a target application is important.</p>
+</li>
+<li>
+<p>Became more familiar with pwntools&rsquo; shellcode generation.</p>
+</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/buckeyectf-2022/">BuckeyeCTF 2022</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/binary-exploit/">Binary Exploit</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/ida/">IDA</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/python/">Python</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/script/">Script</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

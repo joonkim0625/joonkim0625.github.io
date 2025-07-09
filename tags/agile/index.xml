@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Agile on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/agile/</link>
+    <description>Recent content in Agile on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 Aug 2021 19:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/agile/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My Retrospective on Working for The ASR Team</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-27-retro-on-work/</link>
+      <pubDate>Fri, 27 Aug 2021 19:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-27-retro-on-work/</guid>
+      <description>&lt;h1 id=&#34;last-day-of-work&#34;&gt;Last Day of Work&lt;/h1&gt;
+&lt;p&gt;Today, I finished my student work at Academic Support Resources (ASR) Custom
+Solutions where I worked as a web developer for a year. Due to the pandemic,
+everything was done remotely. There are so many things that I learned by working
+with professional developers and I want to write down some of them.&lt;/p&gt;
+&lt;h2 id=&#34;agile-methodology&#34;&gt;Agile Methodology&lt;/h2&gt;
+&lt;p&gt;The Agile way of work was something that I would always hear about, but I was
+never involved with. According to Atlassian, it is &amp;ldquo;an iterative approach to
+project management and software development that helps teams deliver value to
+their customers faster and with fewer headaches.&amp;rdquo; - &lt;a href=&#34;https://www.atlassian.com/agile&#34;&gt;What is Agile?&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

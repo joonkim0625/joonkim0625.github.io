@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>DNS &amp; Web Browser Request | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="dns, domain name system">
+<meta name="description" content="What happens if a web browser (client) sends a reqeust to a server?
+
+
+Reference
+
+
+What is DNS (Domain Name System)?
+
+DNS resolves names domain names to IP addresses
+
+
+
+Steps that DNS takes:
+
+
+
+We try to access yahoo.com in our browser
+
+
+
+
+The browser (or your OS) checks its own cache memory for IP Address
+
+
+
+
+if not found, it sends the query to the resolver server
+
+
+The resolver server is basically your ISP (Internet service provider)
+Once it receives the query, it checks its own cache memory to find the IP
+address to yahoo.com
+
+
+
+
+if not found, it sends the query to the root server
+
+
+Root server is the top, or the root, of the DNS hierarchy
+13 sets of these root servers strategically placed around the world
+operated by 12 different organizations
+each set has their own unique IP address
+when the root server receives the query for the IP address for
+yahoo.com, it is not going to know what the IP address is. But, it
+knows where to send the resolver to find the IP address. The root server
+will direct the resolver to the TLD (Top Level Domain server) server for
+the .com domain
+Top Level Domain Server stores the address information for top level
+domains such as .com, .net, .org etc.
+
+
+
+
+TLD server is not going to know what the IP address for yahoo.com. So
+it will direct the resolver to the next and final level which
+are the Authoritative Name servers
+
+
+
+
+The resolver asks the authoritative name server for the IP address for
+yahoo.com
+
+
+Authoritative Name Servers are responsible for knowing everything about
+the domain including the IP address
+when it receives for the query from the resolver, the name server responds
+with the IP address for yahoo.com
+
+
+
+
+Finally, the resolver tells your computer the IP address for yahoo.com
+and your computer now can retrieve the web page for yahoo.com
+
+
+once the resolver receives the IP address for yahoo.com, it will store
+the IP address in its cache memory to prevent going through all these
+steps again
+
+
+
+
+
+After the steps above&hellip;">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="DNS & Web Browser Request">
+  <meta property="og:description" content="What happens if a web browser (client) sends a reqeust to a server? Reference
+What is DNS (Domain Name System)?
+DNS resolves names domain names to IP addresses Steps that DNS takes:
+We try to access yahoo.com in our browser The browser (or your OS) checks its own cache memory for IP Address if not found, it sends the query to the resolver server The resolver server is basically your ISP (Internet service provider) Once it receives the query, it checks its own cache memory to find the IP address to yahoo.com if not found, it sends the query to the root server Root server is the top, or the root, of the DNS hierarchy 13 sets of these root servers strategically placed around the world operated by 12 different organizations each set has their own unique IP address when the root server receives the query for the IP address for yahoo.com, it is not going to know what the IP address is. But, it knows where to send the resolver to find the IP address. The root server will direct the resolver to the TLD (Top Level Domain server) server for the .com domain Top Level Domain Server stores the address information for top level domains such as .com, .net, .org etc. TLD server is not going to know what the IP address for yahoo.com. So it will direct the resolver to the next and final level which are the Authoritative Name servers The resolver asks the authoritative name server for the IP address for yahoo.com Authoritative Name Servers are responsible for knowing everything about the domain including the IP address when it receives for the query from the resolver, the name server responds with the IP address for yahoo.com Finally, the resolver tells your computer the IP address for yahoo.com and your computer now can retrieve the web page for yahoo.com once the resolver receives the IP address for yahoo.com, it will store the IP address in its cache memory to prevent going through all these steps again After the steps above…">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-02-14T00:00:00+00:00">
+    <meta property="article:modified_time" content="2023-02-14T00:00:00+00:00">
+    <meta property="article:tag" content="DNS">
+    <meta property="article:tag" content="Domain Name System">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS &amp; Web Browser Request">
+<meta name="twitter:description" content="What happens if a web browser (client) sends a reqeust to a server?
+
+
+Reference
+
+
+What is DNS (Domain Name System)?
+
+DNS resolves names domain names to IP addresses
+
+
+
+Steps that DNS takes:
+
+
+
+We try to access yahoo.com in our browser
+
+
+
+
+The browser (or your OS) checks its own cache memory for IP Address
+
+
+
+
+if not found, it sends the query to the resolver server
+
+
+The resolver server is basically your ISP (Internet service provider)
+Once it receives the query, it checks its own cache memory to find the IP
+address to yahoo.com
+
+
+
+
+if not found, it sends the query to the root server
+
+
+Root server is the top, or the root, of the DNS hierarchy
+13 sets of these root servers strategically placed around the world
+operated by 12 different organizations
+each set has their own unique IP address
+when the root server receives the query for the IP address for
+yahoo.com, it is not going to know what the IP address is. But, it
+knows where to send the resolver to find the IP address. The root server
+will direct the resolver to the TLD (Top Level Domain server) server for
+the .com domain
+Top Level Domain Server stores the address information for top level
+domains such as .com, .net, .org etc.
+
+
+
+
+TLD server is not going to know what the IP address for yahoo.com. So
+it will direct the resolver to the next and final level which
+are the Authoritative Name servers
+
+
+
+
+The resolver asks the authoritative name server for the IP address for
+yahoo.com
+
+
+Authoritative Name Servers are responsible for knowing everything about
+the domain including the IP address
+when it receives for the query from the resolver, the name server responds
+with the IP address for yahoo.com
+
+
+
+
+Finally, the resolver tells your computer the IP address for yahoo.com
+and your computer now can retrieve the web page for yahoo.com
+
+
+once the resolver receives the IP address for yahoo.com, it will store
+the IP address in its cache memory to prevent going through all these
+steps again
+
+
+
+
+
+After the steps above&hellip;">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "DNS \u0026 Web Browser Request",
+      "item": "https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DNS \u0026 Web Browser Request",
+  "name": "DNS \u0026 Web Browser Request",
+  "description": "What happens if a web browser (client) sends a reqeust to a server? Reference\nWhat is DNS (Domain Name System)?\nDNS resolves names domain names to IP addresses Steps that DNS takes:\nWe try to access yahoo.com in our browser The browser (or your OS) checks its own cache memory for IP Address if not found, it sends the query to the resolver server The resolver server is basically your ISP (Internet service provider) Once it receives the query, it checks its own cache memory to find the IP address to yahoo.com if not found, it sends the query to the root server Root server is the top, or the root, of the DNS hierarchy 13 sets of these root servers strategically placed around the world operated by 12 different organizations each set has their own unique IP address when the root server receives the query for the IP address for yahoo.com, it is not going to know what the IP address is. But, it knows where to send the resolver to find the IP address. The root server will direct the resolver to the TLD (Top Level Domain server) server for the .com domain Top Level Domain Server stores the address information for top level domains such as .com, .net, .org etc. TLD server is not going to know what the IP address for yahoo.com. So it will direct the resolver to the next and final level which are the Authoritative Name servers The resolver asks the authoritative name server for the IP address for yahoo.com Authoritative Name Servers are responsible for knowing everything about the domain including the IP address when it receives for the query from the resolver, the name server responds with the IP address for yahoo.com Finally, the resolver tells your computer the IP address for yahoo.com and your computer now can retrieve the web page for yahoo.com once the resolver receives the IP address for yahoo.com, it will store the IP address in its cache memory to prevent going through all these steps again After the steps above\u0026hellip;\n",
+  "keywords": [
+    "dns", "domain name system"
+  ],
+  "articleBody": "What happens if a web browser (client) sends a reqeust to a server? Reference\nWhat is DNS (Domain Name System)?\nDNS resolves names domain names to IP addresses Steps that DNS takes:\nWe try to access yahoo.com in our browser The browser (or your OS) checks its own cache memory for IP Address if not found, it sends the query to the resolver server The resolver server is basically your ISP (Internet service provider) Once it receives the query, it checks its own cache memory to find the IP address to yahoo.com if not found, it sends the query to the root server Root server is the top, or the root, of the DNS hierarchy 13 sets of these root servers strategically placed around the world operated by 12 different organizations each set has their own unique IP address when the root server receives the query for the IP address for yahoo.com, it is not going to know what the IP address is. But, it knows where to send the resolver to find the IP address. The root server will direct the resolver to the TLD (Top Level Domain server) server for the .com domain Top Level Domain Server stores the address information for top level domains such as .com, .net, .org etc. TLD server is not going to know what the IP address for yahoo.com. So it will direct the resolver to the next and final level which are the Authoritative Name servers The resolver asks the authoritative name server for the IP address for yahoo.com Authoritative Name Servers are responsible for knowing everything about the domain including the IP address when it receives for the query from the resolver, the name server responds with the IP address for yahoo.com Finally, the resolver tells your computer the IP address for yahoo.com and your computer now can retrieve the web page for yahoo.com once the resolver receives the IP address for yahoo.com, it will store the IP address in its cache memory to prevent going through all these steps again After the steps above…\nThen the browser requests passes through a Web Application Firewall Them the request passes through a Load Balancer Then it connects to the webserver on port 80 (http) or 443 (https) Then the web application talks to database Your browser renders the HTML into a viewable website ",
+  "wordCount" : "391",
+  "inLanguage": "en",
+  "datePublished": "2023-02-14T00:00:00Z",
+  "dateModified": "2023-02-14T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      DNS &amp; Web Browser Request
+    </h1>
+    <div class="post-meta"><span title='2023-02-14 00:00:00 +0000 UTC'>February 14, 2023</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="what-happens-if-a-web-browser-client-sends-a-reqeust-to-a-server">What happens if a web browser (client) sends a reqeust to a server?<a hidden class="anchor" aria-hidden="true" href="#what-happens-if-a-web-browser-client-sends-a-reqeust-to-a-server">#</a></h2>
+<ul>
+<li>
+<p><a href="https://www.youtube.com/watch?v=mpQZVYPuDGU">Reference</a></p>
+</li>
+<li>
+<p>What is DNS (Domain Name System)?</p>
+<ul>
+<li>DNS resolves names domain names to IP addresses</li>
+</ul>
+</li>
+<li>
+<p>Steps that DNS takes:</p>
+<ul>
+<li>
+<ol>
+<li>We try to access <code>yahoo.com</code> in our browser</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>The browser (or your OS) checks its own cache memory for IP Address</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>if not found, it sends the query to the resolver server</li>
+</ol>
+<ul>
+<li>The resolver server is basically your ISP (Internet service provider)</li>
+<li>Once it receives the query, it checks its own cache memory to find the IP
+address to <code>yahoo.com</code></li>
+</ul>
+</li>
+<li>
+<ol start="4">
+<li>if not found, it sends the query to the root server</li>
+</ol>
+<ul>
+<li>Root server is the top, or the root, of the DNS hierarchy</li>
+<li>13 sets of these root servers strategically placed around the world</li>
+<li>operated by 12 different organizations</li>
+<li>each set has their own unique IP address</li>
+<li>when the root server receives the query for the IP address for
+<code>yahoo.com</code>, it is not going to know what the IP address is. But, it
+knows where to send the resolver to find the IP address. The root server
+will direct the resolver to the TLD (Top Level Domain server) server for
+the <code>.com</code> domain</li>
+<li>Top Level Domain Server stores the address information for top level
+domains such as <code>.com</code>, <code>.net</code>, <code>.org</code> etc.</li>
+</ul>
+</li>
+<li>
+<ol start="5">
+<li>TLD server is not going to know what the IP address for <code>yahoo.com</code>. So
+it will direct the resolver to the next and final level which
+are the Authoritative Name servers</li>
+</ol>
+</li>
+<li>
+<ol start="6">
+<li>The resolver asks the authoritative name server for the IP address for
+<code>yahoo.com</code></li>
+</ol>
+<ul>
+<li>Authoritative Name Servers are responsible for knowing everything about
+the domain including the IP address</li>
+<li>when it receives for the query from the resolver, the name server responds
+with the IP address for <code>yahoo.com</code></li>
+</ul>
+</li>
+<li>
+<ol start="7">
+<li>Finally, the resolver tells your computer the IP address for <code>yahoo.com</code>
+and your computer now can retrieve the web page for <code>yahoo.com</code></li>
+</ol>
+<ul>
+<li>once the resolver receives the IP address for <code>yahoo.com</code>, it will store
+the IP address in its cache memory to prevent going through all these
+steps again</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>After the steps above&hellip;</p>
+<ul>
+<li>Then the browser requests passes through a Web Application Firewall</li>
+<li>Them the request passes through a Load Balancer</li>
+<li>Then it connects to the webserver on port 80 (http) or 443 (https)</li>
+<li>Then the web application talks to database</li>
+<li>Your browser renders the HTML into a viewable website</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/dns/">DNS</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/domain-name-system/">Domain Name System</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Hello on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/hello/</link>
+    <description>Recent content in Hello on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 05 Aug 2021 23:21:00 +0500</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/hello/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Welcome!</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-05-first-post/</link>
+      <pubDate>Thu, 05 Aug 2021 23:21:00 +0500</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-05-first-post/</guid>
+      <description>&lt;h1 id=&#34;hello&#34;&gt;Hello!&lt;/h1&gt;
+&lt;p&gt;Hi, this is Joon and I will be writing about some of the things that I do while
+studying at the University of Minnesota - Twin Cities. I will be starting my
+first year of Master&amp;rsquo;s program in computer science.&lt;/p&gt;
+&lt;p&gt;I hope you enjoy your time here!&lt;/p&gt;
+&lt;p&gt;Thanks for visiting,&lt;/p&gt;
+&lt;p&gt;Joon&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

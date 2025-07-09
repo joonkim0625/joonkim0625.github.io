@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LoveTok HTB Walkthrough | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="HTB, LoveTok, PHP, addslashes, command injection, eval, source code review, CTF, web hacking">
+<meta name="description" content="This post documents my process for solving the LoveTok box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of addslashes, and exploiting command injection through the eval function.
+Description
+
+True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung&hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin&rsquo; (at your door). Come and check it out, but don&rsquo;t try to cheat love because love cheats back.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2025-04-20-lovetok/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2025-04-20-lovetok/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2025-04-20-lovetok/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="LoveTok HTB Walkthrough">
+  <meta property="og:description" content="This post documents my process for solving the LoveTok box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of addslashes, and exploiting command injection through the eval function.
+Description True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung… you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin’ (at your door). Come and check it out, but don’t try to cheat love because love cheats back.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-04-20T00:00:00+00:00">
+    <meta property="article:tag" content="HTB">
+    <meta property="article:tag" content="LoveTok">
+    <meta property="article:tag" content="PHP">
+    <meta property="article:tag" content="Addslashes">
+    <meta property="article:tag" content="Command Injection">
+    <meta property="article:tag" content="Eval">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LoveTok HTB Walkthrough">
+<meta name="twitter:description" content="This post documents my process for solving the LoveTok box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of addslashes, and exploiting command injection through the eval function.
+Description
+
+True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung&hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin&rsquo; (at your door). Come and check it out, but don&rsquo;t try to cheat love because love cheats back.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "LoveTok HTB Walkthrough",
+      "item": "https://joonkim0625.github.io/posts/2025-04-20-lovetok/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LoveTok HTB Walkthrough",
+  "name": "LoveTok HTB Walkthrough",
+  "description": "This post documents my process for solving the LoveTok box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of addslashes, and exploiting command injection through the eval function.\nDescription True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung\u0026hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin\u0026rsquo; (at your door). Come and check it out, but don\u0026rsquo;t try to cheat love because love cheats back.\n",
+  "keywords": [
+    "HTB", "LoveTok", "PHP", "addslashes", "command injection", "eval", "source code review", "CTF", "web hacking"
+  ],
+  "articleBody": "This post documents my process for solving the LoveTok box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of addslashes, and exploiting command injection through the eval function.\nDescription True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung… you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin’ (at your door). Come and check it out, but don’t try to cheat love because love cheats back.\nThe source code must be downloaded to analyze the website.\nReference:\nhttps://swordandcircuitboard.com/php-addslashes-command-injection-bypass/\nSource Code Review TimeModel.php:\n\u003c?php class TimeModel { public function __construct($format) { $this-\u003eformat = addslashes($format); [ $d, $h, $m, $s ] = [ rand(1, 6), rand(1, 23), rand(1, 59), rand(1, 69) ]; $this-\u003eprediction = \"+${d} day +${h} hour +${m} minute +${s} second\"; } public function getTime() { eval('$time = date(\"' . $this-\u003eformat . '\", strtotime(\"' . $this-\u003eprediction . '\"));'); return isset($time) ? $time : 'Something went terribly wrong'; } } The key line is:\neval('$time = date(\"' . $this-\u003eformat . '\", strtotime(\"' . $this-\u003eprediction . '\"));'); The $format is taken from user input and only passed through addslashes, which is not sufficient to prevent code injection.\nExploitation A bypass technique for addslashes command injection is discussed in this reference article.\nYou can exploit the vulnerability with a payload like:\n${system($_GET[1])}\u00261=cat+../flagBweet This payload breaks out of the intended context and executes arbitrary commands, such as reading the flag.\nLessons Learned Never use addslashes as your only input validation/sanitization. Always use proper validation and context-aware escaping. PHP’s eval is dangerous when handling user-supplied data, especially if input is not strictly sanitized. Reviewing source code is a powerful way to discover hidden vulnerabilities and exploitation techniques. Attackers often look for creative ways to bypass insufficient sanitization using PHP features like variable variables and braces. Writeup based on my own exploitation process and references from the CTF and web security communities.\n",
+  "wordCount" : "369",
+  "inLanguage": "en",
+  "datePublished": "2025-04-20T00:00:00Z",
+  "dateModified": "2025-04-20T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2025-04-20-lovetok/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      LoveTok HTB Walkthrough
+    </h1>
+    <div class="post-meta"><span title='2025-04-20 00:00:00 +0000 UTC'>April 20, 2025</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><p>This post documents my process for solving the <strong>LoveTok</strong> box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of <code>addslashes</code>, and exploiting command injection through the eval function.</p>
+<h2 id="description">Description<a hidden class="anchor" aria-hidden="true" href="#description">#</a></h2>
+<blockquote>
+<p>True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung&hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin&rsquo; (at your door). Come and check it out, but don&rsquo;t try to cheat love because love cheats back.</p></blockquote>
+<p>The source code must be downloaded to analyze the website.</p>
+<p>Reference:<br>
+<a href="https://swordandcircuitboard.com/php-addslashes-command-injection-bypass/">https://swordandcircuitboard.com/php-addslashes-command-injection-bypass/</a></p>
+<h2 id="source-code-review">Source Code Review<a hidden class="anchor" aria-hidden="true" href="#source-code-review">#</a></h2>
+<p><code>TimeModel.php</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TimeModel</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">__construct</span>($format)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">format</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">addslashes</span>($format);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        [ $d, $h, $m, $s ] <span style="color:#f92672">=</span> [ <span style="color:#a6e22e">rand</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">6</span>), <span style="color:#a6e22e">rand</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">23</span>), <span style="color:#a6e22e">rand</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">59</span>), <span style="color:#a6e22e">rand</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">69</span>) ];
+</span></span><span style="display:flex;"><span>        $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">prediction</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;+</span><span style="color:#e6db74">${</span>d<span style="color:#e6db74">}</span><span style="color:#e6db74"> day +</span><span style="color:#e6db74">${</span>h<span style="color:#e6db74">}</span><span style="color:#e6db74"> hour +</span><span style="color:#e6db74">${</span>m<span style="color:#e6db74">}</span><span style="color:#e6db74"> minute +</span><span style="color:#e6db74">${</span>s<span style="color:#e6db74">}</span><span style="color:#e6db74"> second&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">getTime</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">eval</span>(<span style="color:#e6db74">&#39;$time = date(&#34;&#39;</span> <span style="color:#f92672">.</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">format</span> <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;&#34;, strtotime(&#34;&#39;</span> <span style="color:#f92672">.</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">prediction</span> <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;&#34;));&#39;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">isset</span>($time) <span style="color:#f92672">?</span> $time <span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Something went terribly wrong&#39;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}       
+</span></span></code></pre></div><p>The key line is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">eval</span>(<span style="color:#e6db74">&#39;$time = date(&#34;&#39;</span> <span style="color:#f92672">.</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">format</span> <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;&#34;, strtotime(&#34;&#39;</span> <span style="color:#f92672">.</span> $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">prediction</span> <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;&#34;));&#39;</span>);
+</span></span></code></pre></div><p>The <code>$format</code> is taken from user input and only passed through <code>addslashes</code>, which is <strong>not sufficient to prevent code injection</strong>.</p>
+<h2 id="exploitation">Exploitation<a hidden class="anchor" aria-hidden="true" href="#exploitation">#</a></h2>
+<p>A bypass technique for <code>addslashes</code> command injection is discussed in this <a href="https://swordandcircuitboard.com/php-addslashes-command-injection-bypass/">reference article</a>.</p>
+<p>You can exploit the vulnerability with a payload like:</p>
+<pre tabindex="0"><code>${system($_GET[1])}&amp;1=cat+../flagBweet
+</code></pre><p>This payload breaks out of the intended context and executes arbitrary commands, such as reading the flag.</p>
+<h2 id="lessons-learned">Lessons Learned<a hidden class="anchor" aria-hidden="true" href="#lessons-learned">#</a></h2>
+<ul>
+<li><strong>Never use <code>addslashes</code> as your only input validation/sanitization.</strong> Always use proper validation and context-aware escaping.</li>
+<li><strong>PHP&rsquo;s <code>eval</code> is dangerous</strong> when handling user-supplied data, especially if input is not strictly sanitized.</li>
+<li>Reviewing source code is a powerful way to discover hidden vulnerabilities and exploitation techniques.</li>
+<li>Attackers often look for creative ways to bypass insufficient sanitization using PHP features like variable variables and braces.</li>
+</ul>
+<hr>
+<p>Writeup based on my own exploitation process and references from the CTF and web security communities.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/htb/">HTB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/lovetok/">LoveTok</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/php/">PHP</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/addslashes/">Addslashes</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/command-injection/">Command Injection</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/eval/">Eval</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/source-code-review/">Source Code Review</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/web-hacking/">Web Hacking</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

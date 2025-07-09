@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>CMS on My Blog</title>
+    <link>http://localhost:1313/categories/cms/</link>
+    <description>Recent content in CMS on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 01 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/cms/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Writeup HTB Walkthrough</title>
+      <link>http://localhost:1313/posts/2025-04-01-writeup/</link>
+      <pubDate>Tue, 01 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025-04-01-writeup/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Writeup&lt;/strong&gt; box on Hack The Box. The machine revolves around web enumeration, CMS exploitation, SQLi, hash cracking, and privilege escalation via PATH hijacking.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Target: 10.10.10.138&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -sC -sV 10.10.10.138
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Results:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;22/tcp (SSH) OpenSSH 9.2p1 Debian&lt;/li&gt;
+&lt;li&gt;80/tcp (HTTP) Apache httpd 2.4.25 (Debian)&lt;/li&gt;
+&lt;li&gt;robots.txt has a disallowed entry: &lt;code&gt;/writeup/&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Site uses CMS Made Simple, version 2.2.9.1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;cms-exploitation&#34;&gt;CMS Exploitation&lt;/h2&gt;
+&lt;p&gt;Accessed &lt;code&gt;/writeup&lt;/code&gt; and &lt;code&gt;/writeup/doc/CHANGELOG.txt&lt;/code&gt; to confirm CMS version.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Alfred</title>
+      <link>http://localhost:1313/posts/2023-6-26-thm-alfred/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2023-6-26-thm-alfred/</guid>
+      <description>&lt;h2 id=&#34;challenge-alfred&#34;&gt;Challenge: Alfred&lt;/h2&gt;
+&lt;p&gt;This box is about exploiting Jenkins (misconfiguration). Jenkins is an open
+source &lt;strong&gt;continuous integration/continuous delivery and deployment (CI/CD)&lt;/strong&gt;
+automation software DevOps tool written in the Java programming language. This
+tool is used to implement CI/CD workflows, called pipelines.&lt;/p&gt;
+&lt;p&gt;This box introduces a tool called Nishang which is a framework and collection of
+scripts and payloads which enables usage of PowerShell for offensive security,
+penetration testing and red teaming.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

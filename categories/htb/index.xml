@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>HTB on My Blog</title>
+    <link>http://localhost:1313/categories/htb/</link>
+    <description>Recent content in HTB on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 13 Oct 2024 22:20:03 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/htb/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HTB Academy File Inclusion Skills Assessment</title>
+      <link>http://localhost:1313/posts/2024-10-13-htb-academy-file-inclusion-skills-assessment/</link>
+      <pubDate>Sun, 13 Oct 2024 22:20:03 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2024-10-13-htb-academy-file-inclusion-skills-assessment/</guid>
+      <description>&lt;h2 id=&#34;identifying-the-local-file-inclusion-lfi-vulnerability&#34;&gt;Identifying the Local File Inclusion (LFI) Vulnerability&lt;/h2&gt;
+&lt;p&gt;While working on the skills assessment for the File Inclusion module, I first checked whether the target website was vulnerable to Local File Inclusion (LFI). The website had a query parameter called page in the URL, as shown below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;http://&amp;lt;IP&amp;gt;/index.php?page=&amp;lt;page name&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When I attempted to traverse directories using relative paths, like &lt;code&gt;../../../../etc/passwd&lt;/code&gt;, I encountered an error message: &amp;ldquo;&lt;strong&gt;Invalid input detected!&lt;/strong&gt;&amp;rdquo;.&lt;/p&gt;
+&lt;h2 id=&#34;directory-enumeration-with-ffuf&#34;&gt;Directory Enumeration with ffuf&lt;/h2&gt;
+&lt;p&gt;To explore available pages on the site, I used the ffuf tool to fuzz the directories:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

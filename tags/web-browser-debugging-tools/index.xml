@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Web Browser Debugging Tools on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/web-browser-debugging-tools/</link>
+    <description>Recent content in Web Browser Debugging Tools on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 10 Dec 2024 22:41:30 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/web-browser-debugging-tools/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SANS Holiday Hack Challenge Elf Connect</title>
+      <link>https://joonkim0625.github.io/posts/2024-12-10-sans-holiday-hack-challenge-elf-connect/</link>
+      <pubDate>Tue, 10 Dec 2024 22:41:30 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-12-10-sans-holiday-hack-challenge-elf-connect/</guid>
+      <description>&lt;h2 id=&#34;hacking-a-javascript-game&#34;&gt;Hacking a JavaScript Game&lt;/h2&gt;
+&lt;p&gt;Referring to &lt;a href=&#34;https://www.youtube.com/watch?v=XsEqZvrTyoU&amp;amp;t=126s&#34;&gt;this video&lt;/a&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;examination&#34;&gt;Examination&lt;/h2&gt;
+&lt;p&gt;This is a web-based game, so we begin by inspecting the game page using the browser&amp;rsquo;s developer tools.&lt;/p&gt;
+&lt;h3 id=&#34;inspecting-the-game&#34;&gt;Inspecting the Game&lt;/h3&gt;
+&lt;p&gt;Open the browser&amp;rsquo;s developer tools and navigate to the debugger section. This section displays all the files associated with the page you are inspecting.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Debugger Section&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/sans-holiday-hack/elf-connect/debugger.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;You can view the HTML source code of the Elf Connect game here:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Game Code&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/sans-holiday-hack/elf-connect/game-code.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

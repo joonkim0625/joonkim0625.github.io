@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>SMB on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/smb/</link>
+    <description>Recent content in SMB on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 03 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/smb/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>FriendZone HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/</link>
+      <pubDate>Thu, 03 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/</guid>
+      <description>&lt;p&gt;This post covers my process for solving the &lt;strong&gt;FriendZone&lt;/strong&gt; box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://0xdf.gitlab.io/2019/07/13/htb-friendzone.html&#34;&gt;0xdf’s writeup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://rastating.github.io/privilege-escalation-via-python-library-hijacking/&#34;&gt;Python library hijack privilege escalation&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap-scan&#34;&gt;NMAP Scan&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09+03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &amp;lt;unknown&amp;gt;, NetBIOS MAC: &amp;lt;unknown&amp;gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;hr&gt;
+&lt;h2 id=&#34;tags-htb-friendzone-smb-lfi-privilege-escalation-python-hijack-reverse-shell-dns-enumeration&#34;&gt;title: FriendZone HTB Walkthrough
+date: 2025-07-03
+categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security]
+tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration]&lt;/h2&gt;
+&lt;p&gt;This post covers my process for solving the &lt;strong&gt;FriendZone&lt;/strong&gt; box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Relevant</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</link>
+      <pubDate>Thu, 29 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</guid>
+      <description>&lt;h2 id=&#34;challenge-relevant&#34;&gt;Challenge: Relevant&lt;/h2&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;p&gt;I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool &lt;code&gt;threader3000&lt;/code&gt; and I decided to give it a try.&lt;/p&gt;
+&lt;p&gt;The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>HackTheBox - Beginner Track: Blue</title>
+      <link>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</link>
+      <pubDate>Sat, 29 Apr 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</guid>
+      <description>&lt;h2 id=&#34;challenge-blue&#34;&gt;Challenge: Blue&lt;/h2&gt;
+&lt;p&gt;There wasn&amp;rsquo;t a description, so I ran &lt;code&gt;nmap&lt;/code&gt; on the IP address that I was given:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;PORT      STATE SERVICE      VERSION
+135/tcp   open  msrpc        Microsoft Windows RPC
+139/tcp   open  netbios-ssn  Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds Windows 7 Professional 7601 Service Pack 1 microsoft-ds (workgroup: WORKGROUP)
+49152/tcp open  msrpc        Microsoft Windows RPC
+49153/tcp open  msrpc        Microsoft Windows RPC
+49154/tcp open  msrpc        Microsoft Windows RPC
+49155/tcp open  msrpc        Microsoft Windows RPC
+49156/tcp open  msrpc        Microsoft Windows RPC
+49157/tcp open  msrpc        Microsoft Windows RPC
+Service Info: Host: HARIS-PC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb-security-mode:
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-time:
+|   date: 2023-04-30T01:23:49
+|_  start_date: 2023-04-30T01:19:21
+| smb2-security-mode:
+|   210:
+|_    Message signing enabled but not required
+| smb-os-discovery:
+|   OS: Windows 7 Professional 7601 Service Pack 1 (Windows 7 Professional 6.1)
+|   OS CPE: cpe:/o:microsoft:windows_7::sp1:professional
+|   Computer name: haris-PC
+|   NetBIOS computer name: HARIS-PC\x00
+|   Workgroup: WORKGROUP\x00
+|_  System time: 2023-04-30T02:23:51+01:00
+|_clock-skew: mean: -19m03s, deviation: 34m35s, median: 54s
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 135 was open, so I googled if there were any exploits regarding the msrpc
+service. I was able to find this &lt;a href=&#34;https://book.hacktricks.xyz/network-services-pentesting/135-pentesting-msrpc&#34;&gt;article&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

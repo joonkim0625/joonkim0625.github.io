@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>X86 on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/x86/</link>
+    <description>Recent content in X86 on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 13 Mar 2023 10:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/x86/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HackTheBox: You know 0xDiablos</title>
+      <link>https://joonkim0625.github.io/posts/2023-3-13-hackthebox-you-know-0xdiablos/</link>
+      <pubDate>Mon, 13 Mar 2023 10:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-3-13-hackthebox-you-know-0xdiablos/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;This is one of the challenges of the beginner track in HackTheBox.&lt;/p&gt;
+&lt;p&gt;I was given a binary with no source code. This indicated that I would need to
+use Ghidra to look at the decompiled source code. First, some checks on the
+binary:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;─$ file ./vuln
+./vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=ab7f19bb67c16ae453d4959fba4e6841d930a6dd, for GNU/Linux 3.2.0, not stripped
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;No defensive mechanisms are turned on for this challenge.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

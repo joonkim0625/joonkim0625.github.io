@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Winpeas on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/winpeas/</link>
+    <description>Recent content in Winpeas on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 28 Jun 2023 22:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/winpeas/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>TryHackMe - HackPark</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/</link>
+      <pubDate>Wed, 28 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/</guid>
+      <description>&lt;h2 id=&#34;challenge-hackpark&#34;&gt;Challenge: HackPark&lt;/h2&gt;
+&lt;p&gt;In this box, it introduces Hydra, RCE &amp;amp; WinPEAS tools/techniques to exploit a
+Windows System.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24+00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using &lt;code&gt;xfreerdp&lt;/code&gt; or &lt;code&gt;rdesktop&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

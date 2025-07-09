@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>GraphQL on My Blog</title>
+    <link>http://localhost:1313/categories/graphql/</link>
+    <description>Recent content in GraphQL on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 31 Mar 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/graphql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Help HTB Walkthrough</title>
+      <link>http://localhost:1313/posts/2025-03-31-help/</link>
+      <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025-03-31-help/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Help&lt;/strong&gt; box on Hack The Box. This box involves GraphQL enumeration, credential dumping, hash cracking, and classic web application enumeration and exploitation.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Initial nmap scan:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -sC -sV -oA nmap/help &amp;lt;IP&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Found GraphQL running on port 3000.&lt;/p&gt;
+&lt;h2 id=&#34;graphql-enumeration&#34;&gt;GraphQL Enumeration&lt;/h2&gt;
+&lt;p&gt;Referred to &lt;a href=&#34;https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/GraphQL%20Injection/README.md&#34;&gt;PayloadsAllTheThings - GraphQL Injection&lt;/a&gt; to start enumeration.&lt;/p&gt;
+&lt;p&gt;Discovered GraphQL types via introspection:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;http://10.10.10.121:3000/graphql?query={__schema{types{name}}}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Full schema dump and queries revealed a &lt;code&gt;user&lt;/code&gt; type with &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt; fields.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

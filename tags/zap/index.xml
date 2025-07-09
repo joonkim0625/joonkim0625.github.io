@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Zap on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/zap/</link>
+    <description>Recent content in Zap on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Feb 2025 00:34:20 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/zap/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>webhackingkr old 02</title>
+      <link>https://joonkim0625.github.io/posts/2025-02-09-webhackingkr-old-02/</link>
+      <pubDate>Sun, 09 Feb 2025 00:34:20 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-02-09-webhackingkr-old-02/</guid>
+      <description>&lt;p&gt;This is a challenge &lt;code&gt;old-02&lt;/code&gt; from &lt;code&gt;webhacking.kr&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I was stuck trying to understand how people were discovering this SQLi vulnerability through a cookie, as no blog posts explained why the attack was effective. This wasn&amp;rsquo;t a typical SQLi challenge that I&amp;rsquo;m used to, so I really wanted to know why it worked the way it did. The goal of this challenge is to figure out the password used for the &lt;code&gt;admin.php&lt;/code&gt; page (mentioned in the HTML comment).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

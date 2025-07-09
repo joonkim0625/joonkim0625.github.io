@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Learning on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/learning/</link>
+    <description>Recent content in Learning on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 27 Jan 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/learning/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RSA Encryption</title>
+      <link>https://joonkim0625.github.io/posts/2022-1-27-rsa-encryption/</link>
+      <pubDate>Thu, 27 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-1-27-rsa-encryption/</guid>
+      <description>&lt;h1 id=&#34;rsa-encryption&#34;&gt;RSA Encryption&lt;/h1&gt;
+&lt;p&gt;I was working on picoCTF 2021: Mind your Ps and Qs problem and the problem was
+about decrypting a RSA encryption. I have used RSA encryption to create some SSH
+keys. And, of course, there are many times that I just don&amp;rsquo;t realize but RSA
+encryption is being used under the hood. So, I wanted to know about how it would
+actually work. I watched this &lt;a href=&#34;https://www.youtube.com/watch?v=4zahvcJ9glg&#34;&gt;Youtube video&lt;/a&gt; by Eddie Woo and it was really helpful!&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

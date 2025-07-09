@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LFI | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="">
+<meta name="description" content="Cybersecurity Blog">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/tags/lfi/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://joonkim0625.github.io/tags/lfi/index.xml">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/tags/lfi/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/tags/lfi/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="LFI">
+  <meta property="og:description" content="Cybersecurity Blog">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LFI">
+<meta name="twitter:description" content="Cybersecurity Blog">
+
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header">
+  <h1>
+    LFI
+  </h1>
+</header>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">FriendZone HTB Walkthrough
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.
+References 0xdf’s writeup Python library hijack privilege escalation Recon NMAP Scan └──╼ [★]$ nmap -sC -sV 10.10.10.123 Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT Nmap scan report for 10.10.10.123 Host is up (0.011s latency). Not shown: 993 closed tcp ports (reset) PORT STATE SERVICE VERSION 21/tcp open ftp vsftpd 3.0.3 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA) | 256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA) |_ 256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519) 53/tcp open domain ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux) | dns-nsid: |_ bind.version: 9.11.3-1ubuntu1.2-Ubuntu 80/tcp open http Apache httpd 2.4.29 ((Ubuntu)) |_http-title: Friend Zone Escape software |_http-server-header: Apache/2.4.29 (Ubuntu) 139/tcp open netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP) 443/tcp open ssl/http Apache httpd 2.4.29 |_http-server-header: Apache/2.4.29 (Ubuntu) | tls-alpn: |_ http/1.1 |_ssl-date: TLS randomness does not represent time |_http-title: 404 Not Found | ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO | Not valid before: 2018-10-05T21:02:30 |_Not valid after: 2018-11-04T21:02:30 445/tcp open netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP) Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel Host script results: | smb2-time: | date: 2025-07-03T20:02:08 |_ start_date: N/A | smb2-security-mode: | 3:1:1: |_ Message signing enabled but not required |_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s | smb-os-discovery: | OS: Windows 6.1 (Samba 4.7.6-Ubuntu) | Computer name: friendzone | NetBIOS computer name: FRIENDZONE\x00 | Domain name: \x00 | FQDN: friendzone |_ System time: 2025-07-03T23:02:09&#43;03:00 |_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &lt;unknown&gt;, NetBIOS MAC: &lt;unknown&gt; (unknown) | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds title: FriendZone HTB Walkthrough date: 2025-07-03 categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security] tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration] This post covers my process for solving the FriendZone box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-07-03 00:00:00 +0000 UTC'>July 3, 2025</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to FriendZone HTB Walkthrough" href="https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">Toxic HTB Walkthrough
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>This post documents my process for solving the Toxic box on Hack The Box. This box is all about PHP insecure deserialization, exploiting LFI, and using log poisoning to achieve remote code execution.
+Synopsis PHP insecure deserialization to LFI that abuses log poisoning for RCE.
+Learning References:
+https://ianpeter.medium.com/exploiting-log-poisoning-through-lfi-and-serialization-in-php-e039e7b126ad The official writeup I wasn’t sure what to do at first, so I checked the writeup after struggling for a while.
+Challenge Analysis &amp; Source Code Review The web page didn’t reveal much, but looking at the source code, you see:
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-04-21 00:00:00 +0000 UTC'>April 21, 2025</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to Toxic HTB Walkthrough" href="https://joonkim0625.github.io/posts/2025-04-21-toxic/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">HTB Academy File Inclusion Skills Assessment
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Identifying the Local File Inclusion (LFI) Vulnerability While working on the skills assessment for the File Inclusion module, I first checked whether the target website was vulnerable to Local File Inclusion (LFI). The website had a query parameter called page in the URL, as shown below:
+http://&lt;IP&gt;/index.php?page=&lt;page name&gt; When I attempted to traverse directories using relative paths, like ../../../../etc/passwd, I encountered an error message: “Invalid input detected!”.
+Directory Enumeration with ffuf To explore available pages on the site, I used the ffuf tool to fuzz the directories:
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-13 22:20:03 +0000 UTC'>October 13, 2024</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to HTB Academy File Inclusion Skills Assessment" href="https://joonkim0625.github.io/posts/2024-10-13-htb-academy-file-inclusion-skills-assessment/"></a>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>PHP on My Blog</title>
+    <link>http://localhost:1313/categories/php/</link>
+    <description>Recent content in PHP on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 21 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/php/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Toxic HTB Walkthrough</title>
+      <link>http://localhost:1313/posts/2025-04-21-toxic/</link>
+      <pubDate>Mon, 21 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2025-04-21-toxic/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Toxic&lt;/strong&gt; box on Hack The Box. This box is all about PHP insecure deserialization, exploiting LFI, and using log poisoning to achieve remote code execution.&lt;/p&gt;
+&lt;h2 id=&#34;synopsis&#34;&gt;Synopsis&lt;/h2&gt;
+&lt;p&gt;PHP insecure deserialization to LFI that abuses log poisoning for RCE.&lt;/p&gt;
+&lt;h2 id=&#34;learning&#34;&gt;Learning&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://ianpeter.medium.com/exploiting-log-poisoning-through-lfi-and-serialization-in-php-e039e7b126ad&#34;&gt;https://ianpeter.medium.com/exploiting-log-poisoning-through-lfi-and-serialization-in-php-e039e7b126ad&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;The official writeup&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I wasn&amp;rsquo;t sure what to do at first, so I checked the writeup after struggling for a while.&lt;/p&gt;
+&lt;h2 id=&#34;challenge-analysis--source-code-review&#34;&gt;Challenge Analysis &amp;amp; Source Code Review&lt;/h2&gt;
+&lt;p&gt;The web page didn&amp;rsquo;t reveal much, but looking at the source code, you see:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

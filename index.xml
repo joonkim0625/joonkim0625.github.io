@@ -1,0 +1,1146 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/</link>
+    <description>Recent content on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 03 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Blocky HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-07-03-htb-blocky/</link>
+      <pubDate>Thu, 03 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-07-03-htb-blocky/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Blocky&lt;/strong&gt; box on Hack The Box. The machine revolves around web enumeration, WordPress, reverse engineering a Java plugin, MySQL credential hunting, and privilege escalation.&lt;/p&gt;
+&lt;h2 id=&#34;reference&#34;&gt;Reference&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://0xdf.gitlab.io/2020/06/30/htb-blocky.html&#34;&gt;https://0xdf.gitlab.io/2020/06/30/htb-blocky.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;Nmap&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -sC -sV 10.10.10.37
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;PORT     STATE  SERVICE VERSION
+21/tcp   open   ftp     ProFTPD 1.3.5a
+22/tcp   open   ssh     OpenSSH 7.2p2 Ubuntu 4ubuntu2.2 (Ubuntu Linux; protocol 2.0)
+80/tcp   open   http    Apache httpd 2.4.18
+8192/tcp closed sophos
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Notes:&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>FriendZone HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/</link>
+      <pubDate>Thu, 03 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-07-03-htb-friendzone/</guid>
+      <description>&lt;p&gt;This post covers my process for solving the &lt;strong&gt;FriendZone&lt;/strong&gt; box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://0xdf.gitlab.io/2019/07/13/htb-friendzone.html&#34;&gt;0xdf’s writeup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://rastating.github.io/privilege-escalation-via-python-library-hijacking/&#34;&gt;Python library hijack privilege escalation&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap-scan&#34;&gt;NMAP Scan&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;└──╼ [★]$ nmap -sC -sV 10.10.10.123
+Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-07-03 15:01 CDT
+Nmap scan report for 10.10.10.123
+Host is up (0.011s latency).
+Not shown: 993 closed tcp ports (reset)
+PORT    STATE SERVICE     VERSION
+21/tcp  open  ftp         vsftpd 3.0.3
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 a9:68:24:bc:97:1f:1e:54:a5:80:45:e7:4c:d9:aa:a0 (RSA)
+|   256 e5:44:01:46:ee:7a:bb:7c:e9:1a:cb:14:99:9e:2b:8e (ECDSA)
+|_  256 00:4e:1a:4f:33:e8:a0:de:86:a6:e4:2a:5f:84:61:2b (ED25519)
+53/tcp  open  domain      ISC BIND 9.11.3-1ubuntu1.2 (Ubuntu Linux)
+| dns-nsid: 
+|_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+80/tcp  open  http        Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Friend Zone Escape software
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp open  ssl/http    Apache httpd 2.4.29
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+| tls-alpn: 
+|_  http/1.1
+|_ssl-date: TLS randomness does not represent time
+|_http-title: 404 Not Found
+| ssl-cert: Subject: commonName=friendzone.red/organizationName=CODERED/stateOrProvinceName=CODERED/countryName=JO
+| Not valid before: 2018-10-05T21:02:30
+|_Not valid after:  2018-11-04T21:02:30
+445/tcp open  netbios-ssn Samba smbd 4.7.6-Ubuntu (workgroup: WORKGROUP)
+Service Info: Hosts: FRIENDZONE, 127.0.1.1; OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb2-time: 
+|   date: 2025-07-03T20:02:08
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled but not required
+|_clock-skew: mean: -1h00m00s, deviation: 1h43m55s, median: -1s
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: friendzone
+|   NetBIOS computer name: FRIENDZONE\x00
+|   Domain name: \x00
+|   FQDN: friendzone
+|_  System time: 2025-07-03T23:02:09+03:00
+|_nbstat: NetBIOS name: FRIENDZONE, NetBIOS user: &amp;lt;unknown&amp;gt;, NetBIOS MAC: &amp;lt;unknown&amp;gt; (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.29 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;hr&gt;
+&lt;h2 id=&#34;tags-htb-friendzone-smb-lfi-privilege-escalation-python-hijack-reverse-shell-dns-enumeration&#34;&gt;title: FriendZone HTB Walkthrough
+date: 2025-07-03
+categories: [Penetration Testing, CTF Walkthrough, Privilege Escalation, Web Application Security]
+tags: [HTB, FriendZone, SMB, LFI, privilege escalation, python hijack, reverse shell, DNS, enumeration]&lt;/h2&gt;
+&lt;p&gt;This post covers my process for solving the &lt;strong&gt;FriendZone&lt;/strong&gt; box on Hack The Box. It demonstrates a typical CTF methodology: recon, enumeration, exploitation (web and SMB), privilege escalation via Python library hijacking, and lessons learned.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Neonify HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-22-neonify/</link>
+      <pubDate>Tue, 22 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-22-neonify/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Neonify&lt;/strong&gt; box on Hack The Box. This challenge revolves around a Ruby application vulnerable to Server-Side Template Injection (SSTI) via a regex newline bypass.&lt;/p&gt;
+&lt;h2 id=&#34;challenge-description&#34;&gt;Challenge Description&lt;/h2&gt;
+&lt;p&gt;It&amp;rsquo;s time for a shiny new reveal for the first-ever text neonifier. Come test out our brand new website and make any text glow like a lo-fi neon tube!&lt;/p&gt;
+&lt;h2 id=&#34;solution&#34;&gt;Solution&lt;/h2&gt;
+&lt;p&gt;After looking at the source code, I noticed it was a Ruby application and suspected some kind of command injection. I didn&amp;rsquo;t immediately see the path, so I referred to a writeup and discovered that the challenge is about &amp;ldquo;ERB SSTI via newline regex bypass.&amp;rdquo; There’s very little public writeup info on this exact method, which made it a great learning opportunity.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Toxic HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-21-toxic/</link>
+      <pubDate>Mon, 21 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-21-toxic/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Toxic&lt;/strong&gt; box on Hack The Box. This box is all about PHP insecure deserialization, exploiting LFI, and using log poisoning to achieve remote code execution.&lt;/p&gt;
+&lt;h2 id=&#34;synopsis&#34;&gt;Synopsis&lt;/h2&gt;
+&lt;p&gt;PHP insecure deserialization to LFI that abuses log poisoning for RCE.&lt;/p&gt;
+&lt;h2 id=&#34;learning&#34;&gt;Learning&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;References:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://ianpeter.medium.com/exploiting-log-poisoning-through-lfi-and-serialization-in-php-e039e7b126ad&#34;&gt;https://ianpeter.medium.com/exploiting-log-poisoning-through-lfi-and-serialization-in-php-e039e7b126ad&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;The official writeup&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I wasn&amp;rsquo;t sure what to do at first, so I checked the writeup after struggling for a while.&lt;/p&gt;
+&lt;h2 id=&#34;challenge-analysis--source-code-review&#34;&gt;Challenge Analysis &amp;amp; Source Code Review&lt;/h2&gt;
+&lt;p&gt;The web page didn&amp;rsquo;t reveal much, but looking at the source code, you see:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LoveTok HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-20-lovetok/</link>
+      <pubDate>Sun, 20 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-20-lovetok/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;LoveTok&lt;/strong&gt; box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of &lt;code&gt;addslashes&lt;/code&gt;, and exploiting command injection through the eval function.&lt;/p&gt;
+&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung&amp;hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin&amp;rsquo; (at your door). Come and check it out, but don&amp;rsquo;t try to cheat love because love cheats back.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Phonebook HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-19-phonebook/</link>
+      <pubDate>Sat, 19 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-19-phonebook/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Phonebook&lt;/strong&gt; box on Hack The Box. The box focuses on LDAP injection and brute-forcing credentials using knowledge of LDAP search/filter syntax.&lt;/p&gt;
+&lt;h2 id=&#34;solve&#34;&gt;Solve&lt;/h2&gt;
+&lt;p&gt;I didn’t find any obvious attack vectors except for a DOM-based HTML injection. After checking a writeup, I learned the challenge was about LDAP injection—a topic I had little prior experience with.&lt;/p&gt;
+&lt;h3 id=&#34;what-is-ldap-injection&#34;&gt;What is LDAP Injection?&lt;/h3&gt;
+&lt;p&gt;According to PayloadAllTheThings, LDAP Injection is a vulnerability that occurs when user-supplied input is used to construct LDAP queries without proper sanitization or escaping.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Pandora HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-13-pandora/</link>
+      <pubDate>Sun, 13 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-13-pandora/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Pandora&lt;/strong&gt; box on Hack The Box. The challenge focuses on recon, SNMP enumeration, port forwarding, SQLi on an internal service, and a series of lateral movement and privilege escalation steps.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Initial port scan:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ports&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;nmap -p- --min-rate&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1000&lt;/span&gt; -T4 10.10.11.136 | grep ^&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;0-9&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; | cut -d &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; -f &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; | tr &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;,&amp;#39;&lt;/span&gt; | sed s/,$//&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -p$ports -sC -sV 10.10.11.136
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Open ports:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;22 (SSH)&lt;/li&gt;
+&lt;li&gt;80 (HTTP, Apache, Ubuntu)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Enumerated with UDP scan (&lt;code&gt;-sU&lt;/code&gt;):&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Validation HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-10-validation/</link>
+      <pubDate>Thu, 10 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-10-validation/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Validation&lt;/strong&gt; box on Hack The Box. This challenge centers on SQL injection, writing a web shell via SQLi, and privilege escalation via password reuse.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Started with full port scan:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;ports&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;nmap -p- --min-rate&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1000&lt;/span&gt; -T4 &amp;lt;IP&amp;gt; | grep ^&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;0-9&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; | cut -d &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/&amp;#39;&lt;/span&gt; -f &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; | tr &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;\n&amp;#39;&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;,&amp;#39;&lt;/span&gt; | sed s/,$//&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;echo $ports
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# 22,80,4566,5000,5001,5002,5003,5004,5005,5006,5007,5008,8080&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -p$ports -sC -sV 10.10.11.116
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Main open ports: 22 (SSH), 80 (Apache), 4566 (nginx), 8080 (nginx).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Writeup HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-01-writeup/</link>
+      <pubDate>Tue, 01 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-01-writeup/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Writeup&lt;/strong&gt; box on Hack The Box. The machine revolves around web enumeration, CMS exploitation, SQLi, hash cracking, and privilege escalation via PATH hijacking.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Target: 10.10.10.138&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -sC -sV 10.10.10.138
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Results:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;22/tcp (SSH) OpenSSH 9.2p1 Debian&lt;/li&gt;
+&lt;li&gt;80/tcp (HTTP) Apache httpd 2.4.25 (Debian)&lt;/li&gt;
+&lt;li&gt;robots.txt has a disallowed entry: &lt;code&gt;/writeup/&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Site uses CMS Made Simple, version 2.2.9.1&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;cms-exploitation&#34;&gt;CMS Exploitation&lt;/h2&gt;
+&lt;p&gt;Accessed &lt;code&gt;/writeup&lt;/code&gt; and &lt;code&gt;/writeup/doc/CHANGELOG.txt&lt;/code&gt; to confirm CMS version.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Help HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-03-31-help/</link>
+      <pubDate>Mon, 31 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-03-31-help/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Help&lt;/strong&gt; box on Hack The Box. This box involves GraphQL enumeration, credential dumping, hash cracking, and classic web application enumeration and exploitation.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Initial nmap scan:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;nmap -sC -sV -oA nmap/help &amp;lt;IP&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Found GraphQL running on port 3000.&lt;/p&gt;
+&lt;h2 id=&#34;graphql-enumeration&#34;&gt;GraphQL Enumeration&lt;/h2&gt;
+&lt;p&gt;Referred to &lt;a href=&#34;https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/GraphQL%20Injection/README.md&#34;&gt;PayloadsAllTheThings - GraphQL Injection&lt;/a&gt; to start enumeration.&lt;/p&gt;
+&lt;p&gt;Discovered GraphQL types via introspection:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;http://10.10.10.121:3000/graphql?query={__schema{types{name}}}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Full schema dump and queries revealed a &lt;code&gt;user&lt;/code&gt; type with &lt;code&gt;username&lt;/code&gt; and &lt;code&gt;password&lt;/code&gt; fields.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>webhackingkr old 02</title>
+      <link>https://joonkim0625.github.io/posts/2025-02-09-webhackingkr-old-02/</link>
+      <pubDate>Sun, 09 Feb 2025 00:34:20 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-02-09-webhackingkr-old-02/</guid>
+      <description>&lt;p&gt;This is a challenge &lt;code&gt;old-02&lt;/code&gt; from &lt;code&gt;webhacking.kr&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;I was stuck trying to understand how people were discovering this SQLi vulnerability through a cookie, as no blog posts explained why the attack was effective. This wasn&amp;rsquo;t a typical SQLi challenge that I&amp;rsquo;m used to, so I really wanted to know why it worked the way it did. The goal of this challenge is to figure out the password used for the &lt;code&gt;admin.php&lt;/code&gt; page (mentioned in the HTML comment).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>SANS Holiday Hack Challenge Elf Connect</title>
+      <link>https://joonkim0625.github.io/posts/2024-12-10-sans-holiday-hack-challenge-elf-connect/</link>
+      <pubDate>Tue, 10 Dec 2024 22:41:30 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-12-10-sans-holiday-hack-challenge-elf-connect/</guid>
+      <description>&lt;h2 id=&#34;hacking-a-javascript-game&#34;&gt;Hacking a JavaScript Game&lt;/h2&gt;
+&lt;p&gt;Referring to &lt;a href=&#34;https://www.youtube.com/watch?v=XsEqZvrTyoU&amp;amp;t=126s&#34;&gt;this video&lt;/a&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;examination&#34;&gt;Examination&lt;/h2&gt;
+&lt;p&gt;This is a web-based game, so we begin by inspecting the game page using the browser&amp;rsquo;s developer tools.&lt;/p&gt;
+&lt;h3 id=&#34;inspecting-the-game&#34;&gt;Inspecting the Game&lt;/h3&gt;
+&lt;p&gt;Open the browser&amp;rsquo;s developer tools and navigate to the debugger section. This section displays all the files associated with the page you are inspecting.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Debugger Section&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/sans-holiday-hack/elf-connect/debugger.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;You can view the HTML source code of the Elf Connect game here:&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Game Code&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/sans-holiday-hack/elf-connect/game-code.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>PicoCTF Trickster</title>
+      <link>https://joonkim0625.github.io/posts/2024-11-26-picoctf-trickster/</link>
+      <pubDate>Tue, 26 Nov 2024 01:56:19 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-11-26-picoctf-trickster/</guid>
+      <description>&lt;h2 id=&#34;trickster&#34;&gt;Trickster&lt;/h2&gt;
+&lt;p&gt;Author: Junias Bonou&lt;/p&gt;
+&lt;p&gt;Description
+I found a web app that can help process images: PNG images only! Try it here!&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;picoctf-trickster&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/picoctf-trickster/picoctf-trickster.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;When I attempted to upload some random files, I got the following error message:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Error: File name does not contain &#39;.png&#39;.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This suggests that the app strictly checks for .png extensions. To dig deeper, we can perform a directory search to see if we can find anything useful. A tool like gobuster is perfect for this kind of task.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>USCCTF2024 Pwn Portal</title>
+      <link>https://joonkim0625.github.io/posts/2024-11-15-uscctf2024-pwn-portal/</link>
+      <pubDate>Fri, 15 Nov 2024 00:24:34 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-11-15-uscctf2024-pwn-portal/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;pre&gt;&lt;code&gt;Can you use the portals to get to the right place?
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You are provided with a 32-bit executable:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;└─$ file portal 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;portal: ELF 32-bit LSB executable, Intel 80386, version &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;SYSV&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;, dynamically linked, interpreter /lib/ld-linux.so.2, BuildID&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;sha1&lt;span style=&#34;color:#f92672&#34;&gt;]=&lt;/span&gt;2777afda2049624cbbecde55650e58f347efcd29, &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; GNU/Linux 3.2.0, not stripped
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Using checksec on this binary reveals that there are no security defenses enabled:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;*&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;/home/kali/ctf/uscctf2024/pwn/portal/portal&amp;#39;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Arch:       i386-32-little
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    RELRO:      No RELRO
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Stack:      No canary found
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    NX:         NX unknown - GNU_STACK missing
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    PIE:        No PIE &lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;0x8048000&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Stack:      Executable
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    RWX:        Has RWX segments
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    Stripped:   No
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is a straightforward &amp;ldquo;return-to-win&amp;rdquo; challenge. Upon inspecting the binary with objdump, you can see that the function win is the goal:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>XSS Skills Assessment</title>
+      <link>https://joonkim0625.github.io/posts/2024-11-14-xss-skills-assessment/</link>
+      <pubDate>Thu, 14 Nov 2024 00:10:37 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-11-14-xss-skills-assessment/</guid>
+      <description>&lt;p&gt;The search bar didn’t seem to be a viable target for XSS injection because either it simply echoes the search query or it sanitizes/blocks the payloads I tested (for example, the payloads generated by XSStrike didn’t work).&lt;/p&gt;
+&lt;p&gt;Next, I explored the &amp;ldquo;Leave a Comment&amp;rdquo; section, which includes multiple input fields. When posting a comment, I noticed that the inputs aren’t reflected directly back on the page. Searching for a comment only shows the search result, not the actual comment content, which means we need to identify which input area, if any, is vulnerable.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Unholy Union</title>
+      <link>https://joonkim0625.github.io/posts/2024-10-27-unholy-union/</link>
+      <pubDate>Sun, 27 Oct 2024 00:14:09 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-10-27-unholy-union/</guid>
+      <description>&lt;p&gt;A challenge about SLQi that uses Union injection technique.&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;unholy-main&#34; loading=&#34;lazy&#34; src=&#34;https://joonkim0625.github.io/images/Unholy.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;What is convenient about this challenge is it shows the query that is used to pull the data from the database. I used these SQL injection cheat sheet that is from the SQLi fundamental module from the HTB academy:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;cn&amp;#39; UNION select 1,database(),2,3-- - 	Current database name
+cn&amp;#39; UNION select 1,schema_name,3,4 from INFORMATION_SCHEMA.SCHEMATA-- - 	List all databases
+cn&amp;#39; UNION select 1,TABLE_NAME,TABLE_SCHEMA,4 from INFORMATION_SCHEMA.TABLES where table_schema=&amp;#39;dev&amp;#39;-- - 	List all tables in a specific database
+cn&amp;#39; UNION select 1,COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA from INFORMATION_SCHEMA.COLUMNS where table_name=&amp;#39;credentials&amp;#39;-- - 	List all columns in a specific table
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Steps I took based on the cheat sheet from the HTB Academy:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>webhackingkr-old-18</title>
+      <link>https://joonkim0625.github.io/posts/2024-10-25-webhackingkr-old-18/</link>
+      <pubDate>Fri, 25 Oct 2024 22:51:34 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-10-25-webhackingkr-old-18/</guid>
+      <description>&lt;p&gt;This is a challenge from &lt;code&gt;webhacking.kr&lt;/code&gt;. As the name of the website suggests, it is about SQL injection. You can check the source code of the page:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-php&#34; data-lang=&#34;php&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;?&lt;/span&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;php&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;($_GET[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;no&amp;#39;&lt;/span&gt;]){
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  $db &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;dbconnect&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;preg_match&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/ |\/|\(|\)|\||&amp;amp;|select|from|0x/i&amp;#34;&lt;/span&gt;,$_GET[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;no&amp;#39;&lt;/span&gt;])) &lt;span style=&#34;color:#66d9ef&#34;&gt;exit&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;no hack&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  $result &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;mysqli_fetch_array&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;mysqli_query&lt;/span&gt;($db,&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;select id from chall18 where id=&amp;#39;guest&amp;#39; and no=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;$_GET[no]&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)); &lt;span style=&#34;color:#75715e&#34;&gt;// admin&amp;#39;s no = 2
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;($result[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;]&lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;guest&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#66d9ef&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hi guest&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;($result[&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;id&amp;#39;&lt;/span&gt;]&lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;admin&amp;#34;&lt;/span&gt;){
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;solve&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;18&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hi admin!&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;?&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our goal seems to be creating a payload that would make the &lt;code&gt;id&lt;/code&gt; value &lt;code&gt;admin&lt;/code&gt; and also make the &lt;code&gt;no&lt;/code&gt; value &lt;code&gt;2&lt;/code&gt;. So, let&amp;rsquo;s assume that there is no filter so we can enter anything as a payload. When we enter &lt;code&gt;2&lt;/code&gt; as our input, you will see something like this:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>HTB Academy File Inclusion Skills Assessment</title>
+      <link>https://joonkim0625.github.io/posts/2024-10-13-htb-academy-file-inclusion-skills-assessment/</link>
+      <pubDate>Sun, 13 Oct 2024 22:20:03 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-10-13-htb-academy-file-inclusion-skills-assessment/</guid>
+      <description>&lt;h2 id=&#34;identifying-the-local-file-inclusion-lfi-vulnerability&#34;&gt;Identifying the Local File Inclusion (LFI) Vulnerability&lt;/h2&gt;
+&lt;p&gt;While working on the skills assessment for the File Inclusion module, I first checked whether the target website was vulnerable to Local File Inclusion (LFI). The website had a query parameter called page in the URL, as shown below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;http://&amp;lt;IP&amp;gt;/index.php?page=&amp;lt;page name&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When I attempted to traverse directories using relative paths, like &lt;code&gt;../../../../etc/passwd&lt;/code&gt;, I encountered an error message: &amp;ldquo;&lt;strong&gt;Invalid input detected!&lt;/strong&gt;&amp;rdquo;.&lt;/p&gt;
+&lt;h2 id=&#34;directory-enumeration-with-ffuf&#34;&gt;Directory Enumeration with ffuf&lt;/h2&gt;
+&lt;p&gt;To explore available pages on the site, I used the ffuf tool to fuzz the directories:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BuckeyeCTF 2024 - SSFS</title>
+      <link>https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/</link>
+      <pubDate>Mon, 07 Oct 2024 00:29:20 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-10-07-buckeyectf-2024-ssfs/</guid>
+      <description>&lt;h2 id=&#34;page-source-inspection&#34;&gt;Page Source Inspection&lt;/h2&gt;
+&lt;p&gt;The actual functionality of uploading and downloading files weren&amp;rsquo;t working so I looked at the page source. I saw this portion of the source:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;const searchFile = async () =&amp;gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	let formData = new FormData(searchForm);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	console.log([...formData][0]);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	let response = await fetch(&amp;#39;/search/&amp;#39; + [...formData][0][1], {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		method: &amp;#39;GET&amp;#39;,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	searchWrapper.hidden = false;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	if (response.status === 200) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		searchMessage.innerHTML = &amp;#39;File found. Download link: &amp;lt;&lt;span style=&#34;color:#f92672&#34;&gt;a&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;href&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/download/&amp;#39; + [...formData][0][1] + &amp;#39;&amp;#34;&lt;/span&gt;&amp;gt;Download&amp;lt;/&lt;span style=&#34;color:#f92672&#34;&gt;a&lt;/span&gt;&amp;gt;&amp;#39;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	} else {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;		searchMessage.innerHTML = &amp;#39;File not found.&amp;#39;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;If we look closer, once a file is found from the search bar (or the search functionality), there will be a linked provided by the site that accesses the path of that file:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BuckeyeCTF 2024 - Binary Exploitation</title>
+      <link>https://joonkim0625.github.io/posts/2024-10-06-ctf-buckeyectf-2024-runway0/</link>
+      <pubDate>Sun, 06 Oct 2024 01:39:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2024-10-06-ctf-buckeyectf-2024-runway0/</guid>
+      <description>&lt;h2 id=&#34;beginner-pwn-first-challenge&#34;&gt;Beginner pwn: First challenge&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;string.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; command[&lt;span style=&#34;color:#ae81ff&#34;&gt;110&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cowsay &lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; message[&lt;span style=&#34;color:#ae81ff&#34;&gt;100&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Give me a message to say!&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;fflush&lt;/span&gt;(stdout);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;fgets&lt;/span&gt;(message, &lt;span style=&#34;color:#ae81ff&#34;&gt;0x100&lt;/span&gt;, stdin);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;strncat&lt;/span&gt;(command, message, &lt;span style=&#34;color:#ae81ff&#34;&gt;98&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;strncat&lt;/span&gt;(command, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;system&lt;/span&gt;(command);
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It has been a while since I have done any CTFs! So I struggled a little bit looking at the code and what they do.&lt;/p&gt;
+&lt;p&gt;When I pass 109 A&amp;rsquo;s, it still runs the &lt;a href=&#34;https://en.wikipedia.org/wiki/Cowsay&#34;&gt;cowsay&lt;/a&gt; bin.&lt;/p&gt;
+&lt;p&gt;When you pass in 113 A&amp;rsquo;s, the output starts to show a single &amp;lsquo;A&amp;rsquo;:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Brainstorm</title>
+      <link>https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/</link>
+      <pubDate>Sat, 23 Sep 2023 00:10:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/</guid>
+      <description>&lt;h2 id=&#34;challenge-brainstorm&#34;&gt;Challenge: Brainstorm&lt;/h2&gt;
+&lt;p&gt;This is a room that tests on reverse engineering a chat program to exploit a
+Windows machine.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Nmap:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;─$&lt;/span&gt; nmap &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;sC &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;sV &lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;Pn &lt;span style=&#34;color:#ae81ff&#34;&gt;10.10.37.33&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Starting Nmap &lt;span style=&#34;color:#ae81ff&#34;&gt;7.93&lt;/span&gt; ( https:&lt;span style=&#34;color:#f92672&#34;&gt;//&lt;/span&gt;nmap&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;org ) at &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;02&lt;/span&gt; EDT
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Nmap scan report &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt; hi&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;hormel&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;wg010&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;hi&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;umn&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;edu (&lt;span style=&#34;color:#ae81ff&#34;&gt;10.10.37.33&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Host &lt;span style=&#34;color:#f92672&#34;&gt;is&lt;/span&gt; up (&lt;span style=&#34;color:#ae81ff&#34;&gt;0.22&lt;/span&gt;s latency)&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Not shown: &lt;span style=&#34;color:#ae81ff&#34;&gt;997&lt;/span&gt; filtered tcp ports (no&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;response)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;PORT     STATE SERVICE            VERSION
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp   open  ftp                Microsoft ftpd
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ftp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;anon: Anonymous FTP login allowed (FTP code &lt;span style=&#34;color:#ae81ff&#34;&gt;230&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_Can&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;t get directory listing: TIMEOUT&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ftp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;syst:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_  SYST: Windows_NT
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;3389&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp open  ssl&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;ms&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;wbt&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;server&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;?&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; rdp&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;ntlm&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;info:
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   Target_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   NetBIOS_Domain_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   NetBIOS_Computer_Name: BRAINSTORM
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   DNS_Domain_Name: brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   DNS_Computer_Name: brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;   Product_Version: &lt;span style=&#34;color:#ae81ff&#34;&gt;6.1.7601&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_  System_Time: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T04:&lt;span style=&#34;color:#ae81ff&#34;&gt;05&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;48&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; ssl&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;cert: Subject: commonName&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;brainstorm
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt; Not valid before: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;21&lt;/span&gt;T03:&lt;span style=&#34;color:#ae81ff&#34;&gt;52&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;41&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_Not valid after:  &lt;span style=&#34;color:#ae81ff&#34;&gt;2024&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;03&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T03:&lt;span style=&#34;color:#ae81ff&#34;&gt;52&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;41&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;|&lt;/span&gt;_ssl&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;date: &lt;span style=&#34;color:#ae81ff&#34;&gt;2023&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;09&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;22&lt;/span&gt;T04:&lt;span style=&#34;color:#ae81ff&#34;&gt;06&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;19&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;:&lt;span style=&#34;color:#ae81ff&#34;&gt;00&lt;/span&gt;; &lt;span style=&#34;color:#f92672&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;s &lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; scanner time&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;9999&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;tcp open  abyss&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;?&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Service Info: OS: Windows; CPE: cpe:&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;o:microsoft:windows
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Service detection performed&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt; Please report any incorrect results at https:&lt;span style=&#34;color:#f92672&#34;&gt;//&lt;/span&gt;nmap&lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;org&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt;submit&lt;span style=&#34;color:#f92672&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color:#f92672&#34;&gt;.&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;Nmap done: &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; IP address (&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; host up) scanned &lt;span style=&#34;color:#f92672&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;216.80&lt;/span&gt; seconds
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;First thing I noticed was Port 21 &lt;code&gt;ftp&lt;/code&gt; was open with the anonymous FTP login
+enabled. I checked it out by running &lt;code&gt;ftp 10.10.37.33&lt;/code&gt; with the name
+&lt;code&gt;anonymous&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Relevant</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</link>
+      <pubDate>Thu, 29 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</guid>
+      <description>&lt;h2 id=&#34;challenge-relevant&#34;&gt;Challenge: Relevant&lt;/h2&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;p&gt;I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool &lt;code&gt;threader3000&lt;/code&gt; and I decided to give it a try.&lt;/p&gt;
+&lt;p&gt;The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - HackPark</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/</link>
+      <pubDate>Wed, 28 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/</guid>
+      <description>&lt;h2 id=&#34;challenge-hackpark&#34;&gt;Challenge: HackPark&lt;/h2&gt;
+&lt;p&gt;In this box, it introduces Hydra, RCE &amp;amp; WinPEAS tools/techniques to exploit a
+Windows System.&lt;/p&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;nmap -sC -sV -O -sT 10.10.170.188
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC
+Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188)
+Host is up (0.00068s latency).
+Not shown: 998 filtered tcp ports (no-response)
+PORT     STATE SERVICE            VERSION
+80/tcp   open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+| http-robots.txt: 6 disallowed entries
+| /Account/*.* /search /search.aspx /error404.aspx
+|_/archive /archive.aspx
+|_http-server-header: Microsoft-IIS/8.5
+|_http-title: hackpark | hackpark amusements
+| http-methods:
+|_  Potentially risky methods: TRACE
+3389/tcp open  ssl/ms-wbt-server?
+|_ssl-date: 2023-06-20T18:28:29+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=hackpark
+| Not valid before: 2023-06-19T18:14:25
+|_Not valid after:  2023-12-19T18:14:25
+| rdp-ntlm-info:
+|   Target_Name: HACKPARK
+|   NetBIOS_Domain_Name: HACKPARK
+|   NetBIOS_Computer_Name: HACKPARK
+|   DNS_Domain_Name: hackpark
+|   DNS_Computer_Name: hackpark
+|   Product_Version: 6.3.9600
+|_  System_Time: 2023-06-20T18:28:24+00:00
+MAC Address: 02:51:BA:0B:1C:1B (Unknown)
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2012 (89%)
+OS CPE: cpe:/o:microsoft:windows_server_2012:r2
+Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 1 hop
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once
+we get the cred to get onto the target machine we can remotely access it by
+using &lt;code&gt;xfreerdp&lt;/code&gt; or &lt;code&gt;rdesktop&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>TryHackMe - Alfred</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-26-thm-alfred/</link>
+      <pubDate>Mon, 26 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-26-thm-alfred/</guid>
+      <description>&lt;h2 id=&#34;challenge-alfred&#34;&gt;Challenge: Alfred&lt;/h2&gt;
+&lt;p&gt;This box is about exploiting Jenkins (misconfiguration). Jenkins is an open
+source &lt;strong&gt;continuous integration/continuous delivery and deployment (CI/CD)&lt;/strong&gt;
+automation software DevOps tool written in the Java programming language. This
+tool is used to implement CI/CD workflows, called pipelines.&lt;/p&gt;
+&lt;p&gt;This box introduces a tool called Nishang which is a framework and collection of
+scripts and payloads which enables usage of PowerShell for offensive security,
+penetration testing and red teaming.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>HackTheBox - Beginner Track: Blue</title>
+      <link>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</link>
+      <pubDate>Sat, 29 Apr 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</guid>
+      <description>&lt;h2 id=&#34;challenge-blue&#34;&gt;Challenge: Blue&lt;/h2&gt;
+&lt;p&gt;There wasn&amp;rsquo;t a description, so I ran &lt;code&gt;nmap&lt;/code&gt; on the IP address that I was given:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;PORT      STATE SERVICE      VERSION
+135/tcp   open  msrpc        Microsoft Windows RPC
+139/tcp   open  netbios-ssn  Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds Windows 7 Professional 7601 Service Pack 1 microsoft-ds (workgroup: WORKGROUP)
+49152/tcp open  msrpc        Microsoft Windows RPC
+49153/tcp open  msrpc        Microsoft Windows RPC
+49154/tcp open  msrpc        Microsoft Windows RPC
+49155/tcp open  msrpc        Microsoft Windows RPC
+49156/tcp open  msrpc        Microsoft Windows RPC
+49157/tcp open  msrpc        Microsoft Windows RPC
+Service Info: Host: HARIS-PC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb-security-mode:
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-time:
+|   date: 2023-04-30T01:23:49
+|_  start_date: 2023-04-30T01:19:21
+| smb2-security-mode:
+|   210:
+|_    Message signing enabled but not required
+| smb-os-discovery:
+|   OS: Windows 7 Professional 7601 Service Pack 1 (Windows 7 Professional 6.1)
+|   OS CPE: cpe:/o:microsoft:windows_7::sp1:professional
+|   Computer name: haris-PC
+|   NetBIOS computer name: HARIS-PC\x00
+|   Workgroup: WORKGROUP\x00
+|_  System time: 2023-04-30T02:23:51+01:00
+|_clock-skew: mean: -19m03s, deviation: 34m35s, median: 54s
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 135 was open, so I googled if there were any exploits regarding the msrpc
+service. I was able to find this &lt;a href=&#34;https://book.hacktricks.xyz/network-services-pentesting/135-pentesting-msrpc&#34;&gt;article&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>HackTheBox: You know 0xDiablos</title>
+      <link>https://joonkim0625.github.io/posts/2023-3-13-hackthebox-you-know-0xdiablos/</link>
+      <pubDate>Mon, 13 Mar 2023 10:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-3-13-hackthebox-you-know-0xdiablos/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;This is one of the challenges of the beginner track in HackTheBox.&lt;/p&gt;
+&lt;p&gt;I was given a binary with no source code. This indicated that I would need to
+use Ghidra to look at the decompiled source code. First, some checks on the
+binary:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;─$ file ./vuln
+./vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=ab7f19bb67c16ae453d4959fba4e6841d930a6dd, for GNU/Linux 3.2.0, not stripped
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;No defensive mechanisms are turned on for this challenge.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LA CTF - pwn: bot</title>
+      <link>https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/</link>
+      <pubDate>Tue, 14 Feb 2023 10:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;I made a bot to automatically answer all of your questions.&lt;/p&gt;
+&lt;p&gt;nc lac.tf 31180&lt;/p&gt;
+&lt;h2 id=&#34;my-approach&#34;&gt;My approach&lt;/h2&gt;
+&lt;p&gt;Again, the source code, its binary, and the Dockerfile were given. Looking at the
+sour code code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;string.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;setbuf&lt;/span&gt;(stdout, NULL);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; input[&lt;span style=&#34;color:#ae81ff&#34;&gt;64&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;volatile&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; give_flag &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hi, how can i help?&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#a6e22e&#34;&gt;gets&lt;/span&gt;(input);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;give me the flag&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;lol no&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;please give me the flag&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;no&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;help, i have no idea how to solve this&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;L&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;may i have the flag?&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;not with that attitude&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;please please please give me the flag&amp;#34;&lt;/span&gt;) &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;i&amp;#39;ll consider it&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;sleep&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;15&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (give_flag) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;ok here&amp;#39;s your flag&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;system&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cat flag.txt&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;      &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;no&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;sorry, i didn&amp;#39;t understand your question&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;exit&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;After looking at the source code, I noticed that there is a &lt;code&gt;give_flag&lt;/code&gt; variable
+and a buffer that we can overflow since the user input is received with
+&lt;code&gt;gets()&lt;/code&gt;. Unlike the previous challenge I worked on, &lt;code&gt;give_flag&lt;/code&gt; variable would
+always be located after the buffer &lt;code&gt;input&lt;/code&gt; so we won&amp;rsquo;t be able to modify the
+value of &lt;code&gt;give_flag&lt;/code&gt; this time.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>DNS &amp; Web Browser Request</title>
+      <link>https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/</link>
+      <pubDate>Tue, 14 Feb 2023 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/</guid>
+      <description>&lt;h2 id=&#34;what-happens-if-a-web-browser-client-sends-a-reqeust-to-a-server&#34;&gt;What happens if a web browser (client) sends a reqeust to a server?&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=mpQZVYPuDGU&#34;&gt;Reference&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;What is DNS (Domain Name System)?&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;DNS resolves names domain names to IP addresses&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Steps that DNS takes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;ol&gt;
+&lt;li&gt;We try to access &lt;code&gt;yahoo.com&lt;/code&gt; in our browser&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;2&#34;&gt;
+&lt;li&gt;The browser (or your OS) checks its own cache memory for IP Address&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;if not found, it sends the query to the resolver server&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;The resolver server is basically your ISP (Internet service provider)&lt;/li&gt;
+&lt;li&gt;Once it receives the query, it checks its own cache memory to find the IP
+address to &lt;code&gt;yahoo.com&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;if not found, it sends the query to the root server&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Root server is the top, or the root, of the DNS hierarchy&lt;/li&gt;
+&lt;li&gt;13 sets of these root servers strategically placed around the world&lt;/li&gt;
+&lt;li&gt;operated by 12 different organizations&lt;/li&gt;
+&lt;li&gt;each set has their own unique IP address&lt;/li&gt;
+&lt;li&gt;when the root server receives the query for the IP address for
+&lt;code&gt;yahoo.com&lt;/code&gt;, it is not going to know what the IP address is. But, it
+knows where to send the resolver to find the IP address. The root server
+will direct the resolver to the TLD (Top Level Domain server) server for
+the &lt;code&gt;.com&lt;/code&gt; domain&lt;/li&gt;
+&lt;li&gt;Top Level Domain Server stores the address information for top level
+domains such as &lt;code&gt;.com&lt;/code&gt;, &lt;code&gt;.net&lt;/code&gt;, &lt;code&gt;.org&lt;/code&gt; etc.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;TLD server is not going to know what the IP address for &lt;code&gt;yahoo.com&lt;/code&gt;. So
+it will direct the resolver to the next and final level which
+are the Authoritative Name servers&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;6&#34;&gt;
+&lt;li&gt;The resolver asks the authoritative name server for the IP address for
+&lt;code&gt;yahoo.com&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Authoritative Name Servers are responsible for knowing everything about
+the domain including the IP address&lt;/li&gt;
+&lt;li&gt;when it receives for the query from the resolver, the name server responds
+with the IP address for &lt;code&gt;yahoo.com&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;ol start=&#34;7&#34;&gt;
+&lt;li&gt;Finally, the resolver tells your computer the IP address for &lt;code&gt;yahoo.com&lt;/code&gt;
+and your computer now can retrieve the web page for &lt;code&gt;yahoo.com&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;once the resolver receives the IP address for &lt;code&gt;yahoo.com&lt;/code&gt;, it will store
+the IP address in its cache memory to prevent going through all these
+steps again&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;After the steps above&amp;hellip;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>LA CTF - pwn: gatekeep</title>
+      <link>https://joonkim0625.github.io/posts/2023-2-13-la-ctf-pwn-gatekeep/</link>
+      <pubDate>Mon, 13 Feb 2023 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-2-13-la-ctf-pwn-gatekeep/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;If I gaslight you enough, you won&amp;rsquo;t be able to get my flag! :)&lt;/p&gt;
+&lt;p&gt;nc lac.tf 31121&lt;/p&gt;
+&lt;p&gt;Note: The attached binary is the exact same as the one executing on the remote server.&lt;/p&gt;
+&lt;h2 id=&#34;source-code&#34;&gt;Source code&lt;/h2&gt;
+&lt;p&gt;The source code, its binary, and the Dockerfile were given. Looking at the
+sour code code:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;unistd.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;fcntl.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;string.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;print_flag&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; flag[&lt;span style=&#34;color:#ae81ff&#34;&gt;256&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    FILE&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; flagfile &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;fopen&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;flag.txt&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;r&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (flagfile &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; NULL) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Cannot read flag.txt.&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;fgets&lt;/span&gt;(flag, &lt;span style=&#34;color:#ae81ff&#34;&gt;256&lt;/span&gt;, flagfile);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        flag[&lt;span style=&#34;color:#a6e22e&#34;&gt;strcspn&lt;/span&gt;(flag, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;)] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;\0&amp;#39;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;puts&lt;/span&gt;(flag);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;check&lt;/span&gt;(){
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; input[&lt;span style=&#34;color:#ae81ff&#34;&gt;15&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; pass[&lt;span style=&#34;color:#ae81ff&#34;&gt;10&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; access &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#75715e&#34;&gt;// If my password is random, I can gatekeep my flag! :)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; data &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;open&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;/dev/urandom&amp;#34;&lt;/span&gt;, O_RDONLY);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (data &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Can&amp;#39;t access /dev/urandom.&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;exit&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;ssize_t&lt;/span&gt; result &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;read&lt;/span&gt;(data, pass, &lt;span style=&#34;color:#66d9ef&#34;&gt;sizeof&lt;/span&gt; pass);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (result &lt;span style=&#34;color:#f92672&#34;&gt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;)
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Data not received from /dev/urandom&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            &lt;span style=&#34;color:#a6e22e&#34;&gt;exit&lt;/span&gt;(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;close&lt;/span&gt;(data);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Password:&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;gets&lt;/span&gt;(input);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;strcmp&lt;/span&gt;(input, pass)) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;I swore that was the right password ...&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        access &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt;(access) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Guess I couldn&amp;#39;t gaslight you!&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;print_flag&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;(){
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;setbuf&lt;/span&gt;(stdout, NULL);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;If I gaslight you enough, you won&amp;#39;t be able to guess my password! :)&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;check&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;within &lt;code&gt;check()&lt;/code&gt;, the password is being stored into a buffer using &lt;code&gt;gets()&lt;/code&gt;. So
+I immediately thought that if I can control the return address of &lt;code&gt;check()&lt;/code&gt;
+function to &lt;code&gt;print_flag()&lt;/code&gt;, then we can get the flag. I checked the security
+properties of this binary by running &lt;code&gt;pwn checksec --file=./gatekeep&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>diceCTF 2023 - pwn: bop</title>
+      <link>https://joonkim0625.github.io/posts/2023-2-06-dicectf2023-pwn-bop/</link>
+      <pubDate>Mon, 06 Feb 2023 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-2-06-dicectf2023-pwn-bop/</guid>
+      <description>&lt;h2 id=&#34;pwn-bop&#34;&gt;PWN: bop&lt;/h2&gt;
+&lt;p&gt;I didn&amp;rsquo;t get to solve this by my own but there were many interesting things
+that I wasn&amp;rsquo;t aware of that can be used to solve this challenge. However, I
+wanted to talk about a few things I got to know during the struggle of working
+on this challenge.&lt;/p&gt;
+&lt;h3 id=&#34;ret2dlresovle&#34;&gt;ret2dlresovle&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;References:
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://syst3mfailure.io/ret2dl_resolve&#34;&gt;https://syst3mfailure.io/ret2dl_resolve&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ir0nstone.gitbook.io/notes/types/stack/ret2dlresolve&#34;&gt;https://ir0nstone.gitbook.io/notes/types/stack/ret2dlresolve&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When a binary uses the shared libraries by dynamically linking to them, they do
+not have (or know) all the addresses for those library functions as the program starts up.
+They would resolve this issue (finding the addresses of those functions) when
+the functions are actually called. And the trick in this technique is to force
+the dynamic linker to resolve (or relocate) all the addresses of the library functions as the program starts.
+The &lt;code&gt;pwntools&lt;/code&gt; python library allows us to choose the functions of our choice
+and and use them as their addresses were already resolved.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF 2020 - pwn: guessing game 1</title>
+      <link>https://joonkim0625.github.io/posts/2022-12-27-guessing-game-1/</link>
+      <pubDate>Tue, 27 Dec 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-12-27-guessing-game-1/</guid>
+      <description>&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;p&gt;1: &lt;a href=&#34;https://mregraoncyber.com/picoctf-writeup-guessing-game-1/&#34;&gt;https://mregraoncyber.com/picoctf-writeup-guessing-game-1/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;2: &lt;a href=&#34;https://github.com/dannyc-dev/Building-the-ROP-Chain&#34;&gt;https://github.com/dannyc-dev/Building-the-ROP-Chain&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;3: &lt;a href=&#34;https://cyb3rwhitesnake.medium.com/picoctf-guessing-game-1-pwn-bdc1c87016f9&#34;&gt;https://cyb3rwhitesnake.medium.com/picoctf-guessing-game-1-pwn-bdc1c87016f9&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;investigation&#34;&gt;Investigation&lt;/h2&gt;
+&lt;h3 id=&#34;file-vuln&#34;&gt;file ./vuln&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;vuln: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 3.2.0, BuildID[sha1]=94924855c14a01a7b5b38d9ed368fba31dfd4f60, not stripped
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This tells us that this executable contains all the libraries so we will be able
+to find a lot of gadgets if we have to find some.&lt;/p&gt;
+&lt;h3 id=&#34;checksec-result&#34;&gt;Checksec result&lt;/h3&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Arch:     amd64-64-little
+RELRO:    Partial RELRO
+Stack:    Canary found
+NX:       NX enabled
+PIE:      No PIE (0x400000)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;PIE is disabled and NX is enabled so we won&amp;rsquo;t be able to execute anything by putting things onto the
+stack. We will need to do some ROP.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BuckeyeCTF 2022 - pwn: ronin</title>
+      <link>https://joonkim0625.github.io/posts/2022-11-30-ronin/</link>
+      <pubDate>Tue, 29 Nov 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-11-30-ronin/</guid>
+      <description>&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md&#34;&gt;https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;decompiled-code&#34;&gt;Decompiled code&lt;/h2&gt;
+&lt;p&gt;After decompiling the binary, I was able to take a look at those major funtions
+that make up this program.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;main()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char shellcode_buffer[80]; // [rsp+0h] [rbp-50h] BYREF
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  scroll(txt);
+  fgets(shellcode_buffer, 80, stdin);
+  if ( !strncmp(&amp;#34;Chase after it.&amp;#34;, shellcode_buffer, 15uLL) )
+  {
+    scroll(off_4028);
+    chase();
+  }
+  scroll(off_4030);
+  return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;scroll()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;ize_t __fastcall scroll(const char *addr_to_some_buffer)
+{
+  __useconds_t v1; // eax
+  size_t result; // rax
+  char single_char; // [rsp+1Fh] [rbp-11h]
+  size_t v4; // [rsp+20h] [rbp-10h]
+  size_t i; // [rsp+28h] [rbp-8h]
+
+  v4 = strlen(addr_to_some_buffer);
+  for ( i = 0LL; ; ++i )
+  {
+    result = i;
+    if ( i &amp;gt;= v4 )
+      break;
+    single_char = addr_to_some_buffer[i];       // printing a single char from the string array
+    putchar(single_char);
+    if ( single_char == 10 )
+      v1 = 1000000;
+    else
+      v1 = 50000;
+    usleep(v1);
+  }
+  return result;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;encounter()&lt;/code&gt;:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BuckeyeCTF 2022 - pwn: samurai</title>
+      <link>https://joonkim0625.github.io/posts/2022-11-29-samurai/</link>
+      <pubDate>Tue, 29 Nov 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-11-29-samurai/</guid>
+      <description>&lt;h2 id=&#34;buckeyectf-2022---pwn-samurai&#34;&gt;BuckeyeCTF 2022 - pwn: samurai&lt;/h2&gt;
+&lt;p&gt;What I didn&amp;rsquo;t understand was the program inserts &lt;code&gt;./n&lt;/code&gt; which can be represented
+as &lt;code&gt;0x2ea&lt;/code&gt;. This is just a part of the string that it gets printed out to STDOUT. How
+this program works is it reads in some input from STDIN using &lt;code&gt;fgets&lt;/code&gt;. &lt;code&gt;fgets&lt;/code&gt;
+inserts a newline char after reading everything in (EOF or newline). But, if the
+input that I pass in to overflow the buffer that does not end with a newline char,
+then it will keep going (or being read) until it overflows the variable I want to overwrite.
+It can still work but there is this line of code &lt;code&gt;strcpy(&amp;amp;s[strlen(s) - 1], &amp;quot;.\n&amp;quot;);&lt;/code&gt;
+that puts a new line character at strlen(s) - 1. So, when I was naively giving
+an input that I would think should overwrite the variable, the last bit was
+always replaced by &lt;code&gt;2ea&lt;/code&gt; which is &lt;code&gt;.\n&lt;/code&gt;. AH!!!!!!!!!!!! So, what we would want
+to do is at least have a newline char in the middle of the string so strcpy does
+not insert that &lt;code&gt;.\n&lt;/code&gt; where the last bit is (this bit is still needed to be
+overwritten with some value to make the attack happen).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>IA-32 Assembly</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</link>
+      <pubDate>Fri, 27 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</guid>
+      <description>&lt;h2 id=&#34;ia32-assembly-language&#34;&gt;IA32 Assembly Language&lt;/h2&gt;
+&lt;p&gt;As I was working on picoCTF2021 - filtered-shellcode challenge, I realized that
+I need to write the shellcode in 32 bit assembly rather than in 64 bit. And
+compiling 32 bit assembly code is different than compiling 64 bit assembly code
+using &lt;code&gt;gcc&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Great reference: &lt;a href=&#34;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&#34;&gt;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;First, to create an object file, use &lt;code&gt;nasm&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nasm -f elf32 -o file.o file.s&lt;/code&gt;. This creates an object file &lt;code&gt;file.o&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Then link the object file with &lt;code&gt;ld&lt;/code&gt;. The object file must have &lt;code&gt;global _start&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF 2021 - Here&#39;s a LIBC</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-24-heresalibc/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-24-heresalibc/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;AUTHOR: MADSTACKS&lt;/p&gt;
+&lt;p&gt;Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774&lt;/p&gt;
+&lt;p&gt;Hints: PWNTools has a lot of useful features for getting offsets.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&#34;&gt;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc&#34;&gt;https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://ctf101.org/binary-exploitation/relocation-read-only/&#34;&gt;https://ctf101.org/binary-exploitation/relocation-read-only/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc&#34;&gt;https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;my-approach&#34;&gt;My Approach&lt;/h2&gt;
+&lt;p&gt;In challenges like this one, you are given an executable, a libc library, and a
+Makefile to work with. And the first thing I do is to find some information
+about the executable file.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF 2021 - Cache Me Outside</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/</link>
+      <pubDate>Sat, 14 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;While being super relevant with my meme references, I wrote a program to see how
+much you understand heap allocations. &lt;code&gt;nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Hints: It may be helpful to read a little bit on GLIBC&amp;rsquo;s tcache.&lt;/p&gt;
+&lt;h2 id=&#34;my-approach&#34;&gt;My Approach&lt;/h2&gt;
+&lt;p&gt;Until this point, I had not done any binary exploits that are related to the
+heap. And this challenge gave me a better understanding of heap
+allocation/deallocation and how one can try to exploit the glibc heap.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>tamuctf 2022 - Lockout</title>
+      <link>https://joonkim0625.github.io/posts/2022-4-22-tamuctf2022-lockout/</link>
+      <pubDate>Fri, 22 Apr 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-4-22-tamuctf2022-lockout/</guid>
+      <description>&lt;h1 id=&#34;taumf2022-lockout&#34;&gt;taumf2022: lockout&lt;/h1&gt;
+&lt;p&gt;Author: SwitchBlade&lt;/p&gt;
+&lt;p&gt;I seem to have locked myself out of my admin panel! Can you find a way back in for me?&lt;/p&gt;
+&lt;p&gt;Do not connect with HTTPS, make sure to connect with HTTP&lt;/p&gt;
+&lt;p&gt;Link: &lt;a href=&#34;http://lockout.tamuctf.com&#34;&gt;http://lockout.tamuctf.com&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;solve&#34;&gt;Solve&lt;/h2&gt;
+&lt;p&gt;I couldn&amp;rsquo;t solve this one so I referred to this &lt;a href=&#34;https://www.youtube.com/watch?v=f198HnqCwng&amp;amp;t=206s&#34;&gt;https://www.youtube.com/watch?v=f198HnqCwng&amp;amp;t=206s&lt;/a&gt; video.&lt;/p&gt;
+&lt;p&gt;When you attempt to login to the blog, the page gets redirected back to the login
+page right away because of the 302 response.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>tamuctf 2022 - Lucky</title>
+      <link>https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/</link>
+      <pubDate>Wed, 20 Apr 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-4-20-tamuctf2022-lucky/</guid>
+      <description>&lt;h1 id=&#34;tamuctf-2022-lucky&#34;&gt;tamuctf 2022: Lucky&lt;/h1&gt;
+&lt;p&gt;Author: nhwn&lt;/p&gt;
+&lt;p&gt;Feeling lucky? I have just the challenge for you :D&lt;/p&gt;
+&lt;h2 id=&#34;reference&#34;&gt;Reference&lt;/h2&gt;
+&lt;p&gt;I could not solve this on my own so I had to refer to this writeup:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky&#34;&gt;https://github.com/tj-oconnor/ctf-writeups/tree/main/tamu_ctf/lucky&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color:#75715e&#34;&gt;&amp;lt;stdlib.h&amp;gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;welcome&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; buf[&lt;span style=&#34;color:#ae81ff&#34;&gt;16&lt;/span&gt;];
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Enter your name: &amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;fgets&lt;/span&gt;(buf, &lt;span style=&#34;color:#66d9ef&#34;&gt;sizeof&lt;/span&gt;(buf), stdin);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;Welcome, %s&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;If you&amp;#39;re super lucky, you might get a flag! &amp;#34;&lt;/span&gt;, buf);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;seed&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; msg[] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;GLHF :D&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;%s&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;, msg);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; lol;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; lol;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;win&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;char&lt;/span&gt; flag[&lt;span style=&#34;color:#ae81ff&#34;&gt;64&lt;/span&gt;] &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; {&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;};
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    FILE&lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; f &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;fopen&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;flag.txt&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;r&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;fread&lt;/span&gt;(flag, &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#66d9ef&#34;&gt;sizeof&lt;/span&gt;(flag), f);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Nice work! Here&amp;#39;s the flag: %s&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;, flag);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;main&lt;/span&gt;() {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;setvbuf&lt;/span&gt;(stdout, NULL, _IONBF, &lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;welcome&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#a6e22e&#34;&gt;srand&lt;/span&gt;(&lt;span style=&#34;color:#a6e22e&#34;&gt;seed&lt;/span&gt;());
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; key0 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rand&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;306291429&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; key1 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rand&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;442612432&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; key2 &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;rand&lt;/span&gt;() &lt;span style=&#34;color:#f92672&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color:#ae81ff&#34;&gt;110107425&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;if&lt;/span&gt; (key0 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; key1 &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; key2) {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;win&lt;/span&gt;();
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    } &lt;span style=&#34;color:#66d9ef&#34;&gt;else&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#a6e22e&#34;&gt;printf&lt;/span&gt;(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Looks like you weren&amp;#39;t lucky enough. Better luck next time!&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;\n&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;&lt;/span&gt;);
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    }
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;In &lt;code&gt;welcome()&lt;/code&gt; function, before &lt;code&gt;fgets&lt;/code&gt; gets called, &lt;code&gt;rbp-0x10&lt;/code&gt; which is the address
+to &lt;code&gt;buf&lt;/code&gt; is loaded into &lt;code&gt;rax&lt;/code&gt;. I passed in &lt;code&gt;aaaabaaacaaadaaaeaaafaaag&lt;/code&gt;, the
+buffer was filled with &lt;code&gt;aaaabaaacaaadaa\0&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF - Scavenger Hunt</title>
+      <link>https://joonkim0625.github.io/posts/2022-3-04-picoctf-scavenger-hunt/</link>
+      <pubDate>Fri, 04 Mar 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-3-04-picoctf-scavenger-hunt/</guid>
+      <description>&lt;h1 id=&#34;picoctf-scavenger-hunt&#34;&gt;picoCTF: Scavenger Hunt&lt;/h1&gt;
+&lt;p&gt;Things I learned from this challenge:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Try to access those dot files! And other files that might be accessible other
+than the public ones.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;robots.txt&lt;/code&gt; - &lt;a href=&#34;https://developers.google.com/search/docs/advanced/robots/intro&#34;&gt;https://developers.google.com/search/docs/advanced/robots/intro&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Apache server manages its server permissions in &lt;code&gt;.htaccess&lt;/code&gt; file.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It is always good to know what options I have to find vulnerabilities.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>RSA Encryption</title>
+      <link>https://joonkim0625.github.io/posts/2022-1-27-rsa-encryption/</link>
+      <pubDate>Thu, 27 Jan 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-1-27-rsa-encryption/</guid>
+      <description>&lt;h1 id=&#34;rsa-encryption&#34;&gt;RSA Encryption&lt;/h1&gt;
+&lt;p&gt;I was working on picoCTF 2021: Mind your Ps and Qs problem and the problem was
+about decrypting a RSA encryption. I have used RSA encryption to create some SSH
+keys. And, of course, there are many times that I just don&amp;rsquo;t realize but RSA
+encryption is being used under the hood. So, I wanted to know about how it would
+actually work. I watched this &lt;a href=&#34;https://www.youtube.com/watch?v=4zahvcJ9glg&#34;&gt;Youtube video&lt;/a&gt; by Eddie Woo and it was really helpful!&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Retrospective on Fall 2021 Semester</title>
+      <link>https://joonkim0625.github.io/posts/2021-12-23-retro-on-21fall-semester/</link>
+      <pubDate>Thu, 23 Dec 2021 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-12-23-retro-on-21fall-semester/</guid>
+      <description>&lt;p&gt;This semester was very different than the previous semesters that I had in
+college. Not being able to attend classes and interact with people for about a
+year and a half seemed to have some kind of an impact that I did not realize
+that I was having. Maybe that is why I was actually excited to come back to
+campus! Obviously, things were much different - wearing a mask on campus,
+supporting remote learning for the majority of classes, and another year of
+online career fairs.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>My Retrospective on Working for The ASR Team</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-27-retro-on-work/</link>
+      <pubDate>Fri, 27 Aug 2021 19:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-27-retro-on-work/</guid>
+      <description>&lt;h1 id=&#34;last-day-of-work&#34;&gt;Last Day of Work&lt;/h1&gt;
+&lt;p&gt;Today, I finished my student work at Academic Support Resources (ASR) Custom
+Solutions where I worked as a web developer for a year. Due to the pandemic,
+everything was done remotely. There are so many things that I learned by working
+with professional developers and I want to write down some of them.&lt;/p&gt;
+&lt;h2 id=&#34;agile-methodology&#34;&gt;Agile Methodology&lt;/h2&gt;
+&lt;p&gt;The Agile way of work was something that I would always hear about, but I was
+never involved with. According to Atlassian, it is &amp;ldquo;an iterative approach to
+project management and software development that helps teams deliver value to
+their customers faster and with fewer headaches.&amp;rdquo; - &lt;a href=&#34;https://www.atlassian.com/agile&#34;&gt;What is Agile?&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>My Choice of Linux Distro</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-11-installing-linux/</link>
+      <pubDate>Wed, 11 Aug 2021 19:21:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-11-installing-linux/</guid>
+      <description>&lt;p&gt;I was crazy enough to choose Arch Linux as my first Linux distro to start with -
+when a lot of people recommend choosing user-friendly distros to begin with.
+From creating a bootable USB to deciding what kind of programs to install so I
+can have my laptop work, it took a very long time.&lt;/p&gt;
+&lt;p&gt;Then, somehow, I got into this thinking that I didn&amp;rsquo;t want to have a desktop
+environment (DE) installed but wanted to install a window manager only! This, of
+course, was me refusing all the comfortable features that DEs provide to users.
+I messed up a few times and ended up reinstalling Arch over and over. Later, I
+found out about Manjaro Linux which is an Arch-based distro that carries the
+benefits of Arch with more user-friendly features! Manjaro definitely takes care
+of some of the chores that I have to go through when installing Arch (of course,
+I am a noob Linux user).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Welcome!</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-05-first-post/</link>
+      <pubDate>Thu, 05 Aug 2021 23:21:00 +0500</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-05-first-post/</guid>
+      <description>&lt;h1 id=&#34;hello&#34;&gt;Hello!&lt;/h1&gt;
+&lt;p&gt;Hi, this is Joon and I will be writing about some of the things that I do while
+studying at the University of Minnesota - Twin Cities. I will be starting my
+first year of Master&amp;rsquo;s program in computer science.&lt;/p&gt;
+&lt;p&gt;I hope you enjoy your time here!&lt;/p&gt;
+&lt;p&gt;Thanks for visiting,&lt;/p&gt;
+&lt;p&gt;Joon&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title></title>
+      <link>https://joonkim0625.github.io/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/about/</guid>
+      <description>&lt;p&gt;Test&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

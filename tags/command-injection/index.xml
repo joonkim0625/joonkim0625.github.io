@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Command Injection on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/command-injection/</link>
+    <description>Recent content in Command Injection on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/command-injection/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>LoveTok HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-20-lovetok/</link>
+      <pubDate>Sun, 20 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-20-lovetok/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;LoveTok&lt;/strong&gt; box on Hack The Box. The challenge involves analyzing PHP source code, understanding the misuse of &lt;code&gt;addslashes&lt;/code&gt;, and exploiting command injection through the eval function.&lt;/p&gt;
+&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;True love is tough, and even harder to find. Once the sun has set, the lights close and the bell has rung&amp;hellip; you find yourself licking your wounds and contemplating human existence. You wish to have somebody important in your life to share the experiences that come with it, the good and the bad. This is why we made LoveTok, the brand new service that accurately predicts in the threshold of milliseconds when love will come knockin&amp;rsquo; (at your door). Come and check it out, but don&amp;rsquo;t try to cheat love because love cheats back.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

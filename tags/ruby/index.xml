@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ruby on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/ruby/</link>
+    <description>Recent content in Ruby on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 22 Apr 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/ruby/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Neonify HTB Walkthrough</title>
+      <link>https://joonkim0625.github.io/posts/2025-04-22-neonify/</link>
+      <pubDate>Tue, 22 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2025-04-22-neonify/</guid>
+      <description>&lt;p&gt;This post documents my process for solving the &lt;strong&gt;Neonify&lt;/strong&gt; box on Hack The Box. This challenge revolves around a Ruby application vulnerable to Server-Side Template Injection (SSTI) via a regex newline bypass.&lt;/p&gt;
+&lt;h2 id=&#34;challenge-description&#34;&gt;Challenge Description&lt;/h2&gt;
+&lt;p&gt;It&amp;rsquo;s time for a shiny new reveal for the first-ever text neonifier. Come test out our brand new website and make any text glow like a lo-fi neon tube!&lt;/p&gt;
+&lt;h2 id=&#34;solution&#34;&gt;Solution&lt;/h2&gt;
+&lt;p&gt;After looking at the source code, I noticed it was a Ruby application and suspected some kind of command injection. I didn&amp;rsquo;t immediately see the path, so I referred to a writeup and discovered that the challenge is about &amp;ldquo;ERB SSTI via newline regex bypass.&amp;rdquo; There’s very little public writeup info on this exact method, which made it a great learning opportunity.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

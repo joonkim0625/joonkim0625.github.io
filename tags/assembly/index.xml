@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Assembly on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/assembly/</link>
+    <description>Recent content in Assembly on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/assembly/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>IA-32 Assembly</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</link>
+      <pubDate>Fri, 27 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</guid>
+      <description>&lt;h2 id=&#34;ia32-assembly-language&#34;&gt;IA32 Assembly Language&lt;/h2&gt;
+&lt;p&gt;As I was working on picoCTF2021 - filtered-shellcode challenge, I realized that
+I need to write the shellcode in 32 bit assembly rather than in 64 bit. And
+compiling 32 bit assembly code is different than compiling 64 bit assembly code
+using &lt;code&gt;gcc&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Great reference: &lt;a href=&#34;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&#34;&gt;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;First, to create an object file, use &lt;code&gt;nasm&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nasm -f elf32 -o file.o file.s&lt;/code&gt;. This creates an object file &lt;code&gt;file.o&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Then link the object file with &lt;code&gt;ld&lt;/code&gt;. The object file must have &lt;code&gt;global _start&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Os on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/os/</link>
+    <description>Recent content in Os on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 11 Aug 2021 19:21:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/os/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My Choice of Linux Distro</title>
+      <link>https://joonkim0625.github.io/posts/2021-08-11-installing-linux/</link>
+      <pubDate>Wed, 11 Aug 2021 19:21:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2021-08-11-installing-linux/</guid>
+      <description>&lt;p&gt;I was crazy enough to choose Arch Linux as my first Linux distro to start with -
+when a lot of people recommend choosing user-friendly distros to begin with.
+From creating a bootable USB to deciding what kind of programs to install so I
+can have my laptop work, it took a very long time.&lt;/p&gt;
+&lt;p&gt;Then, somehow, I got into this thinking that I didn&amp;rsquo;t want to have a desktop
+environment (DE) installed but wanted to install a window manager only! This, of
+course, was me refusing all the comfortable features that DEs provide to users.
+I messed up a few times and ended up reinstalling Arch over and over. Later, I
+found out about Manjaro Linux which is an Arch-based distro that carries the
+benefits of Arch with more user-friendly features! Manjaro definitely takes care
+of some of the chores that I have to go through when installing Arch (of course,
+I am a noob Linux user).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Ms17-010 on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/ms17-010/</link>
+    <description>Recent content in Ms17-010 on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 29 Jun 2023 22:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/ms17-010/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>TryHackMe - Relevant</title>
+      <link>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</link>
+      <pubDate>Thu, 29 Jun 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/</guid>
+      <description>&lt;h2 id=&#34;challenge-relevant&#34;&gt;Challenge: Relevant&lt;/h2&gt;
+&lt;h2 id=&#34;recon&#34;&gt;Recon&lt;/h2&gt;
+&lt;h3 id=&#34;nmap&#34;&gt;NMAP&lt;/h3&gt;
+&lt;p&gt;I was not able to find any clues from the initial Nmap scans and other tools
+that I used. So I looked up the official writeup, and the author suggests to run
+a scan that detects the open ports and then run more focused Nmap scan on them.
+He created a tool &lt;code&gt;threader3000&lt;/code&gt; and I decided to give it a try.&lt;/p&gt;
+&lt;p&gt;The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and
+49668. And these 40,000s are commonly used for backend operations within virtual
+environments such as AWS.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

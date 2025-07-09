@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Blogging on My Blog</title>
+    <link>http://localhost:1313/categories/blogging/</link>
+    <description>Recent content in Blogging on My Blog</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/categories/blogging/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>My Choice of Linux Distro</title>
+      <link>http://localhost:1313/posts/2021-08-11-installing-linux/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2021-08-11-installing-linux/</guid>
+      <description>&lt;p&gt;I was crazy enough to choose Arch Linux as my first Linux distro to start with -
+when a lot of people recommend choosing user-friendly distros to begin with.
+From creating a bootable USB to deciding what kind of programs to install so I
+can have my laptop work, it took a very long time.&lt;/p&gt;
+&lt;p&gt;Then, somehow, I got into this thinking that I didn&amp;rsquo;t want to have a desktop
+environment (DE) installed but wanted to install a window manager only! This, of
+course, was me refusing all the comfortable features that DEs provide to users.
+I messed up a few times and ended up reinstalling Arch over and over. Later, I
+found out about Manjaro Linux which is an Arch-based distro that carries the
+benefits of Arch with more user-friendly features! Manjaro definitely takes care
+of some of the chores that I have to go through when installing Arch (of course,
+I am a noob Linux user).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>My Retrospective on Working for The ASR Team</title>
+      <link>http://localhost:1313/posts/2021-08-27-retro-on-work/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2021-08-27-retro-on-work/</guid>
+      <description>&lt;h1 id=&#34;last-day-of-work&#34;&gt;Last Day of Work&lt;/h1&gt;
+&lt;p&gt;Today, I finished my student work at Academic Support Resources (ASR) Custom
+Solutions where I worked as a web developer for a year. Due to the pandemic,
+everything was done remotely. There are so many things that I learned by working
+with professional developers and I want to write down some of them.&lt;/p&gt;
+&lt;h2 id=&#34;agile-methodology&#34;&gt;Agile Methodology&lt;/h2&gt;
+&lt;p&gt;The Agile way of work was something that I would always hear about, but I was
+never involved with. According to Atlassian, it is &amp;ldquo;an iterative approach to
+project management and software development that helps teams deliver value to
+their customers faster and with fewer headaches.&amp;rdquo; - &lt;a href=&#34;https://www.atlassian.com/agile&#34;&gt;What is Agile?&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Retrospective on Fall 2021 Semester</title>
+      <link>http://localhost:1313/posts/2021-12-23-retro-on-21fall-semester/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2021-12-23-retro-on-21fall-semester/</guid>
+      <description>&lt;p&gt;This semester was very different than the previous semesters that I had in
+college. Not being able to attend classes and interact with people for about a
+year and a half seemed to have some kind of an impact that I did not realize
+that I was having. Maybe that is why I was actually excited to come back to
+campus! Obviously, things were much different - wearing a mask on campus,
+supporting remote learning for the majority of classes, and another year of
+online career fairs.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>RSA Encryption</title>
+      <link>http://localhost:1313/posts/2022-1-27-rsa-encryption/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/2022-1-27-rsa-encryption/</guid>
+      <description>&lt;h1 id=&#34;rsa-encryption&#34;&gt;RSA Encryption&lt;/h1&gt;
+&lt;p&gt;I was working on picoCTF 2021: Mind your Ps and Qs problem and the problem was
+about decrypting a RSA encryption. I have used RSA encryption to create some SSH
+keys. And, of course, there are many times that I just don&amp;rsquo;t realize but RSA
+encryption is being used under the hood. So, I wanted to know about how it would
+actually work. I watched this &lt;a href=&#34;https://www.youtube.com/watch?v=4zahvcJ9glg&#34;&gt;Youtube video&lt;/a&gt; by Eddie Woo and it was really helpful!&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

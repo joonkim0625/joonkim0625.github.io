@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Msrpc on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/msrpc/</link>
+    <description>Recent content in Msrpc on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 29 Apr 2023 22:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/msrpc/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>HackTheBox - Beginner Track: Blue</title>
+      <link>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</link>
+      <pubDate>Sat, 29 Apr 2023 22:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/</guid>
+      <description>&lt;h2 id=&#34;challenge-blue&#34;&gt;Challenge: Blue&lt;/h2&gt;
+&lt;p&gt;There wasn&amp;rsquo;t a description, so I ran &lt;code&gt;nmap&lt;/code&gt; on the IP address that I was given:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;PORT      STATE SERVICE      VERSION
+135/tcp   open  msrpc        Microsoft Windows RPC
+139/tcp   open  netbios-ssn  Microsoft Windows netbios-ssn
+445/tcp   open  microsoft-ds Windows 7 Professional 7601 Service Pack 1 microsoft-ds (workgroup: WORKGROUP)
+49152/tcp open  msrpc        Microsoft Windows RPC
+49153/tcp open  msrpc        Microsoft Windows RPC
+49154/tcp open  msrpc        Microsoft Windows RPC
+49155/tcp open  msrpc        Microsoft Windows RPC
+49156/tcp open  msrpc        Microsoft Windows RPC
+49157/tcp open  msrpc        Microsoft Windows RPC
+Service Info: Host: HARIS-PC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb-security-mode:
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb2-time:
+|   date: 2023-04-30T01:23:49
+|_  start_date: 2023-04-30T01:19:21
+| smb2-security-mode:
+|   210:
+|_    Message signing enabled but not required
+| smb-os-discovery:
+|   OS: Windows 7 Professional 7601 Service Pack 1 (Windows 7 Professional 6.1)
+|   OS CPE: cpe:/o:microsoft:windows_7::sp1:professional
+|   Computer name: haris-PC
+|   NetBIOS computer name: HARIS-PC\x00
+|   Workgroup: WORKGROUP\x00
+|_  System time: 2023-04-30T02:23:51+01:00
+|_clock-skew: mean: -19m03s, deviation: 34m35s, median: 54s
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Port 135 was open, so I googled if there were any exploits regarding the msrpc
+service. I was able to find this &lt;a href=&#34;https://book.hacktricks.xyz/network-services-pentesting/135-pentesting-msrpc&#34;&gt;article&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

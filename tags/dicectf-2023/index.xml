@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Dicectf 2023 on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/dicectf-2023/</link>
+    <description>Recent content in Dicectf 2023 on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 06 Feb 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/dicectf-2023/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>diceCTF 2023 - pwn: bop</title>
+      <link>https://joonkim0625.github.io/posts/2023-2-06-dicectf2023-pwn-bop/</link>
+      <pubDate>Mon, 06 Feb 2023 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2023-2-06-dicectf2023-pwn-bop/</guid>
+      <description>&lt;h2 id=&#34;pwn-bop&#34;&gt;PWN: bop&lt;/h2&gt;
+&lt;p&gt;I didn&amp;rsquo;t get to solve this by my own but there were many interesting things
+that I wasn&amp;rsquo;t aware of that can be used to solve this challenge. However, I
+wanted to talk about a few things I got to know during the struggle of working
+on this challenge.&lt;/p&gt;
+&lt;h3 id=&#34;ret2dlresovle&#34;&gt;ret2dlresovle&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;References:
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://syst3mfailure.io/ret2dl_resolve&#34;&gt;https://syst3mfailure.io/ret2dl_resolve&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://ir0nstone.gitbook.io/notes/types/stack/ret2dlresolve&#34;&gt;https://ir0nstone.gitbook.io/notes/types/stack/ret2dlresolve&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;When a binary uses the shared libraries by dynamically linking to them, they do
+not have (or know) all the addresses for those library functions as the program starts up.
+They would resolve this issue (finding the addresses of those functions) when
+the functions are actually called. And the trick in this technique is to force
+the dynamic linker to resolve (or relocate) all the addresses of the library functions as the program starts.
+The &lt;code&gt;pwntools&lt;/code&gt; python library allows us to choose the functions of our choice
+and and use them as their addresses were already resolved.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

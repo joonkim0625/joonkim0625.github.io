@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head>
+	<meta name="generator" content="Hugo 0.148.0"><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>All Things Cyber – joonkim0625</title>
+
+<meta name="description" content="Cybersecurity Blog">
+<meta name="author" content="Joon Kim">
+<link rel="canonical" href="https://joonkim0625.github.io/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.8fe10233a706bc87f2e08b3cf97b8bd4c0a80f10675a143675d59212121037c0.css" integrity="sha256-j&#43;ECM6cGvIfy4Is8&#43;XuL1MCoDxBnWhQ2ddWSEhIQN8A=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://joonkim0625.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://joonkim0625.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://joonkim0625.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://joonkim0625.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://joonkim0625.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="https://joonkim0625.github.io/index.xml">
+<link rel="alternate" type="application/json" href="https://joonkim0625.github.io/index.json">
+<link rel="alternate" hreflang="en" href="https://joonkim0625.github.io/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:url" content="https://joonkim0625.github.io/">
+  <meta property="og:site_name" content="All Things Cyber – joonkim0625">
+  <meta property="og:title" content="All Things Cyber – joonkim0625">
+  <meta property="og:description" content="Cybersecurity Blog">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="All Things Cyber – joonkim0625">
+<meta name="twitter:description" content="Cybersecurity Blog">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "All Things Cyber – joonkim0625",
+  "url": "https://joonkim0625.github.io/",
+  "description": "Cybersecurity Blog",
+  "logo": "https://joonkim0625.github.io/favicon.ico",
+  "sameAs": [
+      "https://github.com/joonkim0625", "https://www.linkedin.com/in/joonkim0625/", "mailto:joonkim0625@gmail.com"
+  ]
+}
+</script>
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://joonkim0625.github.io/" accesskey="h" title="All Things Cyber – joonkim0625 (Alt + H)">All Things Cyber – joonkim0625</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://joonkim0625.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://joonkim0625.github.io/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">TryHackMe - Brainstorm
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Challenge: Brainstorm This is a room that tests on reverse engineering a chat program to exploit a Windows machine.
+Recon Nmap:
+─$ nmap -sC -sV -Pn 10.10.37.33 Starting Nmap 7.93 ( https://nmap.org ) at 2023-09-22 00:02 EDT Nmap scan report for hi-hormel-wg010.hi.umn.edu (10.10.37.33) Host is up (0.22s latency). Not shown: 997 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 21/tcp open ftp Microsoft ftpd | ftp-anon: Anonymous FTP login allowed (FTP code 230) |_Can&#39;t get directory listing: TIMEOUT | ftp-syst: |_ SYST: Windows_NT 3389/tcp open ssl/ms-wbt-server? | rdp-ntlm-info: | Target_Name: BRAINSTORM | NetBIOS_Domain_Name: BRAINSTORM | NetBIOS_Computer_Name: BRAINSTORM | DNS_Domain_Name: brainstorm | DNS_Computer_Name: brainstorm | Product_Version: 6.1.7601 |_ System_Time: 2023-09-22T04:05:48&#43;00:00 | ssl-cert: Subject: commonName=brainstorm | Not valid before: 2023-09-21T03:52:41 |_Not valid after: 2024-03-22T03:52:41 |_ssl-date: 2023-09-22T04:06:19&#43;00:00; &#43;1s from scanner time. 9999/tcp open abyss? Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 216.80 seconds First thing I noticed was Port 21 ftp was open with the anonymous FTP login enabled. I checked it out by running ftp 10.10.37.33 with the name anonymous.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-09-23 00:10:00 +0000 UTC'>September 23, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to TryHackMe - Brainstorm" href="https://joonkim0625.github.io/posts/2023-9-23-thm-brainstorm/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">TryHackMe - Relevant
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Challenge: Relevant Recon NMAP I was not able to find any clues from the initial Nmap scans and other tools that I used. So I looked up the official writeup, and the author suggests to run a scan that detects the open ports and then run more focused Nmap scan on them. He created a tool threader3000 and I decided to give it a try.
+The result showed that port 80, 139, 135, 445, 3389, 5985, 49663, 49666, and 49668. And these 40,000s are commonly used for backend operations within virtual environments such as AWS.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-06-29 22:00:00 +0000 UTC'>June 29, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to TryHackMe - Relevant" href="https://joonkim0625.github.io/posts/2023-6-29-thm-relevant/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">TryHackMe - HackPark
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Challenge: HackPark In this box, it introduces Hydra, RCE &amp; WinPEAS tools/techniques to exploit a Windows System.
+Recon NMAP nmap -sC -sV -O -sT 10.10.170.188 Starting Nmap 7.93 ( https://nmap.org ) at 2023-06-20 18:27 UTC Nmap scan report for ip-10-10-170-188.eu-west-1.compute.internal (10.10.170.188) Host is up (0.00068s latency). Not shown: 998 filtered tcp ports (no-response) PORT STATE SERVICE VERSION 80/tcp open http Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP) | http-robots.txt: 6 disallowed entries | /Account/*.* /search /search.aspx /error404.aspx |_/archive /archive.aspx |_http-server-header: Microsoft-IIS/8.5 |_http-title: hackpark | hackpark amusements | http-methods: |_ Potentially risky methods: TRACE 3389/tcp open ssl/ms-wbt-server? |_ssl-date: 2023-06-20T18:28:29&#43;00:00; 0s from scanner time. | ssl-cert: Subject: commonName=hackpark | Not valid before: 2023-06-19T18:14:25 |_Not valid after: 2023-12-19T18:14:25 | rdp-ntlm-info: | Target_Name: HACKPARK | NetBIOS_Domain_Name: HACKPARK | NetBIOS_Computer_Name: HACKPARK | DNS_Domain_Name: hackpark | DNS_Computer_Name: hackpark | Product_Version: 6.3.9600 |_ System_Time: 2023-06-20T18:28:24&#43;00:00 MAC Address: 02:51:BA:0B:1C:1B (Unknown) Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port Device type: general purpose Running (JUST GUESSING): Microsoft Windows 2012 (89%) OS CPE: cpe:/o:microsoft:windows_server_2012:r2 Aggressive OS guesses: Microsoft Windows Server 2012 or Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 R2 (89%), Microsoft Windows Server 2012 (87%) No exact OS matches for host (test conditions non-ideal). Network Distance: 1 hop Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ . Nmap done: 1 IP address (1 host up) scanned in 79.85 seconds Port 80 runs Microsoft HTTPAPI httpd 2.0. Also, port 3389 indicates that once we get the cred to get onto the target machine we can remotely access it by using xfreerdp or rdesktop.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-06-28 22:00:00 +0000 UTC'>June 28, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to TryHackMe - HackPark" href="https://joonkim0625.github.io/posts/2023-6-28-thm-hackpark/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">TryHackMe - Alfred
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Challenge: Alfred This box is about exploiting Jenkins (misconfiguration). Jenkins is an open source continuous integration/continuous delivery and deployment (CI/CD) automation software DevOps tool written in the Java programming language. This tool is used to implement CI/CD workflows, called pipelines.
+This box introduces a tool called Nishang which is a framework and collection of scripts and payloads which enables usage of PowerShell for offensive security, penetration testing and red teaming.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-06-26 22:00:00 +0000 UTC'>June 26, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to TryHackMe - Alfred" href="https://joonkim0625.github.io/posts/2023-6-26-thm-alfred/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">HackTheBox - Beginner Track: Blue
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Challenge: Blue There wasn’t a description, so I ran nmap on the IP address that I was given:
+PORT STATE SERVICE VERSION 135/tcp open msrpc Microsoft Windows RPC 139/tcp open netbios-ssn Microsoft Windows netbios-ssn 445/tcp open microsoft-ds Windows 7 Professional 7601 Service Pack 1 microsoft-ds (workgroup: WORKGROUP) 49152/tcp open msrpc Microsoft Windows RPC 49153/tcp open msrpc Microsoft Windows RPC 49154/tcp open msrpc Microsoft Windows RPC 49155/tcp open msrpc Microsoft Windows RPC 49156/tcp open msrpc Microsoft Windows RPC 49157/tcp open msrpc Microsoft Windows RPC Service Info: Host: HARIS-PC; OS: Windows; CPE: cpe:/o:microsoft:windows Host script results: | smb-security-mode: | account_used: guest | authentication_level: user | challenge_response: supported |_ message_signing: disabled (dangerous, but default) | smb2-time: | date: 2023-04-30T01:23:49 |_ start_date: 2023-04-30T01:19:21 | smb2-security-mode: | 210: |_ Message signing enabled but not required | smb-os-discovery: | OS: Windows 7 Professional 7601 Service Pack 1 (Windows 7 Professional 6.1) | OS CPE: cpe:/o:microsoft:windows_7::sp1:professional | Computer name: haris-PC | NetBIOS computer name: HARIS-PC\x00 | Workgroup: WORKGROUP\x00 |_ System time: 2023-04-30T02:23:51&#43;01:00 |_clock-skew: mean: -19m03s, deviation: 34m35s, median: 54s Port 135 was open, so I googled if there were any exploits regarding the msrpc service. I was able to find this article.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-04-29 22:00:00 +0000 UTC'>April 29, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to HackTheBox - Beginner Track: Blue" href="https://joonkim0625.github.io/posts/2023-4-29-hackthebox-blue/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">HackTheBox: You know 0xDiablos
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Description This is one of the challenges of the beginner track in HackTheBox.
+I was given a binary with no source code. This indicated that I would need to use Ghidra to look at the decompiled source code. First, some checks on the binary:
+─$ file ./vuln ./vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, BuildID[sha1]=ab7f19bb67c16ae453d4959fba4e6841d930a6dd, for GNU/Linux 3.2.0, not stripped No defensive mechanisms are turned on for this challenge.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-03-13 10:00:00 +0000 UTC'>March 13, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to HackTheBox: You know 0xDiablos" href="https://joonkim0625.github.io/posts/2023-3-13-hackthebox-you-know-0xdiablos/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LA CTF - pwn: bot
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Description I made a bot to automatically answer all of your questions.
+nc lac.tf 31180
+My approach Again, the source code, its binary, and the Dockerfile were given. Looking at the sour code code:
+#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;string.h&gt; #include &lt;unistd.h&gt; int main(void) { setbuf(stdout, NULL); char input[64]; volatile int give_flag = 0; puts(&#34;hi, how can i help?&#34;); gets(input); if (strcmp(input, &#34;give me the flag&#34;) == 0) { puts(&#34;lol no&#34;); } else if (strcmp(input, &#34;please give me the flag&#34;) == 0) { puts(&#34;no&#34;); } else if (strcmp(input, &#34;help, i have no idea how to solve this&#34;) == 0) { puts(&#34;L&#34;); } else if (strcmp(input, &#34;may i have the flag?&#34;) == 0) { puts(&#34;not with that attitude&#34;); } else if (strcmp(input, &#34;please please please give me the flag&#34;) == 0) { puts(&#34;i&#39;ll consider it&#34;); sleep(15); if (give_flag) { puts(&#34;ok here&#39;s your flag&#34;); system(&#34;cat flag.txt&#34;); } else { puts(&#34;no&#34;); } } else { puts(&#34;sorry, i didn&#39;t understand your question&#34;); exit(1); } } After looking at the source code, I noticed that there is a give_flag variable and a buffer that we can overflow since the user input is received with gets(). Unlike the previous challenge I worked on, give_flag variable would always be located after the buffer input so we won’t be able to modify the value of give_flag this time.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-02-14 10:00:00 +0000 UTC'>February 14, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to LA CTF - pwn: bot" href="https://joonkim0625.github.io/posts/2023-2-14-la-ctf-pwn-bot/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">DNS &amp; Web Browser Request
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>What happens if a web browser (client) sends a reqeust to a server? Reference
+What is DNS (Domain Name System)?
+DNS resolves names domain names to IP addresses Steps that DNS takes:
+We try to access yahoo.com in our browser The browser (or your OS) checks its own cache memory for IP Address if not found, it sends the query to the resolver server The resolver server is basically your ISP (Internet service provider) Once it receives the query, it checks its own cache memory to find the IP address to yahoo.com if not found, it sends the query to the root server Root server is the top, or the root, of the DNS hierarchy 13 sets of these root servers strategically placed around the world operated by 12 different organizations each set has their own unique IP address when the root server receives the query for the IP address for yahoo.com, it is not going to know what the IP address is. But, it knows where to send the resolver to find the IP address. The root server will direct the resolver to the TLD (Top Level Domain server) server for the .com domain Top Level Domain Server stores the address information for top level domains such as .com, .net, .org etc. TLD server is not going to know what the IP address for yahoo.com. So it will direct the resolver to the next and final level which are the Authoritative Name servers The resolver asks the authoritative name server for the IP address for yahoo.com Authoritative Name Servers are responsible for knowing everything about the domain including the IP address when it receives for the query from the resolver, the name server responds with the IP address for yahoo.com Finally, the resolver tells your computer the IP address for yahoo.com and your computer now can retrieve the web page for yahoo.com once the resolver receives the IP address for yahoo.com, it will store the IP address in its cache memory to prevent going through all these steps again After the steps above…
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-02-14 00:00:00 +0000 UTC'>February 14, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to DNS & Web Browser Request" href="https://joonkim0625.github.io/posts/2023-2-14-dns-and-webbrowser-request/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">LA CTF - pwn: gatekeep
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Description If I gaslight you enough, you won’t be able to get my flag! :)
+nc lac.tf 31121
+Note: The attached binary is the exact same as the one executing on the remote server.
+Source code The source code, its binary, and the Dockerfile were given. Looking at the sour code code:
+#include &lt;stdio.h&gt; #include &lt;stdlib.h&gt; #include &lt;unistd.h&gt; #include &lt;fcntl.h&gt; #include &lt;string.h&gt; void print_flag() { char flag[256]; FILE* flagfile = fopen(&#34;flag.txt&#34;, &#34;r&#34;); if (flagfile == NULL) { puts(&#34;Cannot read flag.txt.&#34;); } else { fgets(flag, 256, flagfile); flag[strcspn(flag, &#34;\n&#34;)] = &#39;\0&#39;; puts(flag); } } int check(){ char input[15]; char pass[10]; int access = 0; // If my password is random, I can gatekeep my flag! :) int data = open(&#34;/dev/urandom&#34;, O_RDONLY); if (data &lt; 0) { printf(&#34;Can&#39;t access /dev/urandom.\n&#34;); exit(1); } else { ssize_t result = read(data, pass, sizeof pass); if (result &lt; 0) { printf(&#34;Data not received from /dev/urandom\n&#34;); exit(1); } } close(data); printf(&#34;Password:\n&#34;); gets(input); if(strcmp(input, pass)) { printf(&#34;I swore that was the right password ...\n&#34;); } else { access = 1; } if(access) { printf(&#34;Guess I couldn&#39;t gaslight you!\n&#34;); print_flag(); } } int main(){ setbuf(stdout, NULL); printf(&#34;If I gaslight you enough, you won&#39;t be able to guess my password! :)\n&#34;); check(); return 0; } within check(), the password is being stored into a buffer using gets(). So I immediately thought that if I can control the return address of check() function to print_flag(), then we can get the flag. I checked the security properties of this binary by running pwn checksec --file=./gatekeep.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-02-13 00:00:00 +0000 UTC'>February 13, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to LA CTF - pwn: gatekeep" href="https://joonkim0625.github.io/posts/2023-2-13-la-ctf-pwn-gatekeep/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">diceCTF 2023 - pwn: bop
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>PWN: bop I didn’t get to solve this by my own but there were many interesting things that I wasn’t aware of that can be used to solve this challenge. However, I wanted to talk about a few things I got to know during the struggle of working on this challenge.
+ret2dlresovle References: https://syst3mfailure.io/ret2dl_resolve https://ir0nstone.gitbook.io/notes/types/stack/ret2dlresolve When a binary uses the shared libraries by dynamically linking to them, they do not have (or know) all the addresses for those library functions as the program starts up. They would resolve this issue (finding the addresses of those functions) when the functions are actually called. And the trick in this technique is to force the dynamic linker to resolve (or relocate) all the addresses of the library functions as the program starts. The pwntools python library allows us to choose the functions of our choice and and use them as their addresses were already resolved.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-02-06 00:00:00 +0000 UTC'>February 6, 2023</span>&nbsp;·&nbsp;Joon Kim</footer>
+  <a class="entry-link" aria-label="post link to diceCTF 2023 - pwn: bop" href="https://joonkim0625.github.io/posts/2023-2-06-dicectf2023-pwn-bop/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="https://joonkim0625.github.io/page/2/">
+      «&nbsp;Prev&nbsp;
+    </a>
+    <a class="next" href="https://joonkim0625.github.io/page/4/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://joonkim0625.github.io/">All Things Cyber – joonkim0625</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

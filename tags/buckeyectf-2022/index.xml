@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>BuckeyeCTF 2022 on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/buckeyectf-2022/</link>
+    <description>Recent content in BuckeyeCTF 2022 on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 29 Nov 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/buckeyectf-2022/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>BuckeyeCTF 2022 - pwn: ronin</title>
+      <link>https://joonkim0625.github.io/posts/2022-11-30-ronin/</link>
+      <pubDate>Tue, 29 Nov 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-11-30-ronin/</guid>
+      <description>&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md&#34;&gt;https://git.mbund.org/mbund/buckeyectf-2022/src/branch/main/writeups/ronin/ronin.md&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;decompiled-code&#34;&gt;Decompiled code&lt;/h2&gt;
+&lt;p&gt;After decompiling the binary, I was able to take a look at those major funtions
+that make up this program.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;main()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char shellcode_buffer[80]; // [rsp+0h] [rbp-50h] BYREF
+
+  setvbuf(_bss_start, 0LL, 2, 0LL);
+  scroll(txt);
+  fgets(shellcode_buffer, 80, stdin);
+  if ( !strncmp(&amp;#34;Chase after it.&amp;#34;, shellcode_buffer, 15uLL) )
+  {
+    scroll(off_4028);
+    chase();
+  }
+  scroll(off_4030);
+  return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;scroll()&lt;/code&gt;:&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;ize_t __fastcall scroll(const char *addr_to_some_buffer)
+{
+  __useconds_t v1; // eax
+  size_t result; // rax
+  char single_char; // [rsp+1Fh] [rbp-11h]
+  size_t v4; // [rsp+20h] [rbp-10h]
+  size_t i; // [rsp+28h] [rbp-8h]
+
+  v4 = strlen(addr_to_some_buffer);
+  for ( i = 0LL; ; ++i )
+  {
+    result = i;
+    if ( i &amp;gt;= v4 )
+      break;
+    single_char = addr_to_some_buffer[i];       // printing a single char from the string array
+    putchar(single_char);
+    if ( single_char == 10 )
+      v1 = 1000000;
+    else
+      v1 = 50000;
+    usleep(v1);
+  }
+  return result;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;code&gt;encounter()&lt;/code&gt;:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>BuckeyeCTF 2022 - pwn: samurai</title>
+      <link>https://joonkim0625.github.io/posts/2022-11-29-samurai/</link>
+      <pubDate>Tue, 29 Nov 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-11-29-samurai/</guid>
+      <description>&lt;h2 id=&#34;buckeyectf-2022---pwn-samurai&#34;&gt;BuckeyeCTF 2022 - pwn: samurai&lt;/h2&gt;
+&lt;p&gt;What I didn&amp;rsquo;t understand was the program inserts &lt;code&gt;./n&lt;/code&gt; which can be represented
+as &lt;code&gt;0x2ea&lt;/code&gt;. This is just a part of the string that it gets printed out to STDOUT. How
+this program works is it reads in some input from STDIN using &lt;code&gt;fgets&lt;/code&gt;. &lt;code&gt;fgets&lt;/code&gt;
+inserts a newline char after reading everything in (EOF or newline). But, if the
+input that I pass in to overflow the buffer that does not end with a newline char,
+then it will keep going (or being read) until it overflows the variable I want to overwrite.
+It can still work but there is this line of code &lt;code&gt;strcpy(&amp;amp;s[strlen(s) - 1], &amp;quot;.\n&amp;quot;);&lt;/code&gt;
+that puts a new line character at strlen(s) - 1. So, when I was naively giving
+an input that I would think should overwrite the variable, the last bit was
+always replaced by &lt;code&gt;2ea&lt;/code&gt; which is &lt;code&gt;.\n&lt;/code&gt;. AH!!!!!!!!!!!! So, what we would want
+to do is at least have a newline char in the middle of the string so strcpy does
+not insert that &lt;code&gt;.\n&lt;/code&gt; where the last bit is (this bit is still needed to be
+overwritten with some value to make the attack happen).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

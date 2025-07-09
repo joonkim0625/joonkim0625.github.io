@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Picoctf2021 on All Things Cyber – joonkim0625</title>
+    <link>https://joonkim0625.github.io/tags/picoctf2021/</link>
+    <description>Recent content in Picoctf2021 on All Things Cyber – joonkim0625</description>
+    <generator>Hugo -- 0.148.0</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 May 2022 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://joonkim0625.github.io/tags/picoctf2021/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>IA-32 Assembly</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</link>
+      <pubDate>Fri, 27 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-27-ia32-assembly/</guid>
+      <description>&lt;h2 id=&#34;ia32-assembly-language&#34;&gt;IA32 Assembly Language&lt;/h2&gt;
+&lt;p&gt;As I was working on picoCTF2021 - filtered-shellcode challenge, I realized that
+I need to write the shellcode in 32 bit assembly rather than in 64 bit. And
+compiling 32 bit assembly code is different than compiling 64 bit assembly code
+using &lt;code&gt;gcc&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Great reference: &lt;a href=&#34;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&#34;&gt;https://academic.macewan.ca/boersn/images/quickref-20121215.pdf&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;First, to create an object file, use &lt;code&gt;nasm&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;nasm -f elf32 -o file.o file.s&lt;/code&gt;. This creates an object file &lt;code&gt;file.o&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Then link the object file with &lt;code&gt;ld&lt;/code&gt;. The object file must have &lt;code&gt;global _start&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF 2021 - Here&#39;s a LIBC</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-24-heresalibc/</link>
+      <pubDate>Tue, 24 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-24-heresalibc/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;AUTHOR: MADSTACKS&lt;/p&gt;
+&lt;p&gt;Description: I am once again asking for you to pwn this binary vuln libc.so.6 Makefile nc mercury.picoctf.net 1774&lt;/p&gt;
+&lt;p&gt;Hints: PWNTools has a lot of useful features for getting offsets.&lt;/p&gt;
+&lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&#34;&gt;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc&#34;&gt;https://gitlab.com/WhatTheFuzz-CTFs/ctfs/-/tree/main/picoCTF/binary-exploitation/heres-a-libc&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://ctf101.org/binary-exploitation/relocation-read-only/&#34;&gt;https://ctf101.org/binary-exploitation/relocation-read-only/&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc&#34;&gt;https://heartburn.dev/picoctf-2021-binary-exploitation/#here-s-a-libc&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;my-approach&#34;&gt;My Approach&lt;/h2&gt;
+&lt;p&gt;In challenges like this one, you are given an executable, a libc library, and a
+Makefile to work with. And the first thing I do is to find some information
+about the executable file.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>picoCTF 2021 - Cache Me Outside</title>
+      <link>https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/</link>
+      <pubDate>Sat, 14 May 2022 00:00:00 +0000</pubDate>
+      <guid>https://joonkim0625.github.io/posts/2022-5-12-glibc-tcache/</guid>
+      <description>&lt;h2 id=&#34;description&#34;&gt;Description&lt;/h2&gt;
+&lt;p&gt;While being super relevant with my meme references, I wrote a program to see how
+much you understand heap allocations. &lt;code&gt;nc mercury.picoctf.net 31153 heapedit Makefile libc.so.6&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Hints: It may be helpful to read a little bit on GLIBC&amp;rsquo;s tcache.&lt;/p&gt;
+&lt;h2 id=&#34;my-approach&#34;&gt;My Approach&lt;/h2&gt;
+&lt;p&gt;Until this point, I had not done any binary exploits that are related to the
+heap. And this challenge gave me a better understanding of heap
+allocation/deallocation and how one can try to exploit the glibc heap.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
